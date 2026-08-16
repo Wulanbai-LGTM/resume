@@ -796,7 +796,8 @@ const resume = {
     { id: "all", t: { zh: "全部", en: "All" } },
     { id: "aigc", t: { zh: "AIGC 视觉", en: "AIGC Visual" } },
     { id: "design", t: { zh: "设计 · 演讲", en: "Design · Talk" } },
-    { id: "game", t: { zh: "游戏开发", en: "Game Dev" } }
+    { id: "game", t: { zh: "游戏开发", en: "Game Dev" } },
+    { id: "demo", t: { zh: "产品演示", en: "Product Demo" } }
   ],
   projects: [
     { id: "aigc", icon: "🎨", time: "2026.07",
@@ -841,7 +842,18 @@ const resume = {
       ],
       metrics: [["2000+", "行代码"], ["60", "FPS"], ["+70%", "好评率"]],
       media: { type: "video", src: "坦克大战演示视频/坦克大战.mp4", cap: { zh: "游戏实机演示 · 点击播放", en: "Gameplay demo · click to play" } },
-      links: [{ label: { zh: "GitHub 仓库", en: "GitHub repo" }, href: "https://github.com/Wulanbai-LGTM" }] }
+      links: [{ label: { zh: "GitHub 仓库", en: "GitHub repo" }, href: "https://github.com/Wulanbai-LGTM" }] },
+    { id: "demo", icon: "🎧", time: "2026.07",
+      tags: [{ zh: "AIGC 视频生成", en: "AIGC Video" }, { zh: "分镜设计", en: "Storyboarding" }, { zh: "产品演示", en: "Product Demo" }, { zh: "AI 合成", en: "AI Compositing" }],
+      t: { zh: "AIGC 耳机产品演示视频", en: "AIGC Headphone Product Demo" },
+      sum: { zh: "运用 AIGC 视觉工作流独立制作的产品演示短片，从分镜脚本到成片全流程 AI 产出。", en: "A product demo short film crafted end-to-end with the AIGC visual workflow — from storyboard to final cut." },
+      pts: [
+        { zh: "独立完成分镜脚本与镜头设计，AI 生成连续画面并合成为演示视频", en: "Wrote the storyboard and camera plan, generated continuous shots with AI, and composited the final video" },
+        { zh: "多角度展示耳机外观细节与佩戴场景，突出产品设计卖点", en: "Showcases the headphone's design details and usage scenes from multiple angles" }
+      ],
+      metrics: [["1 部", "演示短片"], ["100%", "AI 制作"], ["全流程", "分镜→成片"]],
+      media: { type: "video", src: "耳机产品演示视频/耳机演示视频.mp4", cap: { zh: "AIGC 耳机产品演示 · 点击播放", en: "AIGC headphone demo · click to play" } },
+      links: [] }
   ],
   skills: [
     { icon: "💻", t: { zh: "编程开发", en: "Programming" }, items: [
