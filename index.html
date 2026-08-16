@@ -1177,9 +1177,10 @@ function initInteractions() {
       } else if (tablist.id === "projTabs") {
         state.projTab = tab.dataset.id;
         renderProjCards();
-        /* 重新绑定项目图片灯箱与画廊 */
+        /* 重新绑定项目图片灯箱、画廊与视频卡片 */
         bindProjectMedia();
         bindGallery();
+        bindVideos();
         $$(".proj-grid .reveal").forEach((el) => { el.classList.add("in"); });
       }
       if (focus) tab.focus();
@@ -1207,7 +1208,13 @@ function initInteractions() {
   bindGallery();
 
   /* 4. 视频卡片 */
+  bindVideos();
+}
+
+/* 视频卡片：注入 <video> 并绑定播放（筛选切换/重渲染后需重新调用） */
+function bindVideos() {
   $$("[data-video]").forEach((wrap) => {
+    if (wrap.querySelector("video")) return; /* 防重复注入 */
     const src = wrap.dataset.src;
     const video = document.createElement("video");
     video.src = src;
@@ -1219,8 +1226,9 @@ function initInteractions() {
     wrap.appendChild(video);
     const playBtn = $(".video-play", wrap);
     let started = false;
-    const play = () => { if (!started) { video.play(); } else { video.play(); } };
-    playBtn.addEventListener("click", play);
+    playBtn.addEventListener("click", () => {
+      video.play().catch(() => {});
+    });
     video.addEventListener("play", () => { started = true; playBtn.classList.add("hide"); });
     video.addEventListener("pause", () => { if (started && video.currentTime === 0) playBtn.classList.remove("hide"); });
     video.addEventListener("ended", () => { playBtn.classList.remove("hide"); });
@@ -1537,6 +1545,7 @@ function bindGlobal() {
       renderProjCards();
       bindProjectMedia();
       bindGallery();
+      bindVideos();
     }
     /* 展开所有 Tab 面板、定格数字动画与技能条 */
     $$("[role='tabpanel']").forEach((p) => { p.classList.add("active"); });
