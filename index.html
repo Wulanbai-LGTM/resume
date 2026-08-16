@@ -226,10 +226,11 @@ section[id]{scroll-margin-top:calc(var(--nav-h) + 14px)}
 .proj-grid{display:grid;gap:26px}
 .proj-card{display:grid;grid-template-columns:1fr 1fr;overflow:hidden}
 .proj-media{position:relative;min-height:300px;background:var(--bg-soft);overflow:hidden}
-.proj-media.gallery{position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:100%;grid-auto-rows:100%;height:340px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none;background:var(--bg-soft)}
+.proj-media.gallery{position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:100%;grid-auto-rows:100%;height:340px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none;background:var(--bg-soft);cursor:grab}
+.proj-media.gallery.dragging,.proj-media.gallery.dragging img{cursor:grabbing}
 .proj-media.gallery::-webkit-scrollbar{display:none}
 .proj-media .cell{position:relative;overflow:hidden;scroll-snap-align:center;scroll-snap-stop:always}
-.proj-media img{width:100%;height:100%;object-fit:cover;cursor:zoom-in;transition:transform .35s ease}
+.proj-media img{width:100%;height:100%;object-fit:cover;cursor:zoom-in;transition:transform .35s ease;-webkit-user-drag:none;user-select:none}
 .proj-media .cell:hover img{transform:scale(1.06)}
 /* 画廊控件：左右箭头 + 指示点 + 计数器 */
 .gal-nav{position:absolute;inset:0;z-index:3;pointer-events:none}
@@ -1195,24 +1196,66 @@ function bindProjectMedia() {
     };
   });
 }
-/* 画廊：横向滚动 + 箭头翻页 + 指示点同步 */
+/* 画廊：箭头翻页（可连续点击）+ 鼠标拖拽滑动 + 指示点/计数器同步 */
+let galDragSuppress = false; /* 拖拽结束后短暂抑制 click，避免误开灯箱 */
 function bindGallery() {
   $$(".proj-media.gallery").forEach((gal) => {
     const dots = $$(".gal-dots button", gal);
     const countEl = $(".gal-count", gal);
+    const n = dots.length;
+    /* 当前页索引：由 scrollLeft 就近取整 */
+    const curIdx = () => Math.min(n - 1, Math.max(0, Math.round(gal.scrollLeft / Math.max(gal.clientWidth, 1))));
     const update = () => {
-      const idx = Math.min(dots.length - 1, Math.max(0, Math.round(gal.scrollLeft / Math.max(gal.clientWidth, 1))));
-      dots.forEach((d, i) => d.classList.toggle("active", i === idx));
-      if (countEl) countEl.textContent = (idx + 1) + " / " + dots.length;
+      const i = curIdx();
+      dots.forEach((d, k) => d.classList.toggle("active", k === i));
+      if (countEl) countEl.textContent = (i + 1) + " / " + n;
+    };
+    /* 索引翻页：每次点击都基于最新页索引精确滚动，连续快速点击稳定逐页切换 */
+    const go = (i) => {
+      const target = Math.min(n - 1, Math.max(0, i));
+      gal.scrollTo({ left: target * gal.clientWidth, behavior: prefersReduced ? "auto" : "smooth" });
     };
     gal.addEventListener("scroll", update, { passive: true });
     update();
     $$(".gal-arrow", gal).forEach((btn) => btn.addEventListener("click", () => {
-      gal.scrollBy({ left: btn.dataset.dir === "1" ? gal.clientWidth : -gal.clientWidth, behavior: "smooth" });
+      go(curIdx() + (btn.dataset.dir === "1" ? 1 : -1));
     }));
-    dots.forEach((d) => d.addEventListener("click", () => {
-      gal.scrollTo({ left: +d.dataset.idx * gal.clientWidth, behavior: "smooth" });
-    }));
+    dots.forEach((d) => d.addEventListener("click", () => go(+d.dataset.idx)));
+
+    /* 鼠标拖拽滑动（仅鼠标；触摸屏走原生触摸滚动） */
+    let down = false, startX = 0, startLeft = 0, moved = false;
+    gal.addEventListener("pointerdown", (e) => {
+      if (e.pointerType !== "mouse" || e.target.closest("button")) return;
+      down = true; moved = false;
+      startX = e.clientX; startLeft = gal.scrollLeft;
+      gal.setPointerCapture(e.pointerId);
+      gal.classList.add("dragging");
+      gal.style.scrollSnapType = "none"; /* 拖拽期间关闭吸附，松手恢复 */
+    });
+    gal.addEventListener("pointermove", (e) => {
+      if (!down) return;
+      const dx = e.clientX - startX;
+      if (Math.abs(dx) > 4) moved = true;
+      gal.scrollLeft = startLeft - dx;
+    });
+    gal.addEventListener("pointerup", () => {
+      if (!down) return;
+      down = false;
+      gal.classList.remove("dragging");
+      gal.style.scrollSnapType = "";
+      if (moved) {
+        /* 拖拽产生的 click 不应触发图片灯箱 */
+        galDragSuppress = true;
+        setTimeout(() => { galDragSuppress = false; }, 80);
+      }
+    });
+    gal.addEventListener("click", (e) => {
+      if (galDragSuppress) {
+        e.preventDefault();
+        e.stopPropagation();
+        galDragSuppress = false;
+      }
+    }, true);
   });
 }
 function openLightbox() {
