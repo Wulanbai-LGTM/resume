@@ -884,7 +884,7 @@ const resume = {
         { zh: "MVC 架构解耦界面与逻辑，以最低内存占用完成视觉美化", en: "MVC keeps UI and logic decoupled with a minimal memory footprint" }
       ],
       metrics: [["2000+", "行代码"], ["60", "FPS"], ["+70%", "好评率"]],
-      media: { type: "video", src: "坦克大战演示视频/坦克大战.mp4", cap: { zh: "游戏实机演示 · 点击播放", en: "Gameplay demo · click to play" } },
+      media: { type: "video", src: "坦克大战演示视频/坦克大战.mp4", poster: "图片/坦克大战海报.jpg", cap: { zh: "游戏实机演示 · 点击播放", en: "Gameplay demo · click to play" } },
       links: [{ label: { zh: "GitHub 仓库", en: "GitHub repo" }, href: "https://github.com/Wulanbai-LGTM" }] },
     { id: "demo", icon: "🎧", time: "2026.07",
       tags: [{ zh: "AIGC 视频生成", en: "AIGC Video" }, { zh: "分镜设计", en: "Storyboarding" }, { zh: "产品演示", en: "Product Demo" }, { zh: "AI 合成", en: "AI Compositing" }],
@@ -895,7 +895,7 @@ const resume = {
         { zh: "多角度展示耳机外观细节与佩戴场景，突出产品设计卖点", en: "Showcases the headphone's design details and usage scenes from multiple angles" }
       ],
       metrics: [["1 部", "演示短片"], ["100%", "AI 制作"], ["全流程", "分镜→成片"]],
-      media: { type: "video", src: "耳机产品演示视频/耳机演示视频.mp4", cap: { zh: "AIGC 耳机产品演示 · 点击播放", en: "AIGC headphone demo · click to play" } },
+      media: { type: "video", src: "耳机产品演示视频/耳机演示视频.mp4", poster: "图片/耳机演示海报.jpg", cap: { zh: "AIGC 耳机产品演示 · 点击播放", en: "AIGC headphone demo · click to play" } },
       links: [] }
   ],
   skills: [
@@ -1112,7 +1112,7 @@ function renderProjCards() {
     } else if (p.media.type === "image") {
       media = '<div class="proj-media"><img src="' + p.media.src + '" alt="' + esc(L(p.media.cap)) + '" loading="lazy" decoding="async" data-gallery="' + p.id + '" data-idx="0"><div class="media-cap">' + esc(L(p.media.cap)) + "</div></div>";
     } else {
-      media = '<div class="proj-media"><div class="video-wrap" data-video data-src="' + p.media.src + '">' +
+      media = '<div class="proj-media"><div class="video-wrap" data-video data-src="' + p.media.src + '" data-poster="' + (p.media.poster || "") + '">' +
         '<button class="video-play" aria-label="' + esc(T("labels.play")) + '"><span class="pb"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span><span class="vt">' + esc(L(p.media.cap)) + "</span></button>" +
         "</div></div>";
     }
@@ -1262,6 +1262,17 @@ function bindVideos() {
     const video = document.createElement("video");
     video.src = src;
     video.preload = "none";
+    if (wrap.dataset.poster) video.poster = wrap.dataset.poster; /* 播放前显示封面帧 */
+    /* 滚动到视口附近即开始预下载，点击播放时无需等待缓冲 */
+    const preloadIO = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) {
+          video.preload = "auto";
+          preloadIO.unobserve(wrap);
+        }
+      });
+    }, { rootMargin: "400px 0px" });
+    preloadIO.observe(wrap);
     video.playsInline = true;
     video.controls = true;
     video.setAttribute("controlslist", "nodownload");
