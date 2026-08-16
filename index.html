@@ -996,11 +996,14 @@ function renderExperience() {
   $("#expNote").innerHTML = T("experience.note");
 }
 
-function renderProjects() {
-  /* 筛选 Tabs */
+function renderProjTabs() {
+  /* 筛选 Tabs：仅在整体重渲染时重建（切换筛选时不重建，事件由容器委托保证不丢失） */
   $("#projTabs").innerHTML = resume.projFilters.map((f, i) =>
     '<button class="tab-btn" role="tab" id="projTab-' + f.id + '" aria-selected="' + (f.id === state.projTab) + '" aria-controls="projGrid" data-id="' + f.id + '" tabindex="' + (f.id === state.projTab ? "0" : "-1") + '">' + esc(L(f.t)) + "</button>").join("");
-  /* 卡片 */
+}
+
+function renderProjCards() {
+  /* 卡片：切换筛选时仅重建此区域 */
   const cards = resume.projects.filter((p) => state.projTab === "all" || p.id === state.projTab);
   $("#projGrid").innerHTML = cards.map((p, i) => {
     let media = "";
@@ -1038,6 +1041,12 @@ function renderProjects() {
         (links ? '<div class="proj-links">' + links + "</div>" : "") +
       "</div></article>";
   }).join("");
+}
+
+/* 项目筛选 Tabs + 卡片组合渲染（整体重渲染入口：语言切换等） */
+function renderProjects() {
+  renderProjTabs();
+  renderProjCards();
 }
 
 function renderSkills() {
@@ -1103,23 +1112,23 @@ function initInteractions() {
   $$(".reveal", document).forEach((el) => io.observe(el));
   state.observed.push(io);
 
-  /* 2. Tabs（经历 & 项目）：ARIA + 键盘左右切换 */
+  /* 2. Tabs（经历 & 项目）：ARIA + 键盘左右切换
+       容器事件委托：即使 Tab 按钮被重建，事件也不丢失 */
   $$("[role='tablist']").forEach((tablist) => {
-    const tabs = $$("[role='tab']", tablist);
+    const getTabs = () => $$("[role='tab']", tablist);
     const activate = (tab, focus) => {
-      tabs.forEach((tb) => {
+      getTabs().forEach((tb) => {
         const on = tb === tab;
         tb.setAttribute("aria-selected", on);
         tb.tabIndex = on ? 0 : -1;
       });
-      const panel = document.getElementById(tab.getAttribute("aria-controls"));
       if (tablist.id === "expTabs") {
         state.expTab = tab.dataset.id;
         $$("[role='tabpanel']", $("#expPanels")).forEach((p) => p.classList.remove("active"));
         $("#expPanel-" + tab.dataset.id).classList.add("active");
       } else if (tablist.id === "projTabs") {
         state.projTab = tab.dataset.id;
-        renderProjects();
+        renderProjCards();
         /* 重新绑定项目图片灯箱与画廊 */
         bindProjectMedia();
         bindGallery();
@@ -1127,16 +1136,20 @@ function initInteractions() {
       }
       if (focus) tab.focus();
     };
-    tabs.forEach((tab) => {
-      tab.addEventListener("click", () => activate(tab, false));
-      tab.addEventListener("keydown", (e) => {
-        const idx = tabs.indexOf(tab);
-        if (e.key === "ArrowRight" || e.key === "ArrowDown") { e.preventDefault(); activate(tabs[(idx + 1) % tabs.length], true); }
-        else if (e.key === "ArrowLeft" || e.key === "ArrowUp") { e.preventDefault(); activate(tabs[(idx - 1 + tabs.length) % tabs.length], true); }
-        else if (e.key === "Home") { e.preventDefault(); activate(tabs[0], true); }
-        else if (e.key === "End") { e.preventDefault(); activate(tabs[tabs.length - 1], true); }
-      });
-    });
+    /* 用属性赋值而非 addEventListener：重渲染后重新绑定时不叠加监听器 */
+    tablist.onclick = (e) => {
+      const btn = e.target.closest("[role='tab']");
+      if (btn && tablist.contains(btn)) activate(btn, false);
+    };
+    tablist.onkeydown = (e) => {
+      const tabs = getTabs();
+      const idx = tabs.indexOf(document.activeElement);
+      if (idx === -1) return;
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") { e.preventDefault(); activate(tabs[(idx + 1) % tabs.length], true); }
+      else if (e.key === "ArrowLeft" || e.key === "ArrowUp") { e.preventDefault(); activate(tabs[(idx - 1 + tabs.length) % tabs.length], true); }
+      else if (e.key === "Home") { e.preventDefault(); activate(tabs[0], true); }
+      else if (e.key === "End") { e.preventDefault(); activate(tabs[tabs.length - 1], true); }
+    };
   });
 
   /* 3. 项目图片 → 灯箱 */
@@ -1341,7 +1354,8 @@ function bindGlobal() {
       state.expTab = "all";
       state.projTab = "all";
       renderExperience();
-      renderProjects();
+      renderProjTabs();
+      renderProjCards();
       bindProjectMedia();
       bindGallery();
     }
