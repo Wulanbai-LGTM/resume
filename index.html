@@ -226,10 +226,27 @@ section[id]{scroll-margin-top:calc(var(--nav-h) + 14px)}
 .proj-grid{display:grid;gap:26px}
 .proj-card{display:grid;grid-template-columns:1fr 1fr;overflow:hidden}
 .proj-media{position:relative;min-height:300px;background:var(--bg-soft);overflow:hidden}
-.proj-media.gallery{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr}
-.proj-media .cell{position:relative;overflow:hidden}
+.proj-media.gallery{position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:100%;grid-auto-rows:100%;height:340px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none;background:var(--bg-soft)}
+.proj-media.gallery::-webkit-scrollbar{display:none}
+.proj-media .cell{position:relative;overflow:hidden;scroll-snap-align:center;scroll-snap-stop:always}
 .proj-media img{width:100%;height:100%;object-fit:cover;cursor:zoom-in;transition:transform .35s ease}
 .proj-media .cell:hover img{transform:scale(1.06)}
+/* 画廊控件：左右箭头 + 指示点 */
+.gal-nav{position:absolute;inset:0;z-index:3;pointer-events:none}
+.gal-arrow{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(10,16,32,.42);border:1px solid rgba(255,255,255,.28);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;opacity:0;transition:opacity .2s ease,background .2s ease,transform .2s ease;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.gal-arrow svg{width:18px;height:18px}
+.gal-arrow:hover{background:rgba(79,70,229,.88);transform:translateY(-50%) scale(1.08)}
+.gal-arrow.prev{left:12px}
+.gal-arrow.next{right:12px}
+.proj-media.gallery:hover .gal-arrow,.gal-arrow:focus-visible{opacity:1}
+.gal-dots{position:absolute;left:0;right:0;bottom:12px;display:flex;justify-content:center;gap:7px;pointer-events:none}
+.gal-dots button{width:8px;height:8px;border-radius:99px;padding:0;border:none;background:rgba(255,255,255,.55);cursor:pointer;pointer-events:auto;transition:all .22s ease}
+.gal-dots button:hover{background:#fff}
+.gal-dots button.active{width:22px;background:#fff;box-shadow:0 0 6px rgba(0,0,0,.35)}
+@media (max-width:960px){
+  .proj-media.gallery{height:300px}
+  .gal-arrow{opacity:.85}
+}
 .video-wrap{position:relative;width:100%;height:100%;min-height:300px;background:linear-gradient(135deg,#1e1b4b,#312e81 50%,#164e63)}
 .video-wrap video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .video-play{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .3s ease}
@@ -405,6 +422,9 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
   .hl-card,.tl-card,.stat-card,.skill-card,.edu-card,.edu-note,.cert-card,.pm{box-shadow:none}
   .proj-card{grid-template-columns:1fr 1fr;break-inside:avoid}
   .proj-media{min-height:0;max-height:220px}
+  .proj-media.gallery{display:grid;grid-auto-flow:row;grid-template-columns:1fr 1fr;height:auto;max-height:300px;overflow:visible;scroll-snap-type:none}
+  .proj-media.gallery .cell{scroll-snap-align:none}
+  .gal-nav{display:none !important}
   .video-wrap{display:none}
   .proj-grid{gap:14px}
   .proj-body{padding:12px 14px}
@@ -985,8 +1005,15 @@ function renderProjects() {
   $("#projGrid").innerHTML = cards.map((p, i) => {
     let media = "";
     if (p.media.type === "gallery") {
-      media = '<div class="proj-media gallery">' + p.media.items.map((it, j) =>
-        '<div class="cell"><img src="' + it.src + '" alt="' + esc(L(it.cap)) + '" loading="lazy" decoding="async" data-gallery="' + p.id + '" data-idx="' + j + '"><div class="media-cap">' + esc(L(it.cap)) + "</div></div>").join("") + "</div>";
+      media = '<div class="proj-media gallery" id="gal-' + p.id + '">' +
+        p.media.items.map((it, j) =>
+          '<div class="cell"><img src="' + it.src + '" alt="' + esc(L(it.cap)) + '" loading="lazy" decoding="async" data-gallery="' + p.id + '" data-idx="' + j + '"><div class="media-cap">' + esc(L(it.cap)) + "</div></div>").join("") +
+        '<div class="gal-nav">' +
+          '<button class="gal-arrow prev" type="button" aria-label="' + esc(T("lightbox.prev")) + '" data-gallery="' + p.id + '" data-dir="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>' +
+          '<button class="gal-arrow next" type="button" aria-label="' + esc(T("lightbox.next")) + '" data-gallery="' + p.id + '" data-dir="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>' +
+          '<div class="gal-dots">' + p.media.items.map((_, j) => '<button type="button" data-idx="' + j + '" aria-label="' + (j + 1) + " / " + p.media.items.length + '"></button>').join("") + "</div>" +
+        "</div>" +
+      "</div>";
     } else if (p.media.type === "image") {
       media = '<div class="proj-media"><img src="' + p.media.src + '" alt="' + esc(L(p.media.cap)) + '" loading="lazy" decoding="async" data-gallery="' + p.id + '" data-idx="0"><div class="media-cap">' + esc(L(p.media.cap)) + "</div></div>";
     } else {
@@ -1092,8 +1119,9 @@ function initInteractions() {
       } else if (tablist.id === "projTabs") {
         state.projTab = tab.dataset.id;
         renderProjects();
-        /* 重新绑定项目图片灯箱 */
+        /* 重新绑定项目图片灯箱与画廊 */
         bindProjectMedia();
+        bindGallery();
         $$(".proj-grid .reveal").forEach((el) => { el.classList.add("in"); });
       }
       if (focus) tab.focus();
@@ -1112,6 +1140,9 @@ function initInteractions() {
 
   /* 3. 项目图片 → 灯箱 */
   bindProjectMedia();
+
+  /* 3.5 项目画廊 → 横向滚动控制 */
+  bindGallery();
 
   /* 4. 视频卡片 */
   $$("[data-video]").forEach((wrap) => {
@@ -1148,6 +1179,24 @@ function bindProjectMedia() {
       lbIdx = +img.dataset.idx || 0;
       openLightbox();
     };
+  });
+}
+/* 画廊：横向滚动 + 箭头翻页 + 指示点同步 */
+function bindGallery() {
+  $$(".proj-media.gallery").forEach((gal) => {
+    const dots = $$(".gal-dots button", gal);
+    const update = () => {
+      const idx = Math.min(dots.length - 1, Math.max(0, Math.round(gal.scrollLeft / Math.max(gal.clientWidth, 1))));
+      dots.forEach((d, i) => d.classList.toggle("active", i === idx));
+    };
+    gal.addEventListener("scroll", update, { passive: true });
+    update();
+    $$(".gal-arrow", gal).forEach((btn) => btn.addEventListener("click", () => {
+      gal.scrollBy({ left: btn.dataset.dir === "1" ? gal.clientWidth : -gal.clientWidth, behavior: "smooth" });
+    }));
+    dots.forEach((d) => d.addEventListener("click", () => {
+      gal.scrollTo({ left: +d.dataset.idx * gal.clientWidth, behavior: "smooth" });
+    }));
   });
 }
 function openLightbox() {
@@ -1291,6 +1340,7 @@ function bindGlobal() {
       renderExperience();
       renderProjects();
       bindProjectMedia();
+      bindGallery();
     }
     /* 展开所有 Tab 面板、定格数字动画与技能条 */
     $$("[role='tabpanel']").forEach((p) => { p.classList.add("active"); });
