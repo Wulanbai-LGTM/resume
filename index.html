@@ -6,6 +6,30 @@
 <title>毛英杰 · 个人简历 | 无限进步</title>
 <meta name="description" content="毛英杰 —— 成都师范学院人工智能教育专业准大一，AIGC 视觉创作者 / Python 开发者 / 演讲级 PPT 设计师。无限进步，以作品说话。">
 <meta name="theme-color" content="#4f46e5">
+<!-- ===== SEO / 社交分享 ===== -->
+<meta property="og:type" content="profile">
+<meta property="og:title" content="毛英杰 · 个人简历 | 无限进步">
+<meta property="og:description" content="成都师范学院人工智能教育专业准大一，AIGC 视觉创作者 / Python 开发者 / 演讲级 PPT 设计师。无限进步，以作品说话。">
+<meta property="og:site_name" content="毛英杰 · 在线简历">
+<!-- 部署到 GitHub Pages 后生效；若仓库名不是 resume，请同步更新下面两个 URL -->
+<meta property="og:url" content="https://Wulanbai-LGTM.github.io/resume/">
+<meta property="og:image" content="https://Wulanbai-LGTM.github.io/resume/图片/头像.jpg">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "毛英杰",
+  "alternateName": "Mao Yingjie",
+  "jobTitle": "人工智能教育专业学生 · AIGC 创作者",
+  "email": "mailto:asatuosi0606@qq.com",
+  "telephone": "+86-185-8337-5744",
+  "url": "https://Wulanbai-LGTM.github.io/resume/",
+  "sameAs": ["https://github.com/Wulanbai-LGTM"],
+  "alumniOf": { "@type": "CollegeOrUniversity", "name": "成都师范学院" },
+  "knowsAbout": ["AIGC", "Stable Diffusion", "Midjourney", "Python", "Prompt Engineering", "PPT 设计", "Pygame"]
+}
+</script>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%234f46e5'/><stop offset='1' stop-color='%2306b6d4'/></linearGradient></defs><rect width='64' height='64' rx='14' fill='url(%23g)'/><text x='32' y='43' font-size='28' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>M</text></svg>">
 <!-- 防主题闪烁：在样式生效前同步读取本地主题 -->
 <script>
@@ -69,7 +93,8 @@ section[id]{scroll-margin-top:calc(var(--nav-h) + 14px)}
 /* ============================================================
    3. 导航栏
    ============================================================ */
-.nav{position:fixed;inset:0 0 auto;z-index:200;height:var(--nav-h);background:var(--nav-bg);-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);border-bottom:1px solid var(--border);transition:box-shadow .25s ease}
+.nav{position:fixed;inset:0 0 auto;z-index:200;height:var(--nav-h);background:var(--nav-bg);-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);border-bottom:1px solid var(--border);transition:box-shadow .25s ease,transform .32s cubic-bezier(.22,1,.36,1)}
+.nav.nav-hidden{transform:translateY(-100%)}
 .nav.scrolled{box-shadow:var(--shadow-sm)}
 .nav-inner{max-width:1120px;margin:0 auto;padding:0 24px;height:100%;display:flex;align-items:center;gap:18px}
 .brand{display:flex;align-items:baseline;gap:8px;font-weight:800;font-size:19px;letter-spacing:.01em;white-space:nowrap}
@@ -177,7 +202,12 @@ section[id]{scroll-margin-top:calc(var(--nav-h) + 14px)}
 .section.alt{background:var(--bg-soft)}
 .section-head{max-width:680px;margin:0 auto 46px;text-align:center}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.18em;color:var(--primary);background:rgba(79,70,229,.08);border:1px solid rgba(79,70,229,.22)}
-.section-title{font-size:clamp(26px,3.4vw,36px);font-weight:800;letter-spacing:-.02em;margin:16px 0 10px;line-height:1.25}
+.section-title{font-size:clamp(26px,3.4vw,36px);font-weight:800;letter-spacing:-.02em;margin:16px 0 10px;line-height:1.25;position:relative;padding-bottom:16px}
+/* 区块序号 + 标题下划线动画 */
+.sec-num{display:inline-flex;align-items:center;gap:10px;font-size:12.5px;font-weight:800;letter-spacing:.26em;background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sec-num::after{content:"";width:38px;height:2px;border-radius:2px;background:var(--grad)}
+.section-title::after{content:"";position:absolute;left:50%;bottom:0;width:0;height:3px;border-radius:3px;background:var(--grad);transform:translateX(-50%);transition:width .9s cubic-bezier(.22,1,.36,1) .15s}
+.section-head.reveal.in .section-title::after{width:92px}
 .section-sub{color:var(--text-2);font-size:15.5px}
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s cubic-bezier(.22,1,.36,1);transition-delay:calc(var(--i,0)*80ms)}
 .reveal.in{opacity:1;transform:none}
@@ -255,6 +285,14 @@ html[data-theme="dark"] .tilt::after{background:radial-gradient(520px circle at 
 .gal-hint{position:absolute;left:50%;bottom:36px;transform:translateX(-50%);z-index:3;display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:999px;background:rgba(10,16,32,.58);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:600;letter-spacing:.04em;white-space:nowrap;pointer-events:none;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 6px 18px rgba(0,0,0,.3);animation:hintPulse 2.4s ease-in-out infinite}
 .gal-hint svg{width:14px;height:14px;flex-shrink:0}
 @keyframes hintPulse{0%,100%{opacity:.95}50%{opacity:.6}}
+/* 移动端滑动手势引导（首次触摸或 5 秒后自动消失） */
+.swipe-hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;display:none;align-items:center;gap:8px;padding:10px 18px;border-radius:14px;background:rgba(10,16,32,.62);border:1px solid rgba(255,255,255,.32);color:#fff;font-size:13px;font-weight:600;white-space:nowrap;pointer-events:none;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 8px 22px rgba(0,0,0,.32);transition:opacity .4s ease}
+.swipe-hint .sw-ic{font-size:15px;animation:swipeMove 1.5s ease-in-out infinite}
+.swipe-hint.fade{opacity:0}
+@keyframes swipeMove{0%,100%{transform:translateX(-7px)}50%{transform:translateX(7px)}}
+@media (max-width:960px){
+  .swipe-hint{display:inline-flex}
+}
 @media (max-width:960px){
   .proj-media.gallery{height:300px}
 }
@@ -370,7 +408,7 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
 .lightbox.open{opacity:1;pointer-events:auto}
 .lb-img{max-width:min(88vw,1080px);max-height:82vh;border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,.6);object-fit:contain}
 .lb-img.anim{animation:lbIn .28s cubic-bezier(.22,1,.36,1)}
-@keyframes lbIn{from{opacity:.35;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+@keyframes lbIn{from{opacity:.35}to{opacity:1}}
 .lb-cap{position:absolute;left:0;right:0;bottom:26px;text-align:center;color:rgba(255,255,255,.85);font-size:13.5px;font-weight:600}
 .lb-count{position:absolute;top:22px;left:26px;color:rgba(255,255,255,.6);font-size:13px;font-weight:700;letter-spacing:.1em}
 .lb-btn{position:absolute;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;display:flex;align-items:center;justify-content:center;transition:background .2s ease,transform .2s ease}
@@ -575,6 +613,7 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
     <div class="wrap">
       <div class="section-head reveal">
         <span class="eyebrow" data-i18n="highlights.eyebrow">HIGHLIGHTS</span>
+        <span class="sec-num">01</span>
         <h2 class="section-title" data-i18n="highlights.title">用数据说话的成果</h2>
         <p class="section-sub" data-i18n="highlights.sub">每一条都来自真实实践，可验证、可量化。</p>
       </div>
@@ -587,6 +626,7 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
     <div class="wrap">
       <div class="section-head reveal">
         <span class="eyebrow" data-i18n="experience.eyebrow">JOURNEY</span>
+        <span class="sec-num">02</span>
         <h2 class="section-title" data-i18n="experience.title">成长经历</h2>
         <p class="section-sub" data-i18n="experience.sub">从校园到项目现场，每一步都有作品与成绩见证。</p>
       </div>
@@ -601,6 +641,7 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
     <div class="wrap">
       <div class="section-head reveal">
         <span class="eyebrow" data-i18n="projects.eyebrow">PORTFOLIO</span>
+        <span class="sec-num">03</span>
         <h2 class="section-title" data-i18n="projects.title">项目作品</h2>
         <p class="section-sub" data-i18n="projects.sub">独立完成的完整项目，点击图片可放大预览。</p>
       </div>
@@ -614,6 +655,7 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
     <div class="wrap">
       <div class="section-head reveal">
         <span class="eyebrow" data-i18n="skills.eyebrow">SKILLS</span>
+        <span class="sec-num">04</span>
         <h2 class="section-title" data-i18n="skills.title">技能矩阵</h2>
         <p class="section-sub" data-i18n="skills.sub">以实践项目锤炼出的核心能力。</p>
       </div>
@@ -626,6 +668,7 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
     <div class="wrap">
       <div class="section-head reveal">
         <span class="eyebrow" data-i18n="education.eyebrow">EDUCATION & CREDENTIALS</span>
+        <span class="sec-num">05</span>
         <h2 class="section-title" data-i18n="education.title">教育与证书</h2>
         <p class="section-sub" data-i18n="education.sub">扎实的学历背景与行业认可。</p>
       </div>
@@ -1275,6 +1318,23 @@ function bindGallery() {
       go(curIdx() + (btn.dataset.dir === "1" ? 1 : -1));
     }));
     dots.forEach((d) => d.addEventListener("click", () => go(+d.dataset.idx)));
+
+    /* 移动端滑动手势引导（首次触摸或 5 秒后自动淡出） */
+    if (window.matchMedia("(max-width: 960px)").matches && !prefersReduced) {
+      const hint = document.createElement("div");
+      hint.className = "swipe-hint";
+      hint.innerHTML = '<span class="sw-ic">👈</span>左右滑动查看<span class="sw-ic">👉</span>';
+      gal.appendChild(hint);
+      let hid = false;
+      const hideHint = () => {
+        if (hid) return;
+        hid = true;
+        hint.classList.add("fade");
+        setTimeout(() => hint.remove(), 450);
+      };
+      gal.addEventListener("touchstart", hideHint, { once: true, passive: true });
+      setTimeout(hideHint, 5200);
+    }
   });
 }
 function openLightbox() {
@@ -1282,6 +1342,7 @@ function openLightbox() {
   const img = $("#lbImg");
   img.src = lbItems[lbIdx].src;
   img.alt = lbItems[lbIdx].cap;
+  resetLbTransform(); /* 切换图片时复位缩放/平移 */
   $("#lbCap").textContent = lbItems[lbIdx].cap;
   $("#lbCount").textContent = (lbIdx + 1) + " / " + lbItems.length;
   lb.classList.add("open");
@@ -1300,19 +1361,58 @@ function lbStep(d) {
   lbIdx = (lbIdx + d + lbItems.length) % lbItems.length;
   openLightbox();
 }
+/* 灯箱缩放状态（模块级，切换图片时复位） */
+let lbScale = 1, lbTx = 0, lbTy = 0;
+function resetLbTransform() {
+  lbScale = 1; lbTx = 0; lbTy = 0;
+  const img = $("#lbImg");
+  if (img) img.style.transform = "";
+}
 function bindLightboxControls() {
   $("#lbClose").addEventListener("click", closeLightbox);
   $("#lbPrev").addEventListener("click", () => lbStep(-1));
   $("#lbNext").addEventListener("click", () => lbStep(1));
   $("#lightbox").addEventListener("click", (e) => { if (e.target.id === "lightbox") closeLightbox(); });
-  /* 灯箱内触摸左右滑动切换图片 */
+  /* 灯箱触摸：单指滑动翻页 / 双指捏合缩放（1–4 倍）/ 缩放后单指平移 */
+  const lbBox = $("#lightbox");
+  const lbImg = $("#lbImg");
+  let pinchD = 0, pinchS = 1;
+  let panX = 0, panY = 0;
   let lbTouchX = null;
-  $("#lightbox").addEventListener("touchstart", (e) => { lbTouchX = e.touches[0].clientX; }, { passive: true });
-  $("#lightbox").addEventListener("touchend", (e) => {
-    if (lbTouchX === null) return;
-    const dx = e.changedTouches[0].clientX - lbTouchX;
-    lbTouchX = null;
-    if (Math.abs(dx) > 40) lbStep(dx < 0 ? 1 : -1);
+  const applyLb = () => { lbImg.style.transform = "translate(" + lbTx + "px," + lbTy + "px) scale(" + lbScale + ")"; };
+  lbBox.addEventListener("touchstart", (e) => {
+    if (e.touches.length === 1) {
+      lbTouchX = e.touches[0].clientX;
+      panX = e.touches[0].clientX; panY = e.touches[0].clientY;
+    } else if (e.touches.length === 2) {
+      lbTouchX = null;
+      pinchD = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      pinchS = lbScale;
+    }
+  }, { passive: true });
+  lbBox.addEventListener("touchmove", (e) => {
+    if (e.touches.length === 2) {
+      const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      if (pinchD > 0) lbScale = Math.min(4, Math.max(1, pinchS * (d / pinchD)));
+      applyLb();
+      e.preventDefault();
+    } else if (e.touches.length === 1 && lbScale > 1) {
+      const t = e.touches[0];
+      lbTx += t.clientX - panX; lbTy += t.clientY - panY;
+      panX = t.clientX; panY = t.clientY;
+      applyLb();
+      e.preventDefault();
+    }
+  }, { passive: false });
+  lbBox.addEventListener("touchend", (e) => {
+    /* 单指横向滑动翻页（仅在未缩放时） */
+    if (lbTouchX !== null) {
+      const dx = e.changedTouches[0].clientX - lbTouchX;
+      lbTouchX = null;
+      if (Math.abs(dx) > 40 && lbScale === 1) lbStep(dx < 0 ? 1 : -1);
+    }
+    /* 全部松手且未缩放 → 复位 */
+    if (e.touches.length === 0 && lbScale <= 1) resetLbTransform();
   });
   document.addEventListener("keydown", (e) => {
     if (!$("#lightbox").classList.contains("open")) return;
@@ -1561,10 +1661,16 @@ function bindGlobal() {
   const nav = $("#nav");
   const progress = $("#scrollProgress");
   const backTop = $("#backTop");
+  let lastY = 0;
   const onScroll = () => {
     const y = window.scrollY;
     nav.classList.toggle("scrolled", y > 8);
     backTop.classList.toggle("show", y > 560);
+    /* 智能隐藏：下滑隐藏导航（接近顶部或菜单展开时保持显示），上滑立即显示 */
+    const menuOpen = $("#navLinks").classList.contains("open");
+    if (y > lastY && y > 220 && !menuOpen) nav.classList.add("nav-hidden");
+    else if (y < lastY || y <= 220 || menuOpen) nav.classList.remove("nav-hidden");
+    lastY = y;
     const h = document.documentElement.scrollHeight - window.innerHeight;
     progress.style.width = (h > 0 ? (y / h) * 100 : 0) + "%";
     /* 视差：Hero 背景随滚动缓慢位移 */
