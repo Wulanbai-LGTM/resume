@@ -226,8 +226,7 @@ section[id]{scroll-margin-top:calc(var(--nav-h) + 14px)}
 .proj-grid{display:grid;gap:26px}
 .proj-card{display:grid;grid-template-columns:1fr 1fr;overflow:hidden}
 .proj-media{position:relative;min-height:300px;background:var(--bg-soft);overflow:hidden}
-.proj-media.gallery{position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:100%;grid-auto-rows:100%;height:340px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none;background:var(--bg-soft);cursor:grab}
-.proj-media.gallery.dragging,.proj-media.gallery.dragging img{cursor:grabbing}
+.proj-media.gallery{position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:100%;grid-auto-rows:100%;height:340px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none;background:var(--bg-soft)}
 .proj-media.gallery::-webkit-scrollbar{display:none}
 .proj-media .cell{position:relative;overflow:hidden;scroll-snap-align:center;scroll-snap-stop:always}
 .proj-media img{width:100%;height:100%;object-fit:cover;cursor:zoom-in;transition:transform .35s ease;-webkit-user-drag:none;user-select:none}
@@ -245,6 +244,10 @@ section[id]{scroll-margin-top:calc(var(--nav-h) + 14px)}
 .gal-dots button:hover{background:#fff}
 .gal-dots button.active{width:22px;background:#fff;box-shadow:0 0 6px rgba(0,0,0,.35)}
 .gal-count{position:absolute;top:12px;right:12px;padding:4px 11px;border-radius:99px;background:rgba(10,16,32,.5);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:12px;font-weight:700;letter-spacing:.06em;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);pointer-events:none}
+/* 画廊提示：点击图片可左右滑动查看 */
+.gal-hint{position:absolute;left:50%;bottom:36px;transform:translateX(-50%);z-index:3;display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:999px;background:rgba(10,16,32,.58);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:600;letter-spacing:.04em;white-space:nowrap;pointer-events:none;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 6px 18px rgba(0,0,0,.3);animation:hintPulse 2.4s ease-in-out infinite}
+.gal-hint svg{width:14px;height:14px;flex-shrink:0}
+@keyframes hintPulse{0%,100%{opacity:.95}50%{opacity:.6}}
 @media (max-width:960px){
   .proj-media.gallery{height:300px}
 }
@@ -348,6 +351,8 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
 .lightbox{position:fixed;inset:0;z-index:600;background:rgba(4,7,18,.92);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease}
 .lightbox.open{opacity:1;pointer-events:auto}
 .lb-img{max-width:min(88vw,1080px);max-height:82vh;border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,.6);object-fit:contain}
+.lb-img.anim{animation:lbIn .28s cubic-bezier(.22,1,.36,1)}
+@keyframes lbIn{from{opacity:.35;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
 .lb-cap{position:absolute;left:0;right:0;bottom:26px;text-align:center;color:rgba(255,255,255,.85);font-size:13.5px;font-weight:600}
 .lb-count{position:absolute;top:22px;left:26px;color:rgba(255,255,255,.6);font-size:13px;font-weight:700;letter-spacing:.1em}
 .lb-btn{position:absolute;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;display:flex;align-items:center;justify-content:center;transition:background .2s ease,transform .2s ease}
@@ -870,7 +875,7 @@ const I18N = {
     footer: { rights: "保留所有权利", updated: "最后更新", note: "单文件构建 · 无外部依赖 · 可离线打开" },
     toast: { copied: "邮箱已复制到剪贴板 🎉", fail: "复制失败，请长按手动复制" },
     lightbox: { prev: "上一张", next: "下一张", close: "关闭预览" },
-    labels: { time: "完成时间", play: "点击播放演示视频" }
+    labels: { time: "完成时间", play: "点击播放演示视频", galleryHint: "点击图片可左右滑动查看" }
   },
   en: {
     nav: { highlights: "Highlights", experience: "Journey", projects: "Projects", skills: "Skills", education: "Credentials", contact: "Contact" },
@@ -888,7 +893,7 @@ const I18N = {
     footer: { rights: "All rights reserved", updated: "Last updated", note: "Single-file build · no external dependencies · works offline" },
     toast: { copied: "Email copied to clipboard 🎉", fail: "Copy failed — please copy manually" },
     lightbox: { prev: "Previous", next: "Next", close: "Close" },
-    labels: { time: "Completed", play: "Click to play demo" }
+    labels: { time: "Completed", play: "Click to play demo", galleryHint: "Click image to view & swipe" }
   }
 };
 
@@ -1017,6 +1022,7 @@ function renderProjCards() {
           '<button class="gal-arrow next" type="button" aria-label="' + esc(T("lightbox.next")) + '" data-gallery="' + p.id + '" data-dir="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>' +
           '<div class="gal-dots">' + p.media.items.map((_, j) => '<button type="button" data-idx="' + j + '" aria-label="' + (j + 1) + " / " + p.media.items.length + '"></button>').join("") + "</div>" +
           '<span class="gal-count">1 / ' + p.media.items.length + "</span>" +
+          '<span class="gal-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>' + esc(T("labels.galleryHint")) + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>' +
         "</div>" +
       "</div>";
     } else if (p.media.type === "image") {
@@ -1196,8 +1202,7 @@ function bindProjectMedia() {
     };
   });
 }
-/* 画廊：箭头翻页（可连续点击）+ 鼠标拖拽滑动 + 指示点/计数器同步 */
-let galDragSuppress = false; /* 拖拽结束后短暂抑制 click，避免误开灯箱 */
+/* 画廊：箭头翻页（可连续点击）+ 指示点/计数器同步 */
 function bindGallery() {
   $$(".proj-media.gallery").forEach((gal) => {
     const dots = $$(".gal-dots button", gal);
@@ -1221,41 +1226,6 @@ function bindGallery() {
       go(curIdx() + (btn.dataset.dir === "1" ? 1 : -1));
     }));
     dots.forEach((d) => d.addEventListener("click", () => go(+d.dataset.idx)));
-
-    /* 鼠标拖拽滑动（仅鼠标；触摸屏走原生触摸滚动） */
-    let down = false, startX = 0, startLeft = 0, moved = false;
-    gal.addEventListener("pointerdown", (e) => {
-      if (e.pointerType !== "mouse" || e.target.closest("button")) return;
-      down = true; moved = false;
-      startX = e.clientX; startLeft = gal.scrollLeft;
-      gal.setPointerCapture(e.pointerId);
-      gal.classList.add("dragging");
-      gal.style.scrollSnapType = "none"; /* 拖拽期间关闭吸附，松手恢复 */
-    });
-    gal.addEventListener("pointermove", (e) => {
-      if (!down) return;
-      const dx = e.clientX - startX;
-      if (Math.abs(dx) > 4) moved = true;
-      gal.scrollLeft = startLeft - dx;
-    });
-    gal.addEventListener("pointerup", () => {
-      if (!down) return;
-      down = false;
-      gal.classList.remove("dragging");
-      gal.style.scrollSnapType = "";
-      if (moved) {
-        /* 拖拽产生的 click 不应触发图片灯箱 */
-        galDragSuppress = true;
-        setTimeout(() => { galDragSuppress = false; }, 80);
-      }
-    });
-    gal.addEventListener("click", (e) => {
-      if (galDragSuppress) {
-        e.preventDefault();
-        e.stopPropagation();
-        galDragSuppress = false;
-      }
-    }, true);
   });
 }
 function openLightbox() {
@@ -1267,6 +1237,10 @@ function openLightbox() {
   $("#lbCount").textContent = (lbIdx + 1) + " / " + lbItems.length;
   lb.classList.add("open");
   document.body.style.overflow = "hidden";
+  /* 切换图片时的轻量滑动动画 */
+  img.classList.remove("anim");
+  void img.offsetWidth;
+  img.classList.add("anim");
   $("#lbClose").focus();
 }
 function closeLightbox() {
@@ -1282,6 +1256,15 @@ function bindLightboxControls() {
   $("#lbPrev").addEventListener("click", () => lbStep(-1));
   $("#lbNext").addEventListener("click", () => lbStep(1));
   $("#lightbox").addEventListener("click", (e) => { if (e.target.id === "lightbox") closeLightbox(); });
+  /* 灯箱内触摸左右滑动切换图片 */
+  let lbTouchX = null;
+  $("#lightbox").addEventListener("touchstart", (e) => { lbTouchX = e.touches[0].clientX; }, { passive: true });
+  $("#lightbox").addEventListener("touchend", (e) => {
+    if (lbTouchX === null) return;
+    const dx = e.changedTouches[0].clientX - lbTouchX;
+    lbTouchX = null;
+    if (Math.abs(dx) > 40) lbStep(dx < 0 ? 1 : -1);
+  });
   document.addEventListener("keydown", (e) => {
     if (!$("#lightbox").classList.contains("open")) return;
     if (e.key === "Escape") closeLightbox();
