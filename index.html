@@ -1923,6 +1923,22 @@ function initParticles() {
   io.observe(hero);
 }
 
+/* 外链跳转兜底：部分移动端浏览器（含微信内置）会静默拦截 target="_blank" 新窗口，
+   导致点击无反应——此时改为当前页跳转，保证链接一定可点 */
+function initExternalLinks() {
+  if (!window.matchMedia("(hover: none)").matches) return; /* 仅移动端（触摸优先）接管 */
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest('a[href^="http"]');
+    if (!a) return;
+    e.preventDefault();
+    const w = window.open(a.href, "_blank");
+    if (!w) {
+      /* 新窗口被拦截 → 当前页跳转 */
+      location.href = a.href;
+    }
+  });
+}
+
 /* 头像 3D 视差：鼠标移动时轻微反向位移，增强首屏深度感 */
 function initAvatarParallax() {
   const hero = $("#home");
@@ -2078,6 +2094,7 @@ initTilt();
 initParticles();
 initAvatarParallax();
 initRipple();
+initExternalLinks();
 bindInspire();
 initLoader();
 
