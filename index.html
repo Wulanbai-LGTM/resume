@@ -151,6 +151,11 @@ section[id]{scroll-margin-top:calc(var(--nav-h) + 14px)}
 .hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
 .btn{display:inline-flex;align-items:center;gap:9px;padding:12px 22px;border-radius:13px;font-weight:700;font-size:14.5px;transition:all .22s ease;border:1px solid transparent}
 .btn svg{width:16px;height:16px}
+/* 点击水波反馈（按钮通用） */
+.btn,.c-btn,.tab-btn,.link-btn,.icon-btn{position:relative;overflow:hidden}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.55);transform:scale(0);animation:ripple .6s ease-out forwards;pointer-events:none;z-index:5}
+@keyframes ripple{to{transform:scale(3.5);opacity:0}}
+html[data-theme="dark"] .ripple{background:rgba(255,255,255,.35)}
 .btn-primary{background:var(--grad);color:#fff;box-shadow:0 10px 24px -10px rgba(79,70,229,.65)}
 .btn-primary:hover{transform:translateY(-3px);box-shadow:0 16px 32px -10px rgba(79,70,229,.75)}
 .btn-ghost{background:var(--card);border-color:var(--border-strong);color:var(--text)}
@@ -741,6 +746,10 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             <span id="dlTextLabel">下载简历文本</span>
           </button>
+          <button class="c-btn" id="copyLinkBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <span id="copyLinkLabel">复制链接</span>
+          </button>
         </div>
         <p class="contact-note" id="contactNote"></p>
       </div>
@@ -999,10 +1008,10 @@ const I18N = {
     projects: { eyebrow: "PORTFOLIO", title: "项目作品", sub: "独立完成的完整项目，点击图片可放大预览，游戏含实机演示视频。" },
     skills: { eyebrow: "SKILLS", title: "技能矩阵", sub: "以实践项目锤炼出的核心能力，按应用熟练度分级呈现。" },
     education: { eyebrow: "EDUCATION & CREDENTIALS", title: "教育与证书", sub: "扎实的学历背景与行业认可。" },
-    contact: { eyebrow: "CONTACT", title: "联系我", dlText: "下载简历文本" },
+    contact: { eyebrow: "CONTACT", title: "联系我", dlText: "下载简历文本", copyLink: "复制链接" },
     certs: { flip: "官方认证 · 2026" },
     footer: { rights: "保留所有权利", updated: "最后更新", note: "单文件构建 · 无外部依赖 · 可离线打开" },
-    toast: { copied: "邮箱已复制到剪贴板 🎉", fail: "复制失败，请长按手动复制" },
+    toast: { copied: "邮箱已复制到剪贴板 🎉", fail: "复制失败，请长按手动复制", linkCopied: "链接已复制，快分享给朋友吧 🎉" },
     lightbox: { prev: "上一张", next: "下一张", close: "关闭预览" },
     labels: { time: "完成时间", play: "点击播放演示视频", galleryHint: "点击图片可左右滑动查看" }
   },
@@ -1018,10 +1027,10 @@ const I18N = {
     projects: { eyebrow: "PORTFOLIO", title: "Projects", sub: "Complete projects built independently — click images to zoom, games include live demo videos." },
     skills: { eyebrow: "SKILLS", title: "Skill Matrix", sub: "Core abilities honed through real projects, presented by proficiency tiers." },
     education: { eyebrow: "EDUCATION & CREDENTIALS", title: "Education & Credentials", sub: "Solid academic background with industry recognition." },
-    contact: { eyebrow: "CONTACT", title: "Contact Me", dlText: "Download Resume TXT" },
+    contact: { eyebrow: "CONTACT", title: "Contact Me", dlText: "Download Resume TXT", copyLink: "Copy Link" },
     certs: { flip: "Official Certification" },
     footer: { rights: "All rights reserved", updated: "Last updated", note: "Single-file build · no external dependencies · works offline" },
-    toast: { copied: "Email copied to clipboard 🎉", fail: "Copy failed — please copy manually" },
+    toast: { copied: "Email copied to clipboard 🎉", fail: "Copy failed — please copy manually", linkCopied: "Link copied — share it now 🎉" },
     lightbox: { prev: "Previous", next: "Next", close: "Close" },
     labels: { time: "Completed", play: "Click to play demo", galleryHint: "Click image to view & swipe" }
   }
@@ -1072,6 +1081,7 @@ function renderStaticTexts() {
   $("#contactDesc").textContent = L(resume.contact.d);
   $("#contactNote").textContent = L(resume.contact.note);
   $("#dlTextLabel").textContent = T("contact.dlText");
+  $("#copyLinkLabel").textContent = T("contact.copyLink");
   $("#fMotto").textContent = L(resume.motto);
   $("#fRights").textContent = T("footer.rights");
   $("#fNote").textContent = T("footer.note");
@@ -1602,6 +1612,42 @@ function downloadResumeText() {
   setTimeout(() => URL.revokeObjectURL(url), 3000);
 }
 
+/* 复制当前页面链接 */
+function copyLink() {
+  const url = location.href;
+  const done = () => toast(T("toast.linkCopied"));
+  const fallback = () => {
+    const ta = document.createElement("textarea");
+    ta.value = url;
+    ta.style.cssText = "position:fixed;opacity:0;pointer-events:none";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); done(); } catch (e) { toast(T("toast.fail")); }
+    ta.remove();
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(url).then(done).catch(fallback);
+  } else { fallback(); }
+}
+
+/* 点击水波反馈 */
+function initRipple() {
+  if (prefersReduced) return;
+  document.addEventListener("click", (e) => {
+    const el = e.target.closest(".btn,.c-btn,.tab-btn,.link-btn,.icon-btn");
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const d = Math.max(r.width, r.height);
+    const span = document.createElement("span");
+    span.className = "ripple";
+    span.style.width = span.style.height = d + "px";
+    span.style.left = (e.clientX - r.left - d / 2) + "px";
+    span.style.top = (e.clientY - r.top - d / 2) + "px";
+    el.appendChild(span);
+    setTimeout(() => span.remove(), 650);
+  });
+}
+
 /* ============================================================
    六、全局事件与启动
    ============================================================ */
@@ -1788,6 +1834,9 @@ function bindGlobal() {
   /* 下载简历文本 */
   $("#dlTextBtn").addEventListener("click", downloadResumeText);
 
+  /* 复制链接 */
+  $("#copyLinkBtn").addEventListener("click", copyLink);
+
   /* 导航滚动状态 */
   const nav = $("#nav");
   const progress = $("#scrollProgress");
@@ -1853,7 +1902,17 @@ initTyped();
 initTilt();
 initParticles();
 initAvatarParallax();
+initRipple();
 initLoader();
+
+/* 标签页小彩蛋：离开页面时标题切换 */
+(function () {
+  document.addEventListener("visibilitychange", () => {
+    document.title = document.hidden
+      ? (state.lang === "zh" ? "别走，看看我的作品~ 🎨" : "Wait, check my work~ 🎨")
+      : (state.lang === "zh" ? "毛英杰 · 个人简历 | 无限进步" : "Mao Yingjie · Resume | Relentless Progress");
+  });
+})();
 
 /* ========== 控制台彩蛋（按 F12 查看） ========== */
 (function () {
