@@ -460,6 +460,18 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
 .lb-prev{left:20px;top:50%;transform:translateY(-50%)}
 .lb-next{right:20px;top:50%;transform:translateY(-50%)}
 .lb-next:hover{transform:translateY(-50%) scale(1.08)}
+/* 灵感文案弹窗 */
+.modal{position:fixed;inset:0;z-index:650;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(4,7,18,.66);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .25s ease}
+.modal.open{opacity:1;pointer-events:auto}
+.modal-card{position:relative;max-width:min(92vw,560px);width:100%;padding:44px 34px 30px;border-radius:22px;background:var(--card);border:1px solid var(--border-strong);box-shadow:var(--shadow-lg);text-align:center;transform:translateY(18px) scale(.97);transition:transform .3s cubic-bezier(.22,1,.36,1)}
+.modal.open .modal-card{transform:none}
+.modal-close{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;background:var(--bg-soft);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .25s ease;color:var(--text-2)}
+.modal-close svg{width:15px;height:15px}
+.modal-close:hover{background:rgba(79,70,229,.14);color:var(--primary);transform:rotate(90deg)}
+.modal-badge{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;letter-spacing:.2em;color:var(--primary);background:rgba(79,70,229,.09);border:1px solid rgba(79,70,229,.22);padding:5px 15px;border-radius:999px}
+.modal-text{font-size:clamp(17px,2.4vw,21px);font-weight:700;line-height:1.8;margin:22px 0 4px;min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text)}
+.modal-text::before{content:"“";font-family:Georgia,serif;font-size:52px;line-height:.5;color:var(--primary);opacity:.4;margin-bottom:10px}
+.modal-actions{display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap}
 
 /* ============================================================
    15. 响应式
@@ -628,6 +640,10 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             <span id="ctaPdf">下载 PDF</span>
           </button>
+          <button class="btn btn-ghost" id="inspireBtn" aria-haspopup="dialog">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.7L19.6 10l-5.7 1.9L12 17.6l-1.9-5.7L4.4 10l5.7-1.9z"/><path d="M19 15l.9 2.6L22.5 18.5l-2.6.9L19 22l-.9-2.6-2.6-.9 2.6-.9z"/></svg>
+            <span id="inspireBtnLabel">✨ 灵感文案</span>
+          </button>
         </div>
       </div>
       <div class="avatar-side">
@@ -784,6 +800,21 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
   <button class="lb-btn lb-next" id="lbNext" aria-label="下一张"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
   <div class="lb-count" id="lbCount"></div>
   <div class="lb-cap" id="lbCap"></div>
+</div>
+
+<!-- ================= 灵感文案弹窗 ================= -->
+<div class="modal no-print" id="inspireModal" role="dialog" aria-modal="true" aria-labelledby="inspireText">
+  <div class="modal-card">
+    <button class="modal-close" id="inspireClose" aria-label="关闭">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <span class="modal-badge">✨ <span id="inspireBadge">PROMPT 灵感机</span></span>
+    <p class="modal-text" id="inspireText"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="inspireAgain">↻ <span id="inspireAgainLabel">再来一条</span></button>
+      <button class="btn btn-primary" id="inspireCopy"><span id="inspireCopyLabel">复制文案</span></button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1011,7 +1042,8 @@ const I18N = {
     contact: { eyebrow: "CONTACT", title: "联系我", dlText: "下载简历文本", copyLink: "复制链接" },
     certs: { flip: "官方认证 · 2026" },
     footer: { rights: "保留所有权利", updated: "最后更新", note: "单文件构建 · 无外部依赖 · 可离线打开" },
-    toast: { copied: "邮箱已复制到剪贴板 🎉", fail: "复制失败，请长按手动复制", linkCopied: "链接已复制，快分享给朋友吧 🎉" },
+    toast: { copied: "邮箱已复制到剪贴板 🎉", fail: "复制失败，请长按手动复制", linkCopied: "链接已复制，快分享给朋友吧 🎉", inspireCopied: "文案已复制 ✨" },
+    inspire: { btn: "灵感文案", badge: "PROMPT 灵感机", again: "再来一条", copy: "复制文案" },
     lightbox: { prev: "上一张", next: "下一张", close: "关闭预览" },
     labels: { time: "完成时间", play: "点击播放演示视频", galleryHint: "点击图片可左右滑动查看" }
   },
@@ -1030,7 +1062,8 @@ const I18N = {
     contact: { eyebrow: "CONTACT", title: "Contact Me", dlText: "Download Resume TXT", copyLink: "Copy Link" },
     certs: { flip: "Official Certification" },
     footer: { rights: "All rights reserved", updated: "Last updated", note: "Single-file build · no external dependencies · works offline" },
-    toast: { copied: "Email copied to clipboard 🎉", fail: "Copy failed — please copy manually", linkCopied: "Link copied — share it now 🎉" },
+    toast: { copied: "Email copied to clipboard 🎉", fail: "Copy failed — please copy manually", linkCopied: "Link copied — share it now 🎉", inspireCopied: "Copied ✨" },
+    inspire: { btn: "Inspire Me", badge: "PROMPT INSPIRATION", again: "Another One", copy: "Copy" },
     lightbox: { prev: "Previous", next: "Next", close: "Close" },
     labels: { time: "Completed", play: "Click to play demo", galleryHint: "Click image to view & swipe" }
   }
@@ -1074,6 +1107,10 @@ function renderStaticTexts() {
   $("#ctaCall").textContent = T("hero.ctaCall");
   $("#ctaGithub").textContent = T("hero.ctaGithub");
   $("#ctaPdf").textContent = T("hero.ctaPdf");
+  $("#inspireBtnLabel").textContent = "✨ " + T("inspire.btn");
+  $("#inspireBadge").textContent = T("inspire.badge");
+  $("#inspireAgainLabel").textContent = T("inspire.again");
+  $("#inspireCopyLabel").textContent = T("inspire.copy");
   $("#githubBtn").setAttribute("href", resume.github);
   $("#cEmailText").textContent = resume.email.join("@");
   $("#cGithubText").textContent = L(resume.githubLabel);
@@ -1649,6 +1686,74 @@ function initRipple() {
 }
 
 /* ============================================================
+   灵感文案机：预设 Prompt 风格高级文案，随机抽取展示
+   （前端模板引擎，非真实大模型调用——定位为 Prompt 创意演示）
+   ============================================================ */
+const inspireLines = [
+  { zh: "把每一次生成，都当作与未来的对话。", en: "Treat every generation as a conversation with the future." },
+  { zh: "技术是桨，好奇心是帆，而无限进步是唯一的航向。", en: "Technology is the oar, curiosity the sail — relentless progress the only heading." },
+  { zh: "在 AI 加速的时代，做那个定义问题的人。", en: "In the age of AI, be the one who defines the questions." },
+  { zh: "与其等待灵感，不如训练灵感。", en: "Don't wait for inspiration — train it." },
+  { zh: "每一行代码，都是写给未来的一封信。", en: "Every line of code is a letter to the future." },
+  { zh: "用 prompt 问出好问题，用行动回答时代。", en: "Ask great questions with prompts, answer the era with action." },
+  { zh: "创造不是天赋的专利，而是持续练习的复利。", en: "Creation is not a gift of talent, but the compound interest of practice." },
+  { zh: "教育的本质不是灌输，而是点燃——AI 时代尤甚。", en: "Education is not about pouring in, but lighting up — even more so in the AI era." },
+  { zh: "把大模型当作杠杆，把想象力当作支点。", en: "Use LLMs as the lever, imagination as the fulcrum." },
+  { zh: "别做信息的搬运工，要做思想的锻造者。", en: "Don't be a carrier of information — be a forger of ideas." },
+  { zh: "十年后回看今天，你会感谢那个深夜仍在迭代的自己。", en: "Ten years from now, you'll thank the self who kept iterating late at night." },
+  { zh: "无限进步：昨天的终点，就是今天的起点。", en: "Relentless progress: yesterday's finish line is today's starting line." },
+  { zh: "让工具替你重复，让人生替你思考。", en: "Let tools repeat, and let your life think." },
+  { zh: "作品，是简历最好的注脚。", en: "Work is the best footnote of a resume." },
+  { zh: "AI 不会取代你，但会用 AI 的人会——所以，成为后者。", en: "AI won't replace you, but someone who uses AI will. So become that person." },
+  { zh: "从 0 到 1 很难，从 1 到无限进步，只需要持续。", en: "0 to 1 is hard; 1 to relentless progress just needs persistence." },
+  { zh: "Prompt 是新的编程语言，创意是新的编译器。", en: "Prompts are the new programming language; creativity is the new compiler." },
+  { zh: "在算法与人文的交汇处，看见教育的未来。", en: "At the crossroads of algorithms and humanities, the future of education emerges." },
+  { zh: "与其焦虑被替代，不如成为驾驭者。", en: "Instead of fearing replacement, become the one who drives." },
+  { zh: "每一次点击生成，都是对平庸的一次反抗。", en: "Every click of generation is a rebellion against mediocrity." }
+];
+let lastInspire = -1;
+function pickInspire() {
+  let i;
+  do { i = Math.floor(Math.random() * inspireLines.length); } while (i === lastInspire && inspireLines.length > 1);
+  lastInspire = i;
+  $("#inspireText").textContent = L(inspireLines[i]);
+}
+function openInspire() {
+  pickInspire();
+  $("#inspireModal").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closeInspire() {
+  $("#inspireModal").classList.remove("open");
+  document.body.style.overflow = "";
+}
+function bindInspire() {
+  $("#inspireBtn").addEventListener("click", openInspire);
+  $("#inspireClose").addEventListener("click", closeInspire);
+  $("#inspireAgain").addEventListener("click", pickInspire);
+  $("#inspireCopy").addEventListener("click", () => {
+    const txt = $("#inspireText").textContent;
+    const done = () => toast(T("toast.inspireCopied"));
+    const fallback = () => {
+      const ta = document.createElement("textarea");
+      ta.value = txt;
+      ta.style.cssText = "position:fixed;opacity:0;pointer-events:none";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) { toast(T("toast.fail")); }
+      ta.remove();
+    };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(txt).then(done).catch(fallback);
+    } else { fallback(); }
+  });
+  $("#inspireModal").addEventListener("click", (e) => { if (e.target.id === "inspireModal") closeInspire(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && $("#inspireModal").classList.contains("open")) closeInspire();
+  });
+}
+
+/* ============================================================
    六、全局事件与启动
    ============================================================ */
 
@@ -1903,6 +2008,7 @@ initTilt();
 initParticles();
 initAvatarParallax();
 initRipple();
+bindInspire();
 initLoader();
 
 /* 标签页小彩蛋：离开页面时标题切换 */
