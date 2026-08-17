@@ -68,7 +68,7 @@ html[data-theme="dark"]{
    2. 基础与排版
    ============================================================ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;overflow-x:hidden}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",Arial,sans-serif;
   background:var(--bg); color:var(--text); line-height:1.75; font-size:16px;
@@ -160,11 +160,18 @@ html[data-theme="dark"] .ripple{background:rgba(255,255,255,.35)}
 .btn-primary:hover{transform:translateY(-3px);box-shadow:0 16px 32px -10px rgba(79,70,229,.75)}
 .btn-ghost{background:var(--card);border-color:var(--border-strong);color:var(--text)}
 .btn-ghost:hover{transform:translateY(-3px);border-color:rgba(79,70,229,.45);color:var(--primary);box-shadow:var(--shadow-sm)}
-/* 灵感按钮点击引导提示 */
-.inspire-tip{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700;background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;animation:tipBob 2s ease-in-out infinite}
+/* 灵感按钮点击引导提示（与按钮打包为整体，换行不拆散） */
+.inspire-group{display:inline-flex;align-items:center;gap:8px}
+.inspire-tip{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700;background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;animation:tipBob 2s ease-in-out infinite;white-space:nowrap}
 .it-arrow{width:17px;height:17px;flex-shrink:0;animation:arrowNudge 1.2s ease-in-out infinite}
 @keyframes arrowNudge{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
 @keyframes tipBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@media (max-width:640px){
+  .hero-cta{gap:8px}
+  .hero-cta .btn{padding:10px 15px;font-size:13.5px}
+  .inspire-group{width:100%;justify-content:center}
+  .inspire-group .btn{flex:1}
+}
 /* 头像 */
 .avatar-side{position:relative;display:flex;justify-content:center}
 .avatar-wrap{position:relative;width:min(330px,78vw);aspect-ratio:1;transition:transform .35s cubic-bezier(.22,1,.36,1)}
@@ -213,10 +220,10 @@ html[data-theme="dark"] .ripple{background:rgba(255,255,255,.35)}
 .section .wrap{position:relative;z-index:1}
 /* 区块装饰背景（极淡纹理，增强版面层次） */
 .deco-dots::before,.deco-lines::before,.deco-rings::before{content:"";position:absolute;pointer-events:none;z-index:0}
-.deco-dots::before{width:340px;height:340px;right:-60px;top:30px;background-image:radial-gradient(var(--primary) 1.6px,transparent 1.6px);background-size:20px 20px;opacity:.08;-webkit-mask-image:radial-gradient(circle at 100% 0,#000 8%,transparent 72%);mask-image:radial-gradient(circle at 100% 0,#000 8%,transparent 72%)}
-.deco-lines::before{width:380px;height:380px;left:-70px;bottom:-70px;background:repeating-linear-gradient(45deg,transparent 0 15px,rgba(79,70,229,.06) 15px 16px);-webkit-mask-image:radial-gradient(circle at 0 100%,#000 8%,transparent 72%);mask-image:radial-gradient(circle at 0 100%,#000 8%,transparent 72%)}
-.deco-rings::before{width:360px;height:360px;right:-60px;bottom:0;background:radial-gradient(circle,transparent 60px,rgba(6,182,212,.10) 61px 62px,transparent 63px 82px,rgba(124,58,237,.08) 83px 84px,transparent 85px 104px,rgba(79,70,229,.07) 105px 106px,transparent 107px);opacity:.9}
-.deco-l::before{left:-60px;right:auto;top:auto;bottom:-60px}
+.deco-dots::before{width:340px;height:340px;right:0;top:0;background-image:radial-gradient(var(--primary) 1.6px,transparent 1.6px);background-size:20px 20px;opacity:.08;-webkit-mask-image:radial-gradient(circle at 100% 0,#000 8%,transparent 72%);mask-image:radial-gradient(circle at 100% 0,#000 8%,transparent 72%)}
+.deco-lines::before{width:380px;height:380px;left:0;bottom:0;background:repeating-linear-gradient(45deg,transparent 0 15px,rgba(79,70,229,.06) 15px 16px);-webkit-mask-image:radial-gradient(circle at 0 100%,#000 8%,transparent 72%);mask-image:radial-gradient(circle at 0 100%,#000 8%,transparent 72%)}
+.deco-rings::before{width:360px;height:360px;right:0;bottom:0;background:radial-gradient(circle,transparent 60px,rgba(6,182,212,.10) 61px 62px,transparent 63px 82px,rgba(124,58,237,.08) 83px 84px,transparent 85px 104px,rgba(79,70,229,.07) 105px 106px,transparent 107px);opacity:.9}
+.deco-l::before{left:0;right:auto;top:auto;bottom:0}
 .section-head{max-width:680px;margin:0 auto 46px;text-align:center}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.18em;color:var(--primary);background:rgba(79,70,229,.08);border:1px solid rgba(79,70,229,.22)}
 .section-title{font-size:clamp(26px,3.4vw,36px);font-weight:800;letter-spacing:-.02em;margin:16px 0 10px;line-height:1.25;position:relative;padding-bottom:16px}
@@ -659,14 +666,16 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             <span id="ctaPdf">下载 PDF</span>
           </button>
-          <span class="inspire-tip" aria-hidden="true">
-            <svg class="it-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-            <span id="inspireTipLabel">点我试试</span>
+          <span class="inspire-group">
+            <span class="inspire-tip" aria-hidden="true">
+              <svg class="it-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              <span id="inspireTipLabel">点我试试</span>
+            </span>
+            <button class="btn btn-ghost" id="inspireBtn" aria-haspopup="dialog">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.7L19.6 10l-5.7 1.9L12 17.6l-1.9-5.7L4.4 10l5.7-1.9z"/><path d="M19 15l.9 2.6L22.5 18.5l-2.6.9L19 22l-.9-2.6-2.6-.9 2.6-.9z"/></svg>
+              <span id="inspireBtnLabel">✨ 灵感文案</span>
+            </button>
           </span>
-          <button class="btn btn-ghost" id="inspireBtn" aria-haspopup="dialog">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.7L19.6 10l-5.7 1.9L12 17.6l-1.9-5.7L4.4 10l5.7-1.9z"/><path d="M19 15l.9 2.6L22.5 18.5l-2.6.9L19 22l-.9-2.6-2.6-.9 2.6-.9z"/></svg>
-            <span id="inspireBtnLabel">✨ 灵感文案</span>
-          </button>
         </div>
       </div>
       <div class="avatar-side">
