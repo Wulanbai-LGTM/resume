@@ -160,6 +160,11 @@ html[data-theme="dark"] .ripple{background:rgba(255,255,255,.35)}
 .btn-primary:hover{transform:translateY(-3px);box-shadow:0 16px 32px -10px rgba(79,70,229,.75)}
 .btn-ghost{background:var(--card);border-color:var(--border-strong);color:var(--text)}
 .btn-ghost:hover{transform:translateY(-3px);border-color:rgba(79,70,229,.45);color:var(--primary);box-shadow:var(--shadow-sm)}
+/* 灵感按钮点击引导提示 */
+.inspire-tip{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700;background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;animation:tipBob 2s ease-in-out infinite}
+.it-arrow{width:17px;height:17px;flex-shrink:0;animation:arrowNudge 1.2s ease-in-out infinite}
+@keyframes arrowNudge{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+@keyframes tipBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 /* 头像 */
 .avatar-side{position:relative;display:flex;justify-content:center}
 .avatar-wrap{position:relative;width:min(330px,78vw);aspect-ratio:1;transition:transform .35s cubic-bezier(.22,1,.36,1)}
@@ -640,6 +645,10 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             <span id="ctaPdf">下载 PDF</span>
           </button>
+          <span class="inspire-tip" aria-hidden="true">
+            <svg class="it-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            <span id="inspireTipLabel">点我试试</span>
+          </span>
           <button class="btn btn-ghost" id="inspireBtn" aria-haspopup="dialog">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.7L19.6 10l-5.7 1.9L12 17.6l-1.9-5.7L4.4 10l5.7-1.9z"/><path d="M19 15l.9 2.6L22.5 18.5l-2.6.9L19 22l-.9-2.6-2.6-.9 2.6-.9z"/></svg>
             <span id="inspireBtnLabel">✨ 灵感文案</span>
@@ -1043,7 +1052,7 @@ const I18N = {
     certs: { flip: "官方认证 · 2026" },
     footer: { rights: "保留所有权利", updated: "最后更新", note: "单文件构建 · 无外部依赖 · 可离线打开" },
     toast: { copied: "邮箱已复制到剪贴板 🎉", fail: "复制失败，请长按手动复制", linkCopied: "链接已复制，快分享给朋友吧 🎉", inspireCopied: "文案已复制 ✨" },
-    inspire: { btn: "灵感文案", badge: "PROMPT 灵感机", again: "再来一条", copy: "复制文案" },
+    inspire: { btn: "灵感文案", badge: "PROMPT 灵感机", again: "再来一条", copy: "复制文案", tip: "点我试试" },
     lightbox: { prev: "上一张", next: "下一张", close: "关闭预览" },
     labels: { time: "完成时间", play: "点击播放演示视频", galleryHint: "点击图片可左右滑动查看" }
   },
@@ -1063,7 +1072,7 @@ const I18N = {
     certs: { flip: "Official Certification" },
     footer: { rights: "All rights reserved", updated: "Last updated", note: "Single-file build · no external dependencies · works offline" },
     toast: { copied: "Email copied to clipboard 🎉", fail: "Copy failed — please copy manually", linkCopied: "Link copied — share it now 🎉", inspireCopied: "Copied ✨" },
-    inspire: { btn: "Inspire Me", badge: "PROMPT INSPIRATION", again: "Another One", copy: "Copy" },
+    inspire: { btn: "Inspire Me", badge: "PROMPT INSPIRATION", again: "Another One", copy: "Copy", tip: "Try me" },
     lightbox: { prev: "Previous", next: "Next", close: "Close" },
     labels: { time: "Completed", play: "Click to play demo", galleryHint: "Click image to view & swipe" }
   }
@@ -1108,6 +1117,7 @@ function renderStaticTexts() {
   $("#ctaGithub").textContent = T("hero.ctaGithub");
   $("#ctaPdf").textContent = T("hero.ctaPdf");
   $("#inspireBtnLabel").textContent = "✨ " + T("inspire.btn");
+  $("#inspireTipLabel").textContent = T("inspire.tip");
   $("#inspireBadge").textContent = T("inspire.badge");
   $("#inspireAgainLabel").textContent = T("inspire.again");
   $("#inspireCopyLabel").textContent = T("inspire.copy");
