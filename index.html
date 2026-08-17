@@ -68,12 +68,12 @@ html[data-theme="dark"]{
    2. 基础与排版
    ============================================================ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;overflow-x:hidden}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;overflow-x:hidden;overflow-x:clip;max-width:100%;overscroll-behavior-x:none}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",Arial,sans-serif;
   background:var(--bg); color:var(--text); line-height:1.75; font-size:16px;
   -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
-  transition:background-color .25s ease,color .25s ease; overflow-x:hidden;
+  transition:background-color .25s ease,color .25s ease; overflow-x:hidden; overflow-x:clip; max-width:100%; overscroll-behavior-x:none;
 }
 img,video{max-width:100%;display:block}
 a{color:inherit;text-decoration:none}
