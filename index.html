@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>毛英杰 · 个人简历 | 无限进步</title>
-<meta name="description" content="毛英杰 —— 成都师范学院人工智能教育专业准大一，AIGC 视觉创作者 / Python 开发者 / 演讲级 PPT 设计师。无限进步，以作品说话。">
+<meta name="description" content="毛英杰 —— 成都师范学院人工智能教育专业 2026 级新生，AI 多模态应用创作者 / 教育科技探索者。无限进步，以作品说话。">
 <meta name="theme-color" content="#4f46e5">
 <!-- ===== SEO / 社交分享 ===== -->
 <meta property="og:type" content="profile">
 <meta property="og:title" content="毛英杰 · 个人简历 | 无限进步">
-<meta property="og:description" content="成都师范学院人工智能教育专业准大一，AIGC 视觉创作者 / Python 开发者 / 演讲级 PPT 设计师。无限进步，以作品说话。">
+<meta property="og:description" content="成都师范学院人工智能教育专业 2026 级新生，AI 多模态应用创作者 / 教育科技探索者。无限进步，以作品说话。">
 <meta property="og:site_name" content="毛英杰 · 在线简历">
 <!-- 部署到 GitHub Pages 后生效；若仓库名不是 resume，请同步更新下面两个 URL -->
 <meta property="og:url" content="https://Wulanbai-LGTM.github.io/resume/">
@@ -339,6 +339,10 @@ html[data-theme="dark"] .tilt::after{background:radial-gradient(520px circle at 
 .bar{height:7px;border-radius:99px;background:var(--bg-soft);overflow:hidden}
 .bar i{display:block;height:100%;width:0;border-radius:99px;background:var(--grad);transition:width 1.1s cubic-bezier(.22,1,.36,1)}
 .reveal.in .bar i{width:var(--w)}
+/* 三级技能徽章（熟练应用 / 项目实操 / 协作工具） */
+.skill-tags{display:flex;flex-wrap:wrap;gap:10px}
+.skill-tag{display:inline-flex;align-items:center;padding:8px 16px;border-radius:12px;font-size:13.5px;font-weight:600;background:linear-gradient(135deg,rgba(79,70,229,.09),rgba(6,182,212,.09));border:1px solid var(--border);color:var(--text);transition:all .2s ease}
+.skill-tag:hover{transform:translateY(-3px);border-color:rgba(79,70,229,.45);color:var(--primary);box-shadow:var(--shadow-sm)}
 
 /* ============================================================
    12. 教育与证书
@@ -562,7 +566,7 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
     </div>
     <div class="wrap hero-inner">
       <div class="hero-copy">
-        <span class="hero-chip"><span class="dot"></span><span id="heroChip">准大一 · 人工智能教育专业 · 成都师范学院</span></span>
+        <span class="hero-chip"><span class="dot"></span><span id="heroChip">2026 级新生 · 人工智能教育专业 · 成都师范学院</span></span>
         <h1><span id="heroGreet">你好，我是</span><br><span class="grad-text" id="heroName">毛英杰</span></h1>
         <p class="typed-line" aria-live="polite"><span id="typedIntro">我是一名</span> <span id="typed"></span><span class="typed-caret" aria-hidden="true"></span></p>
         <div class="motto"><span class="mark" aria-hidden="true">“</span><p id="mottoText"></p></div>
@@ -750,8 +754,8 @@ const resume = {
     en: "Relentless Progress — drive technological iteration with lifelong learning, and answer the changing era with practice and innovation."
   },
   roles: {
-    zh: ["AI 视觉创作者", "Python 开发者", "演讲级 PPT 设计师", "智能体工程师", "终身学习者"],
-    en: ["AI Visual Creator", "Python Developer", "Presentation Designer", "Agent Engineer", "Lifelong Learner"]
+    zh: ["AI 多模态应用创作者", "教育科技探索者"],
+    en: ["AI Multimodal Application Creator", "EdTech Explorer"]
   },
   intro: {
     zh: "高中阶段便完成机器学习与 Python 核心课程的自主预习，考取阿里云、科大讯飞等头部企业专业认证；擅长 AIGC 视觉生产、演讲级 PPT 设计与 Python 工程实践，习惯用作品说话，把每个想法打磨成看得见的成果。",
@@ -786,7 +790,7 @@ const resume = {
     tabs: [
       { id: "all", t: { zh: "全部", en: "All" } },
       { id: "campus", t: { zh: "高中 · 校园", en: "High School" } },
-      { id: "practice", t: { zh: "暑期 · 实践", en: "Summer Practice" } }
+      { id: "practice", t: { zh: "项目交付", en: "Project Delivery" } }
     ],
     groups: {
       campus: {
@@ -808,7 +812,7 @@ const resume = {
         ]
       },
       practice: {
-        title: { zh: "暑期 · 项目实践", en: "Summer · Practice" },
+        title: { zh: "独立项目交付经历", en: "Independent Project Delivery" },
         items: [
           { date: "2026.07", role: { zh: "独立完成 · 全流程开发", en: "Solo · full pipeline" },
             t: { zh: "AI 视觉内容生成系统 · 商业级应用", en: "AI Visual Content Generation System" },
@@ -899,18 +903,12 @@ const resume = {
       links: [] }
   ],
   skills: [
-    { icon: "💻", t: { zh: "编程开发", en: "Programming" }, items: [
-      { n: { zh: "Python", en: "Python" }, l: 88 }, { n: { zh: "Pygame", en: "Pygame" }, l: 82 },
-      { n: { zh: "Tkinter", en: "Tkinter" }, l: 72 }, { n: { zh: "自动化脚本 / 数据处理", en: "Automation & Data Processing" }, l: 78 } ] },
-    { icon: "🎨", t: { zh: "AIGC 与 AI 应用", en: "AIGC & AI Applications" }, items: [
-      { n: { zh: "Prompt Engineering", en: "Prompt Engineering" }, l: 92 }, { n: { zh: "Stable Diffusion", en: "Stable Diffusion" }, l: 90 },
-      { n: { zh: "Midjourney / 分镜设计", en: "Midjourney / Storyboarding" }, l: 86 }, { n: { zh: "Codex / DeepSeek 协同开发", en: "Codex / DeepSeek Pairing" }, l: 86 } ] },
-    { icon: "📐", t: { zh: "办公与视觉设计", en: "Office & Visual Design" }, items: [
-      { n: { zh: "演讲级 PPT 设计", en: "Presentation-grade PPT" }, l: 92 }, { n: { zh: "信息架构 / 数据可视化", en: "Info Architecture & Data Viz" }, l: 84 },
-      { n: { zh: "设计心理学", en: "Design Psychology" }, l: 80 }, { n: { zh: "AIGC 创意落地", en: "AIGC Creative Delivery" }, l: 88 } ] },
-    { icon: "🤖", t: { zh: "智能体与模型调优", en: "Agents & Model Tuning" }, items: [
-      { n: { zh: "智能体搭建", en: "Agent Building" }, l: 82 }, { n: { zh: "Prompt 调优", en: "Prompt Tuning" }, l: 88 },
-      { n: { zh: "规划 / 记忆 / 工具调用", en: "Planning / Memory / Tools" }, l: 76 }, { n: { zh: "闭环调优", en: "Closed-loop Optimization" }, l: 80 } ] }
+    { icon: "🚀", t: { zh: "熟练应用", en: "Proficient" }, items: [
+      { zh: "Python", en: "Python" }, { zh: "Prompt Engineering", en: "Prompt Engineering" }, { zh: "Stable Diffusion", en: "Stable Diffusion" } ] },
+    { icon: "🛠️", t: { zh: "项目实操", en: "Hands-on Practice" }, items: [
+      { zh: "Pygame 游戏开发", en: "Pygame Game Dev" }, { zh: "智能体搭建（Coze / Dify）", en: "Agent Building (Coze / Dify)" }, { zh: "数据可视化", en: "Data Visualization" } ] },
+    { icon: "🤝", t: { zh: "协作工具", en: "Collaboration Tools" }, items: [
+      { zh: "Git", en: "Git" }, { zh: "Markdown", en: "Markdown" }, { zh: "Office（PPT 高阶）", en: "Office (Advanced PPT)" } ] }
   ],
   education: {
     icon: "🎓",
@@ -918,7 +916,7 @@ const resume = {
     major: { zh: "人工智能教育 · 本科", en: "Artificial Intelligence in Education · Bachelor" },
     period: { zh: "2026.09 – 2030.06（预期）", en: "Sep 2026 – Jun 2030 (expected)" },
     pts: [
-      { zh: "以优异高考成绩录取，准大一新生", en: "Admitted with an excellent Gaokao score" },
+      { zh: "以优异高考成绩录取，2026 级新生", en: "Admitted with an excellent Gaokao score as a Class of 2026 freshman" },
       { zh: "入学前已完成机器学习、Python 等核心课程自主预习", en: "Pre-studied machine learning & Python before enrollment" },
       { zh: "高中阶段即获多项 AI 头部企业专业认证", en: "Multiple industry AI certifications earned in high school" }
     ],
@@ -946,14 +944,14 @@ const I18N = {
   zh: {
     nav: { highlights: "亮点成果", experience: "成长经历", projects: "项目作品", skills: "技能矩阵", education: "教育证书", contact: "联系我" },
     hero: {
-      chip: "准大一 · 人工智能教育专业 · 成都师范学院", greet: "你好，我是", typed: "我是一名",
+      chip: "2026 级新生 · 人工智能教育专业 · 成都师范学院", greet: "你好，我是", typed: "我是一名",
       ctaEmail: "复制邮箱", ctaCall: "致电", ctaGithub: "GitHub", ctaPdf: "下载 PDF"
     },
     highlights: { eyebrow: "HIGHLIGHTS", title: "用数据说话的成果", sub: "每一条都来自真实实践，可验证、可量化。" },
     experience: { eyebrow: "JOURNEY", title: "成长经历", sub: "从校园到项目现场，每一步都有作品与成绩见证。",
-      note: "说明：作为准大一新生，暂无正式实习经历；以下以 <b>校园成长</b> 与 <b>暑期实践</b> 呈现我的执行轨迹与学习曲线。" },
+      note: "说明：作为 2026 级新生，暂无正式实习经历；以下以 <b>校园成长</b> 与 <b>独立项目交付经历</b> 呈现我的执行轨迹与学习曲线。" },
     projects: { eyebrow: "PORTFOLIO", title: "项目作品", sub: "独立完成的完整项目，点击图片可放大预览，游戏含实机演示视频。" },
-    skills: { eyebrow: "SKILLS", title: "技能矩阵", sub: "以实践项目锤炼出的核心能力，百分比代表熟练度。" },
+    skills: { eyebrow: "SKILLS", title: "技能矩阵", sub: "以实践项目锤炼出的核心能力，按应用熟练度分级呈现。" },
     education: { eyebrow: "EDUCATION & CREDENTIALS", title: "教育与证书", sub: "扎实的学历背景与行业认可。" },
     contact: { eyebrow: "CONTACT", title: "联系我" },
     footer: { rights: "保留所有权利", updated: "最后更新", note: "单文件构建 · 无外部依赖 · 可离线打开" },
@@ -964,14 +962,14 @@ const I18N = {
   en: {
     nav: { highlights: "Highlights", experience: "Journey", projects: "Projects", skills: "Skills", education: "Credentials", contact: "Contact" },
     hero: {
-      chip: "Freshman · AI in Education · Chengdu Normal University", greet: "Hi, I'm", typed: "I am a",
+      chip: "Class of 2026 · AI in Education · Chengdu Normal University", greet: "Hi, I'm", typed: "I am a",
       ctaEmail: "Copy Email", ctaCall: "Call me", ctaGithub: "GitHub", ctaPdf: "Print PDF"
     },
     highlights: { eyebrow: "HIGHLIGHTS", title: "Results That Speak in Numbers", sub: "Every metric comes from real practice — verifiable and measurable." },
     experience: { eyebrow: "JOURNEY", title: "Growth Journey", sub: "From campus to project sites, every step is witnessed by work and results.",
-      note: "Note: as an incoming freshman I have no formal internship yet — the timeline below shows my execution track record from <b>high school</b> and <b>summer practice</b>." },
+      note: "Note: as a Class of 2026 freshman I have no formal internship yet — the timeline below shows my execution track record from <b>high school</b> and <b>independent project delivery</b>." },
     projects: { eyebrow: "PORTFOLIO", title: "Projects", sub: "Complete projects built independently — click images to zoom, games include live demo videos." },
-    skills: { eyebrow: "SKILLS", title: "Skill Matrix", sub: "Core abilities honed through real projects; percentages indicate proficiency." },
+    skills: { eyebrow: "SKILLS", title: "Skill Matrix", sub: "Core abilities honed through real projects, presented by proficiency tiers." },
     education: { eyebrow: "EDUCATION & CREDENTIALS", title: "Education & Credentials", sub: "Solid academic background with industry recognition." },
     contact: { eyebrow: "CONTACT", title: "Contact Me" },
     footer: { rights: "All rights reserved", updated: "Last updated", note: "Single-file build · no external dependencies · works offline" },
@@ -1144,9 +1142,9 @@ function renderSkills() {
   $("#skillGrid").innerHTML = resume.skills.map((g, i) =>
     '<div class="card skill-card reveal tilt" style="--i:' + i + '">' +
       '<div class="skill-head"><span class="skill-ic">' + g.icon + "</span><h3>" + esc(L(g.t)) + "</h3></div>" +
-      g.items.map((it) =>
-        '<div class="skill-item"><div class="skill-row"><span>' + esc(L(it.n)) + '</span><em>' + it.l + "%</em></div>" +
-        '<div class="bar"><i style="--w:' + it.l + '%"></i></div></div>').join("") +
+      '<div class="skill-tags">' +
+        g.items.map((it) => '<span class="skill-tag">' + esc(L(it)) + "</span>").join("") +
+      "</div>" +
     "</div>").join("");
 }
 
@@ -1658,10 +1656,9 @@ function bindGlobal() {
       bindGallery();
       bindVideos();
     }
-    /* 展开所有 Tab 面板、定格数字动画与技能条 */
+    /* 展开所有 Tab 面板、定格数字动画 */
     $$("[role='tabpanel']").forEach((p) => { p.classList.add("active"); });
     $$(".num").forEach((el) => { el.textContent = (+el.dataset.count).toLocaleString("en-US"); });
-    $$(".bar i").forEach((el) => { el.style.width = el.style.getPropertyValue("--w"); });
   });
 
   /* 邮箱复制 */
