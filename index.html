@@ -1103,7 +1103,7 @@ const I18N = {
     contact: { eyebrow: "CONTACT", title: "联系我", dlText: "下载简历文本", copyLink: "复制链接" },
     certs: { flip: "官方认证 · 2026" },
     footer: { rights: "保留所有权利", updated: "最后更新", note: "单文件构建 · 无外部依赖 · 可离线打开" },
-    toast: { copied: "邮箱已复制到剪贴板 🎉", fail: "复制失败，请长按手动复制", linkCopied: "链接已复制，快分享给朋友吧 🎉", inspireCopied: "文案已复制 ✨" },
+    toast: { copied: "邮箱已复制到剪贴板 🎉", fail: "复制失败，请长按手动复制", linkCopied: "链接已复制，快分享给朋友吧 🎉", inspireCopied: "文案已复制 ✨", githubCopied: "已复制 GitHub 链接，请在浏览器中打开 🔗" },
     inspire: { btn: "灵感文案", badge: "PROMPT 灵感机", again: "再来一条", copy: "复制文案", tip: "点我试试" },
     lightbox: { prev: "上一张", next: "下一张", close: "关闭预览" },
     labels: { time: "完成时间", play: "点击播放演示视频", galleryHint: "点击图片可左右滑动查看" }
@@ -1124,7 +1124,7 @@ const I18N = {
     contact: { eyebrow: "CONTACT", title: "Contact Me", dlText: "Download Resume TXT", copyLink: "Copy Link" },
     certs: { flip: "Official Certification" },
     footer: { rights: "All rights reserved", updated: "Last updated", note: "Single-file build · no external dependencies · works offline" },
-    toast: { copied: "Email copied to clipboard 🎉", fail: "Copy failed — please copy manually", linkCopied: "Link copied — share it now 🎉", inspireCopied: "Copied ✨" },
+    toast: { copied: "Email copied to clipboard 🎉", fail: "Copy failed — please copy manually", linkCopied: "Link copied — share it now 🎉", inspireCopied: "Copied ✨", githubCopied: "GitHub link copied — open it in your browser 🔗" },
     inspire: { btn: "Inspire Me", badge: "PROMPT INSPIRATION", again: "Another One", copy: "Copy", tip: "Try me" },
     lightbox: { prev: "Previous", next: "Next", close: "Close" },
     labels: { time: "Completed", play: "Click to play demo", galleryHint: "Click image to view & swipe" }
@@ -1923,18 +1923,39 @@ function initParticles() {
   io.observe(hero);
 }
 
+/* 通用剪贴板复制 */
+function copyTextToClipboard(text, doneMsg) {
+  const done = () => toast(doneMsg);
+  const fallback = () => {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.cssText = "position:fixed;opacity:0;pointer-events:none";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); done(); } catch (e) { toast(T("toast.fail")); }
+    ta.remove();
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(done).catch(fallback);
+  } else { fallback(); }
+}
+
 /* 外链跳转兜底：部分移动端浏览器（含微信内置）会静默拦截 target="_blank" 新窗口，
-   导致点击无反应——此时改为当前页跳转，保证链接一定可点 */
+   点击无反应——此时自动复制链接 + 提示 + 尝试当前页跳转，保证一定反馈 */
 function initExternalLinks() {
-  if (!window.matchMedia("(hover: none)").matches) return; /* 仅移动端（触摸优先）接管 */
+  const isTouch = window.matchMedia("(hover: none)").matches || window.matchMedia("(max-width: 960px)").matches;
+  if (!isTouch) return; /* 桌面端保持原生新标签行为 */
   document.addEventListener("click", (e) => {
     const a = e.target.closest('a[href^="http"]');
     if (!a) return;
     e.preventDefault();
     const w = window.open(a.href, "_blank");
-    if (!w) {
-      /* 新窗口被拦截 → 当前页跳转 */
-      location.href = a.href;
+    if (w) {
+      try { w.opener = null; } catch (err) {}
+    } else {
+      /* 新窗口被拦截：复制链接并提示，再尝试当前页跳转 */
+      copyTextToClipboard(a.href, T("toast.githubCopied"));
+      try { location.href = a.href; } catch (err) {}
     }
   });
 }
