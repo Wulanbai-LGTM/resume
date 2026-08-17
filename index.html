@@ -157,7 +157,7 @@ section[id]{scroll-margin-top:calc(var(--nav-h) + 14px)}
 .btn-ghost:hover{transform:translateY(-3px);border-color:rgba(79,70,229,.45);color:var(--primary);box-shadow:var(--shadow-sm)}
 /* 头像 */
 .avatar-side{position:relative;display:flex;justify-content:center}
-.avatar-wrap{position:relative;width:min(330px,78vw);aspect-ratio:1}
+.avatar-wrap{position:relative;width:min(330px,78vw);aspect-ratio:1;transition:transform .35s cubic-bezier(.22,1,.36,1)}
 .avatar-wrap::before{content:"";position:absolute;inset:0;border-radius:50%;padding:6px;background:conic-gradient(from 0deg,#4f46e5,#06b6d4,#7c3aed,#ec4899,#4f46e5);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;animation:spin 9s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .avatar-wrap img{width:100%;height:100%;object-fit:cover;border-radius:50%;box-shadow:var(--shadow-lg)}
@@ -200,6 +200,13 @@ section[id]{scroll-margin-top:calc(var(--nav-h) + 14px)}
    ============================================================ */
 .section{padding:84px 0;position:relative}
 .section.alt{background:var(--bg-soft)}
+.section .wrap{position:relative;z-index:1}
+/* 区块装饰背景（极淡纹理，增强版面层次） */
+.deco-dots::before,.deco-lines::before,.deco-rings::before{content:"";position:absolute;pointer-events:none;z-index:0}
+.deco-dots::before{width:340px;height:340px;right:-60px;top:30px;background-image:radial-gradient(var(--primary) 1.6px,transparent 1.6px);background-size:20px 20px;opacity:.08;-webkit-mask-image:radial-gradient(circle at 100% 0,#000 8%,transparent 72%);mask-image:radial-gradient(circle at 100% 0,#000 8%,transparent 72%)}
+.deco-lines::before{width:380px;height:380px;left:-70px;bottom:-70px;background:repeating-linear-gradient(45deg,transparent 0 15px,rgba(79,70,229,.06) 15px 16px);-webkit-mask-image:radial-gradient(circle at 0 100%,#000 8%,transparent 72%);mask-image:radial-gradient(circle at 0 100%,#000 8%,transparent 72%)}
+.deco-rings::before{width:360px;height:360px;right:-60px;bottom:0;background:radial-gradient(circle,transparent 60px,rgba(6,182,212,.10) 61px 62px,transparent 63px 82px,rgba(124,58,237,.08) 83px 84px,transparent 85px 104px,rgba(79,70,229,.07) 105px 106px,transparent 107px);opacity:.9}
+.deco-l::before{left:-60px;right:auto;top:auto;bottom:-60px}
 .section-head{max-width:680px;margin:0 auto 46px;text-align:center}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.18em;color:var(--primary);background:rgba(79,70,229,.08);border:1px solid rgba(79,70,229,.22)}
 .section-title{font-size:clamp(26px,3.4vw,36px);font-weight:800;letter-spacing:-.02em;margin:16px 0 10px;line-height:1.25;position:relative;padding-bottom:16px}
@@ -380,6 +387,18 @@ html[data-theme="dark"] .skill-tag.g2:hover{color:#fbbf24}
 .cert-card h4{font-size:14.5px;font-weight:800;line-height:1.4}
 .cert-card p{font-size:12.5px;color:var(--text-3);font-weight:600;margin-top:2px}
 .cert-year{margin-left:auto;flex-shrink:0;font-size:11.5px;font-weight:800;color:var(--primary);background:rgba(79,70,229,.09);padding:3px 10px;border-radius:999px}
+/* 证书 3D 翻转卡 */
+.flip-card{perspective:900px;background:transparent;border:none;box-shadow:none;padding:0;display:block}
+.flip-card .cert-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.22,1,.36,1)}
+.flip-card:hover .cert-inner{transform:rotateY(180deg)}
+.flip-card .cert-face{display:flex;align-items:center;gap:14px;padding:20px;border-radius:var(--radius);background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow-sm);backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.flip-card .cert-front{position:relative}
+.flip-card .cert-back{position:absolute;inset:0;flex-direction:column;justify-content:center;text-align:center;gap:5px;background:linear-gradient(150deg,rgba(79,70,229,.10),rgba(6,182,212,.10));border-color:rgba(79,70,229,.32);transform:rotateY(180deg)}
+.flip-card .cert-back h4{font-size:14.5px;font-weight:800;line-height:1.4}
+.flip-card .cert-back p{font-size:12.5px;color:var(--text-2);font-weight:600}
+.flip-card .cert-back .cb-year{margin-top:3px;font-size:11.5px;font-weight:800;color:var(--primary);background:rgba(79,70,229,.09);padding:3px 10px;border-radius:999px;display:inline-block}
+.flip-card .cert-back small{font-size:11px;color:var(--text-3);letter-spacing:.1em;margin-top:5px}
+@media (prefers-reduced-motion:reduce){.flip-card:hover .cert-inner{transform:none}}
 
 /* ============================================================
    13. 联系 / 页脚
@@ -485,7 +504,7 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
     --shadow-sm:none !important;--shadow:none !important;--shadow-lg:none !important;
   }
   body{font-size:12px;line-height:1.65}
-  .no-print,.nav,.back-top,.scroll-progress,.marquee,.scroll-hint,.hero-bg,.blob,.chip-float,.lightbox,.toast,.video-play,.loader{display:none !important}
+  .no-print,.nav,.back-top,.scroll-progress,.marquee,.scroll-hint,.hero-bg,.blob,.chip-float,.lightbox,.toast,.video-play,.loader,.deco-dots::before,.deco-lines::before,.deco-rings::before{display:none !important}
   .hero{padding:0 0 18px}
   .hero-inner{grid-template-columns:1fr;gap:14px}
   .avatar-side{display:none}
@@ -609,7 +628,10 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
       <div class="avatar-side">
         <div class="avatar-wrap">
           <div class="avatar-glow" aria-hidden="true"></div>
-          <img src="图片/头像.jpg" alt="毛英杰的照片" width="940" height="940" decoding="async" fetchpriority="high">
+          <picture>
+            <source srcset="图片/头像.webp" type="image/webp">
+            <img src="图片/头像.jpg" alt="毛英杰的照片" width="940" height="940" decoding="async" fetchpriority="high">
+          </picture>
         </div>
         <div class="chip-float cf-1"><span class="ic">🏅</span><span>阿里云 · 人工智能训练师</span></div>
         <div class="chip-float cf-2"><span class="ic">⚡</span><span>坦克大战 · 60 FPS</span></div>
@@ -628,7 +650,7 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
   <div class="marquee no-print" aria-hidden="true"><div class="marquee-track" id="marqueeTrack"></div></div>
 
   <!-- ================= 亮点成果 ================= -->
-  <section class="section" id="highlights">
+  <section class="section deco-dots" id="highlights">
     <div class="wrap">
       <div class="section-head reveal">
         <span class="eyebrow" data-i18n="highlights.eyebrow">HIGHLIGHTS</span>
@@ -641,7 +663,7 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
   </section>
 
   <!-- ================= 成长经历 ================= -->
-  <section class="section alt" id="experience">
+  <section class="section alt deco-lines" id="experience">
     <div class="wrap">
       <div class="section-head reveal">
         <span class="eyebrow" data-i18n="experience.eyebrow">JOURNEY</span>
@@ -656,7 +678,7 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
   </section>
 
   <!-- ================= 项目作品 ================= -->
-  <section class="section" id="projects">
+  <section class="section deco-rings" id="projects">
     <div class="wrap">
       <div class="section-head reveal">
         <span class="eyebrow" data-i18n="projects.eyebrow">PORTFOLIO</span>
@@ -670,7 +692,7 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
   </section>
 
   <!-- ================= 技能矩阵 ================= -->
-  <section class="section alt" id="skills">
+  <section class="section alt deco-dots deco-l" id="skills">
     <div class="wrap">
       <div class="section-head reveal">
         <span class="eyebrow" data-i18n="skills.eyebrow">SKILLS</span>
@@ -683,7 +705,7 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
   </section>
 
   <!-- ================= 教育与证书 ================= -->
-  <section class="section" id="education">
+  <section class="section deco-rings deco-l" id="education">
     <div class="wrap">
       <div class="section-head reveal">
         <span class="eyebrow" data-i18n="education.eyebrow">EDUCATION & CREDENTIALS</span>
@@ -715,6 +737,10 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56 0-.27-.01-1.17-.02-2.12-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.7 1.25 3.35.96.1-.75.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.15 1.18a10.9 10.9 0 0 1 2.87-.39c.97 0 1.95.13 2.87.39 2.19-1.49 3.15-1.18 3.15-1.18.62 1.59.23 2.76.11 3.05.73.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.25 5.67.41.35.77 1.05.77 2.12 0 1.53-.01 2.76-.01 3.14 0 .31.21.67.8.56A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
             <span id="cGithubText">github.com/Wulanbai-LGTM</span>
           </a>
+          <button class="c-btn" id="dlTextBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span id="dlTextLabel">下载简历文本</span>
+          </button>
         </div>
         <p class="contact-note" id="contactNote"></p>
       </div>
@@ -973,7 +999,8 @@ const I18N = {
     projects: { eyebrow: "PORTFOLIO", title: "项目作品", sub: "独立完成的完整项目，点击图片可放大预览，游戏含实机演示视频。" },
     skills: { eyebrow: "SKILLS", title: "技能矩阵", sub: "以实践项目锤炼出的核心能力，按应用熟练度分级呈现。" },
     education: { eyebrow: "EDUCATION & CREDENTIALS", title: "教育与证书", sub: "扎实的学历背景与行业认可。" },
-    contact: { eyebrow: "CONTACT", title: "联系我" },
+    contact: { eyebrow: "CONTACT", title: "联系我", dlText: "下载简历文本" },
+    certs: { flip: "官方认证 · 2026" },
     footer: { rights: "保留所有权利", updated: "最后更新", note: "单文件构建 · 无外部依赖 · 可离线打开" },
     toast: { copied: "邮箱已复制到剪贴板 🎉", fail: "复制失败，请长按手动复制" },
     lightbox: { prev: "上一张", next: "下一张", close: "关闭预览" },
@@ -991,7 +1018,8 @@ const I18N = {
     projects: { eyebrow: "PORTFOLIO", title: "Projects", sub: "Complete projects built independently — click images to zoom, games include live demo videos." },
     skills: { eyebrow: "SKILLS", title: "Skill Matrix", sub: "Core abilities honed through real projects, presented by proficiency tiers." },
     education: { eyebrow: "EDUCATION & CREDENTIALS", title: "Education & Credentials", sub: "Solid academic background with industry recognition." },
-    contact: { eyebrow: "CONTACT", title: "Contact Me" },
+    contact: { eyebrow: "CONTACT", title: "Contact Me", dlText: "Download Resume TXT" },
+    certs: { flip: "Official Certification" },
     footer: { rights: "All rights reserved", updated: "Last updated", note: "Single-file build · no external dependencies · works offline" },
     toast: { copied: "Email copied to clipboard 🎉", fail: "Copy failed — please copy manually" },
     lightbox: { prev: "Previous", next: "Next", close: "Close" },
@@ -1007,6 +1035,8 @@ const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const L = (o) => (o && typeof o === "object" && !Array.isArray(o) && o[state.lang]) ? o[state.lang] : (Array.isArray(o) ? o : o);
 const T = (k) => k.split(".").reduce((o, p) => (o ? o[p] : undefined), I18N[state.lang]) || "";
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+/* 同路径 WebP 版本（图片已提供 .webp 源时使用） */
+const webpOf = (s) => s.replace(/\.(jpe?g|png)$/i, ".webp");
 const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const state = {
@@ -1041,6 +1071,7 @@ function renderStaticTexts() {
   $("#contactTitle").textContent = L(resume.contact.t);
   $("#contactDesc").textContent = L(resume.contact.d);
   $("#contactNote").textContent = L(resume.contact.note);
+  $("#dlTextLabel").textContent = T("contact.dlText");
   $("#fMotto").textContent = L(resume.motto);
   $("#fRights").textContent = T("footer.rights");
   $("#fNote").textContent = T("footer.note");
@@ -1119,7 +1150,7 @@ function renderProjCards() {
     if (p.media.type === "gallery") {
       media = '<div class="proj-media gallery" id="gal-' + p.id + '">' +
         p.media.items.map((it, j) =>
-          '<div class="cell"><img src="' + it.src + '" alt="' + esc(L(it.cap)) + '" loading="lazy" decoding="async" data-gallery="' + p.id + '" data-idx="' + j + '"><div class="media-cap">' + esc(L(it.cap)) + "</div></div>").join("") +
+          '<div class="cell"><picture><source srcset="' + webpOf(it.src) + '" type="image/webp"><img src="' + it.src + '" alt="' + esc(L(it.cap)) + '" loading="lazy" decoding="async" data-gallery="' + p.id + '" data-idx="' + j + '"></picture><div class="media-cap">' + esc(L(it.cap)) + "</div></div>").join("") +
         '<div class="gal-nav">' +
           '<button class="gal-arrow prev" type="button" aria-label="' + esc(T("lightbox.prev")) + '" data-gallery="' + p.id + '" data-dir="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>' +
           '<button class="gal-arrow next" type="button" aria-label="' + esc(T("lightbox.next")) + '" data-gallery="' + p.id + '" data-dir="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>' +
@@ -1129,7 +1160,7 @@ function renderProjCards() {
         "</div>" +
       "</div>";
     } else if (p.media.type === "image") {
-      media = '<div class="proj-media"><img src="' + p.media.src + '" alt="' + esc(L(p.media.cap)) + '" loading="lazy" decoding="async" data-gallery="' + p.id + '" data-idx="0"><div class="media-cap">' + esc(L(p.media.cap)) + "</div></div>";
+      media = '<div class="proj-media"><picture><source srcset="' + webpOf(p.media.src) + '" type="image/webp"><img src="' + p.media.src + '" alt="' + esc(L(p.media.cap)) + '" loading="lazy" decoding="async" data-gallery="' + p.id + '" data-idx="0"></picture><div class="media-cap">' + esc(L(p.media.cap)) + "</div></div>";
     } else {
       media = '<div class="proj-media"><div class="video-wrap" data-video data-src="' + p.media.src + '" data-poster="' + (p.media.poster || "") + '">' +
         '<button class="video-play" aria-label="' + esc(T("labels.play")) + '"><span class="pb"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span><span class="vt">' + esc(L(p.media.cap)) + "</span></button>" +
@@ -1182,10 +1213,21 @@ function renderEducation() {
       "</ul></div>" +
     '<div class="card edu-note reveal" style="--i:1"><span class="qn">“</span><p>' + esc(L(edu.note)) + "</p></div>";
   $("#certGrid").innerHTML = resume.certs.map((c, i) =>
-    '<div class="card hover cert-card reveal" style="--i:' + i + '">' +
-      '<span class="cert-ic">' + c.icon + "</span>" +
-      "<div><h4>" + esc(L(c.t)) + "</h4><p>" + esc(L(c.i)) + "</p></div>" +
-      (c.y ? '<span class="cert-year">' + esc(c.y) + "</span>" : "") +
+    '<div class="cert-card reveal flip-card" style="--i:' + i + '">' +
+      '<div class="cert-inner">' +
+        '<div class="cert-face cert-front">' +
+          '<span class="cert-ic">' + c.icon + "</span>" +
+          "<div><h4>" + esc(L(c.t)) + "</h4><p>" + esc(L(c.i)) + "</p></div>" +
+          (c.y ? '<span class="cert-year">' + esc(c.y) + "</span>" : "") +
+        "</div>" +
+        '<div class="cert-face cert-back">' +
+          '<span class="cert-ic">' + c.icon + "</span>" +
+          "<h4>" + esc(L(c.t)) + "</h4>" +
+          "<p>" + esc(L(c.i)) + "</p>" +
+          (c.y ? '<span class="cb-year">' + esc(c.y) + "</span>" : "") +
+          "<small>" + esc(T("certs.flip")) + "</small>" +
+        "</div>" +
+      "</div>" +
     "</div>").join("");
 }
 
@@ -1518,6 +1560,48 @@ function copyEmail() {
   } else { fallback(); }
 }
 
+/* 简历纯文本生成 + 下载（HR 可直接粘贴到招聘系统） */
+function buildResumeText() {
+  const lines = [];
+  lines.push(L(resume.name));
+  lines.push("手机：" + resume.phone);
+  lines.push("邮箱：" + resume.email.join("@"));
+  lines.push("GitHub：" + resume.github);
+  lines.push("");
+  lines.push("格言：" + L(resume.motto));
+  lines.push("");
+  lines.push("— 教育背景 —");
+  lines.push(L(resume.education.school) + " | " + L(resume.education.major) + " | " + L(resume.education.period));
+  resume.education.pts.forEach((p) => lines.push("  · " + L(p)));
+  lines.push("");
+  lines.push("— 技能 —");
+  resume.skills.forEach((g) => lines.push(L(g.t) + "：" + g.items.map((it) => L(it)).join("、")));
+  lines.push("");
+  lines.push("— 项目经历 —");
+  resume.projects.forEach((p) => {
+    lines.push("· " + L(p.t) + "（" + p.time + "）");
+    p.pts.forEach((pt) => lines.push("    - " + L(pt)));
+  });
+  lines.push("");
+  lines.push("— 获奖与证书 —");
+  resume.certs.forEach((c) => lines.push("· " + L(c.t) + " — " + L(c.i) + (c.y ? "（" + c.y + "）" : "")));
+  lines.push("");
+  lines.push(L(resume.motto));
+  return lines.join("\n");
+}
+function downloadResumeText() {
+  const txt = buildResumeText();
+  const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = (state.lang === "zh" ? "毛英杰-简历" : "Mao-Yingjie-Resume") + ".txt";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
+}
+
 /* ============================================================
    六、全局事件与启动
    ============================================================ */
@@ -1618,6 +1702,21 @@ function initParticles() {
   io.observe(hero);
 }
 
+/* 头像 3D 视差：鼠标移动时轻微反向位移，增强首屏深度感 */
+function initAvatarParallax() {
+  const hero = $("#home");
+  const avatar = $(".avatar-wrap", hero);
+  if (!hero || !avatar || prefersReduced) return;
+  hero.addEventListener("pointermove", (e) => {
+    if (e.pointerType !== "mouse") return;
+    const r = hero.getBoundingClientRect();
+    const nx = (e.clientX - r.left) / r.width - 0.5;   /* -0.5 ~ 0.5 */
+    const ny = (e.clientY - r.top) / r.height - 0.5;
+    avatar.style.transform = "translate3d(" + (nx * -16).toFixed(1) + "px," + (ny * -12).toFixed(1) + "px,0)";
+  });
+  hero.addEventListener("pointerleave", () => { avatar.style.transform = ""; });
+}
+
 /* 加载开场动画：最短展示 900ms，随后淡出移除 */
 function initLoader() {
   const loader = $("#loader");
@@ -1686,6 +1785,9 @@ function bindGlobal() {
   $("#copyMailBtn").addEventListener("click", copyEmail);
   $("#copyMailBtn2").addEventListener("click", copyEmail);
 
+  /* 下载简历文本 */
+  $("#dlTextBtn").addEventListener("click", downloadResumeText);
+
   /* 导航滚动状态 */
   const nav = $("#nav");
   const progress = $("#scrollProgress");
@@ -1750,6 +1852,7 @@ renderAll();
 initTyped();
 initTilt();
 initParticles();
+initAvatarParallax();
 initLoader();
 
 /* ========== 控制台彩蛋（按 F12 查看） ========== */
