@@ -797,6 +797,21 @@ html[data-theme="dark"] .c-btn{background:linear-gradient(135deg,#4f46e5,#6d28d9
 html[data-theme="dark"] .c-btn:hover{background:#fff;color:#4f46e5;border-color:#fff;transform:translateY(-3px);box-shadow:0 14px 28px -10px rgba(0,0,0,.45)}
 html[data-theme="dark"] .c-btn.solid{background:linear-gradient(135deg,#4f46e5,#6d28d9);color:#fff;border-color:rgba(255,255,255,.3)}
 html[data-theme="dark"] .c-btn.solid:hover{background:#fff;color:#4f46e5;border-color:#fff}
+/* ============================================================
+   板块二「用数据说话的成果」紧凑化（减少占用体积）
+   ============================================================ */
+#highlights{padding-top:60px;padding-bottom:60px}
+#highlights .section-head{margin-bottom:30px}
+#highlights .hl-grid{grid-template-columns:repeat(auto-fit,minmax(188px,1fr));gap:14px}
+#highlights .hl-card{padding:18px 16px}
+#highlights .hl-icon{width:40px;height:40px;font-size:19px;margin-bottom:10px;border-radius:12px}
+#highlights .hl-tag{font-size:10.5px;margin-bottom:6px;padding:2px 9px}
+#highlights .hl-card h3{font-size:17px;margin-bottom:5px;line-height:1.4}
+#highlights .hl-card p{font-size:12.5px;line-height:1.6}
+@media (max-width:640px){
+  #highlights{padding-top:48px;padding-bottom:48px}
+  #highlights .hl-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+}
 </style>
 </head>
 <body>
