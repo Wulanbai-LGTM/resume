@@ -2170,8 +2170,9 @@ function bindGlobal() {
   const themeBtn = $("#themeBtn");
   const applyThemeIcon = () => {
     const dark = document.documentElement.dataset.theme === "dark";
-    $(".icon-sun", themeBtn).style.display = dark ? "none" : "";
-    $(".icon-moon", themeBtn).style.display = dark ? "" : "none";
+    /* 显式设置 display（而非清空内联），确保覆盖 .icon-off 的 display:none */
+    $(".icon-sun", themeBtn).style.display = dark ? "none" : "inline-block";
+    $(".icon-moon", themeBtn).style.display = dark ? "inline-block" : "none";
     themeBtn.setAttribute("aria-label", dark ? T("hero.themeDark") : T("hero.themeLight"));
   };
   I18N.zh.hero.themeDark = "切换到浅色模式"; I18N.zh.hero.themeLight = "切换到深色模式";
