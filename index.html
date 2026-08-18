@@ -664,9 +664,10 @@ html[data-theme="light"] .nav-links a:hover,html[data-theme="light"] .nav-links 
   background:rgba(34,211,238,.08);border-color:rgba(34,211,238,.22);color:var(--text-2)
 }
 .tag{color:#67e8f9;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.2)}
-.skill-tag.g0{background:rgba(34,211,238,.10);border-color:rgba(34,211,238,.28);color:#67e8f9}
-.skill-tag.g1{background:rgba(129,140,248,.10);border-color:rgba(129,140,248,.28);color:#c7d2fe}
-.skill-tag.g2{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.24);color:#fde68a}
+.skill-tag.g0{background:rgba(34,211,238,.10);border-color:rgba(34,211,238,.28)}
+.skill-tag.g1{background:rgba(129,140,248,.10);border-color:rgba(129,140,248,.28)}
+.skill-tag.g2{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.24)}
+.skill-tag{color:#f1f5f9}
 .skill-tag:hover{transform:translateY(-3px);box-shadow:0 0 20px rgba(34,211,238,.15)}
 
 /* 按钮辉光 */
@@ -712,10 +713,15 @@ html[data-theme="dark"] #themeBtn svg{stroke-width:2.4}
 .obj-label{color:#67e8f9}
 .obj-divider{background:linear-gradient(180deg,transparent,rgba(34,211,238,.5),transparent)}
 
-/* 联系渐变卡 */
+/* 联系渐变卡（文字纯白高对比，保持始终清晰） */
 .contact-card{background:linear-gradient(140deg,rgba(8,47,73,.9),rgba(30,27,75,.92) 55%,rgba(23,37,84,.92));border:1px solid rgba(34,211,238,.2)}
+.contact-card h2{color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.45)}
+.contact-card>p{color:rgba(255,255,255,.94)}
+.contact-note{color:rgba(255,255,255,.82)}
+html[data-theme="dark"] .c-btn{color:#fff}
+html[data-theme="dark"] .c-btn.solid{color:#030712}
 html[data-theme="light"] .contact-card{background:linear-gradient(140deg,#cffafe,#e0e7ff 55%,#e0f2fe)}
-html[data-theme="light"] .contact-card h2,html[data-theme="light"] .contact-card>p{color:#0f172a}
+html[data-theme="light"] .contact-card h2,html[data-theme="light"] .contact-card>p{color:#0f172a;text-shadow:none}
 html[data-theme="light"] .contact-note{color:#475569}
 
 /* 区块装饰强化 */
@@ -1483,7 +1489,7 @@ function renderSkills() {
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
   ];
   $("#skillGrid").innerHTML = resume.skills.map((g, i) =>
-    '<div class="card skill-card reveal tilt" style="--i:' + i + '">' +
+    '<div class="card skill-card reveal" style="--i:' + i + '">' +
       '<div class="skill-head"><span class="skill-ic">' + g.icon + "</span><h3>" + esc(L(g.t)) + "</h3></div>" +
       '<div class="skill-tags">' +
         g.items.map((it) => '<span class="skill-tag g' + i + '">' + gIcons[i] + esc(L(it)) + "</span>").join("") +
