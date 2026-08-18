@@ -676,6 +676,10 @@ html[data-theme="light"] .nav-links a:hover,html[data-theme="light"] .nav-links 
 .btn-ghost:hover,.c-btn:hover{border-color:rgba(34,211,238,.5);box-shadow:0 0 24px rgba(34,211,238,.18)}
 .icon-btn{background:rgba(15,23,42,.5);border-color:var(--border)}
 html[data-theme="light"] .btn-ghost,html[data-theme="light"] .c-btn,html[data-theme="light"] .icon-btn{background:rgba(255,255,255,.7)}
+/* 主题切换按钮：深色模式下青色高亮，保证清晰可见 */
+html[data-theme="dark"] #themeBtn{color:#67e8f9;border-color:rgba(34,211,238,.45);background:rgba(34,211,238,.08)}
+html[data-theme="dark"] #themeBtn:hover{color:#22d3ee;border-color:rgba(34,211,238,.7);box-shadow:0 0 16px rgba(34,211,238,.35);transform:translateY(-1px)}
+html[data-theme="dark"] #themeBtn svg{stroke-width:2.4}
 
 /* 亮点指标看板：大号渐变数字 + Hover 微发光 */
 .hl-card h3{font-size:clamp(20px,2.6vw,26px);background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
