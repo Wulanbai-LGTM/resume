@@ -812,24 +812,6 @@ html[data-theme="dark"] .c-btn.solid:hover{background:#fff;color:#4f46e5;border-
   #highlights{padding-top:48px;padding-bottom:48px}
   #highlights .hl-grid{grid-template-columns:repeat(2,1fr);gap:10px}
 }
-/* ============================================================
-   极光流动：背景光斑缓慢漂移 + 呼吸变化
-   ============================================================ */
-body::before,body::after{will-change:transform,opacity}
-@keyframes auroraA{
-  0%,100%{transform:translate(0,0);opacity:.13}
-  25%{transform:translate(70px,55px);opacity:.17}
-  50%{transform:translate(35px,95px);opacity:.10}
-  75%{transform:translate(-30px,45px);opacity:.16}
-}
-@keyframes auroraB{
-  0%,100%{transform:translate(0,0);opacity:.12}
-  25%{transform:translate(-60px,-45px);opacity:.16}
-  50%{transform:translate(-95px,-75px);opacity:.10}
-  75%{transform:translate(-25px,-95px);opacity:.15}
-}
-body::before{animation:auroraA 26s ease-in-out infinite}
-body::after{animation:auroraB 22s ease-in-out infinite}
 </style>
 </head>
 <body>
