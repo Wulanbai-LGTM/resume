@@ -830,6 +830,19 @@ body::before,body::after{will-change:transform,opacity}
 }
 body::before{animation:auroraA 26s ease-in-out infinite}
 body::after{animation:auroraB 22s ease-in-out infinite}
+/* ============================================================
+   音乐开关：角落音符按钮，默认关闭，点击播放/暂停
+   ============================================================ */
+.music-btn{position:fixed;right:22px;bottom:86px;z-index:150;width:46px;height:46px;border-radius:50%;background:rgba(15,23,42,.72);border:1px solid var(--border-strong);color:var(--text-2);display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:var(--shadow);transition:all .25s ease}
+.music-btn svg{width:19px;height:19px}
+.music-btn:hover{color:#67e8f9;border-color:rgba(34,211,238,.5);transform:translateY(-2px)}
+.music-btn.playing{color:#22d3ee;border-color:rgba(34,211,238,.6);animation:musicPulse 2s ease-in-out infinite}
+.music-btn.playing svg{animation:noteBob 1.2s ease-in-out infinite}
+@keyframes musicPulse{0%,100%{box-shadow:0 0 12px rgba(34,211,238,.25),var(--shadow)}50%{box-shadow:0 0 26px rgba(34,211,238,.5),var(--shadow)}}
+@keyframes noteBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@media (max-width:640px){
+  .music-btn{right:16px;bottom:78px}
+}
 </style>
 </head>
 <body>
@@ -1084,6 +1097,11 @@ body::after{animation:auroraB 22s ease-in-out infinite}
 
 <button class="back-top no-print" id="backTop" aria-label="返回顶部">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<!-- 音乐开关：默认关闭，用户点击后播放（纯音乐循环） -->
+<button class="music-btn no-print" id="musicBtn" aria-label="播放音乐" title="播放音乐">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
 </button>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -1344,7 +1362,7 @@ const I18N = {
     contact: { eyebrow: "CONTACT", title: "联系我", dlText: "下载简历文本", copyLink: "复制链接" },
     certs: { flip: "官方认证 · 2026" },
     footer: { rights: "保留所有权利", updated: "最后更新", note: "单文件构建 · 无外部依赖 · 可离线打开" },
-    toast: { copied: "邮箱已复制到剪贴板 🎉", fail: "复制失败，请长按手动复制", linkCopied: "链接已复制，快分享给朋友吧 🎉", inspireCopied: "文案已复制 ✨", githubCopied: "已复制 GitHub 链接，请在浏览器中打开 🔗", printIOS: "iOS 请点浏览器分享按钮 → 打印 → 存为 PDF 📄", printWechat: "请在系统浏览器打开后使用打印功能 📄" },
+    toast: { copied: "邮箱已复制到剪贴板 🎉", fail: "复制失败，请长按手动复制", linkCopied: "链接已复制，快分享给朋友吧 🎉", inspireCopied: "文案已复制 ✨", githubCopied: "已复制 GitHub 链接，请在浏览器中打开 🔗", printIOS: "iOS 请点浏览器分享按钮 → 打印 → 存为 PDF 📄", printWechat: "请在系统浏览器打开后使用打印功能 📄", musicOn: "🎵 音乐播放中", musicOff: "音乐已暂停" },
     inspire: { btn: "灵感文案", badge: "PROMPT 灵感机", again: "再来一条", copy: "复制文案", tip: "点我试试" },
     lightbox: { prev: "上一张", next: "下一张", close: "关闭预览" },
     labels: { time: "完成时间", play: "点击播放演示视频", galleryHint: "点击图片可左右滑动查看" }
@@ -1365,7 +1383,7 @@ const I18N = {
     contact: { eyebrow: "CONTACT", title: "Contact Me", dlText: "Download Resume TXT", copyLink: "Copy Link" },
     certs: { flip: "Official Certification" },
     footer: { rights: "All rights reserved", updated: "Last updated", note: "Single-file build · no external dependencies · works offline" },
-    toast: { copied: "Email copied to clipboard 🎉", fail: "Copy failed — please copy manually", linkCopied: "Link copied — share it now 🎉", inspireCopied: "Copied ✨", githubCopied: "GitHub link copied — open it in your browser 🔗", printIOS: "iOS: Share → Print → Save as PDF 📄", printWechat: "Open in your browser to print 📄" },
+    toast: { copied: "Email copied to clipboard 🎉", fail: "Copy failed — please copy manually", linkCopied: "Link copied — share it now 🎉", inspireCopied: "Copied ✨", githubCopied: "GitHub link copied — open it in your browser 🔗", printIOS: "iOS: Share → Print → Save as PDF 📄", printWechat: "Open in your browser to print 📄", musicOn: "🎵 Music playing", musicOff: "Music paused" },
     inspire: { btn: "Inspire Me", badge: "PROMPT INSPIRATION", again: "Another One", copy: "Copy", tip: "Try me" },
     lightbox: { prev: "Previous", next: "Next", close: "Close" },
     labels: { time: "Completed", play: "Click to play demo", galleryHint: "Click image to view & swipe" }
@@ -2185,6 +2203,35 @@ function copyTextToClipboard(text, doneMsg) {
   } else { fallback(); }
 }
 
+/* 音乐开关：默认关闭，点击后播放纯音乐（循环、音量 35%），再点暂停 */
+function initMusic() {
+  const btn = $("#musicBtn");
+  if (!btn) return;
+  const music = new Audio("音乐.mp3");
+  music.loop = true;          /* 循环播放 */
+  music.volume = 0.35;        /* 合适音量 */
+  music.preload = "none";     /* 点击后才加载，不浪费流量 */
+  let on = false;
+  btn.addEventListener("click", () => {
+    on = !on;
+    if (on) {
+      music.play().then(() => {
+        btn.classList.add("playing");
+        btn.setAttribute("aria-label", "暂停音乐");
+        toast(T("toast.musicOn"));
+      }).catch(() => {
+        on = false; /* 播放失败（如文件缺失）自动回退 */
+        toast(T("toast.fail"));
+      });
+    } else {
+      music.pause();
+      btn.classList.remove("playing");
+      btn.setAttribute("aria-label", "播放音乐");
+      toast(T("toast.musicOff"));
+    }
+  });
+}
+
 /* 外链跳转兜底：部分移动端浏览器（含微信内置）会静默拦截 target="_blank" 新窗口，
    点击无反应——此时自动复制链接 + 提示 + 尝试当前页跳转，保证一定反馈 */
 function initExternalLinks() {
@@ -2369,6 +2416,7 @@ initParticles();
 initAvatarParallax();
 initRipple();
 initExternalLinks();
+initMusic();
 bindInspire();
 initLoader();
 
