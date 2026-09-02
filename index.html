@@ -1076,6 +1076,13 @@ html[data-theme="light"] .xwall.focusing::after{background:radial-gradient(ellip
    ★ 项目 · 扇形堆叠轮播（点击切换）
    ============================================================ */
 .car-stage{position:relative;height:330px;max-width:1020px;margin:4px auto 0;user-select:none}
+.car-shell{position:relative;max-width:1100px;margin:0 auto}
+.car-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:40;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--border-strong);color:var(--text-2);cursor:pointer;transition:all .22s ease;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:var(--shadow)}
+.car-nav svg{width:20px;height:20px}
+.car-nav:hover{color:#22d3ee;border-color:rgba(34,211,238,.55);transform:translateY(-50%) scale(1.1);box-shadow:0 0 20px rgba(34,211,238,.22)}
+.car-nav:active{transform:translateY(-50%) scale(.95)}
+.car-prev{left:4px}
+.car-next{right:4px}
 .car-card{position:absolute;left:50%;top:50%;width:350px;height:256px;margin:-128px 0 0 -175px;border-radius:16px;overflow:hidden;padding:0;border:2px solid var(--border-strong);background:var(--card);box-shadow:var(--shadow-lg);cursor:pointer;transition:transform .55s cubic-bezier(.22,1,.36,1),opacity .45s ease,border-color .3s ease;transform-origin:center;text-align:left;font:inherit}
 .car-card img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
 .car-name{position:absolute;left:0;right:0;bottom:0;padding:36px 14px 10px;background:linear-gradient(transparent,rgba(2,6,23,.84));color:#fff;display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
@@ -1096,6 +1103,10 @@ html[data-theme="light"] .car-card.is-act{border-color:#0f172a;box-shadow:0 26px
   .car-card{width:min(310px,66vw);height:224px;margin:-112px 0 0 calc(-1 * min(310px,66vw) / 2)}
   .car-name{padding-top:26px}
   .car-name b{font-size:11.5px}
+  .car-nav{width:36px;height:36px}
+  .car-nav svg{width:16px;height:16px}
+  .car-prev{left:0}
+  .car-next{right:0}
 }
 @media print{
   .car-stage,.car-dots,.proj-detail{display:none !important}
@@ -1297,7 +1308,15 @@ html[data-theme="light"] .car-card.is-act{border-color:#0f172a;box-shadow:0 26px
         <p class="section-sub" data-i18n="projects.sub">点击卡片切换项目，下方查看完整详情。</p>
       </div>
       <!-- 扇形堆叠轮播 -->
-      <div class="car-stage" id="carStage" aria-label="项目轮播"></div>
+      <div class="car-shell">
+        <button class="car-nav car-prev" id="carPrev" type="button" aria-label="上一个项目" title="上一个项目">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:scaleX(-1)"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>
+        </button>
+        <div class="car-stage" id="carStage" aria-label="项目轮播"></div>
+        <button class="car-nav car-next" id="carNext" type="button" aria-label="下一个项目" title="下一个项目">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>
+        </button>
+      </div>
       <div class="car-dots" id="carDots"></div>
       <!-- 当前项目详情 -->
       <div class="proj-detail" id="projDetail"></div>
@@ -2928,6 +2947,18 @@ function bindGlobal() {
     showView(VIEW_ORDER[(i + 1) % VIEW_ORDER.length]);
   });
   $("#vnHome").addEventListener("click", () => showView("home"));
+
+  /* 项目轮播：手指按钮上/下一个（环形） */
+  $("#carPrev").addEventListener("click", () => {
+    const n = resume.projects.length;
+    const i = projIndexOf(curProjId);
+    selectProject(resume.projects[(i - 1 + n) % n].id);
+  });
+  $("#carNext").addEventListener("click", () => {
+    const n = resume.projects.length;
+    const i = projIndexOf(curProjId);
+    selectProject(resume.projects[(i + 1) % n].id);
+  });
 
   /* 移动端汉堡菜单 */
   const burger = $("#hamburger");
