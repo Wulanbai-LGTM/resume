@@ -1083,6 +1083,41 @@ html[data-theme="light"] .xwall.focusing::after{background:radial-gradient(ellip
   .x-desc{color:#374151}
 }
 /* ============================================================
+   ★ 成长经历 · 横向轮播（主卡居中 + 两侧预览 + 点击切换）
+   ============================================================ */
+.xsl{position:relative;max-width:1120px;margin:0 auto}
+.xsl-stage{position:relative;height:345px}
+.xsl-card{position:absolute;left:50%;top:50%;width:380px;height:330px;margin:-172px 0 0 -190px;border-radius:20px;overflow:hidden;padding:24px 22px 18px;text-align:left;cursor:pointer;font:inherit;color:inherit;background:var(--card);border:1.5px solid var(--border-strong);box-shadow:var(--shadow);transition:transform .5s cubic-bezier(.22,1,.36,1),opacity .4s ease,filter .3s ease,border-color .3s ease,box-shadow .3s ease;-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3)}
+.xsl-card:not(.is-act){filter:blur(1.6px) saturate(.82)}
+.xsl-card:not(.is-act):hover{filter:none;border-color:rgba(34,211,238,.6)}
+.xsl-card.is-act{border-color:rgba(129,140,248,.78);box-shadow:0 0 0 3px rgba(99,102,241,.22),0 26px 64px -18px rgba(0,0,0,.6)}
+.xsl-card .x-pts li{font-size:13px}
+.xsl-card.is-act .x-pts li::before{background:linear-gradient(135deg,#22d3ee,#818cf8)}
+.xsl-nav{position:absolute;top:38%;z-index:60;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--card);border:1.5px solid var(--border-strong);color:var(--text-2);cursor:pointer;box-shadow:var(--shadow);transition:all .22s ease;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);padding:0}
+.xsl-nav svg{width:20px;height:20px}
+.xsl-prev{left:-20px}
+.xsl-next{right:-20px}
+.xsl-nav:hover{color:#fff;border-color:rgba(34,211,238,.65);box-shadow:0 0 20px rgba(34,211,238,.3);transform:scale(1.08)}
+.xsl-foot{display:flex;justify-content:center;align-items:center;gap:10px;margin:16px 0 4px;position:relative;z-index:5;flex-wrap:wrap}
+.xsl-dot{width:9px;height:9px;border-radius:99px;border:none;padding:0;background:rgba(148,163,184,.35);cursor:pointer;transition:all .25s ease}
+.xsl-dot.on{width:26px;background:var(--grad)}
+.xsl-dot:hover{background:rgba(34,211,238,.7)}
+.xsl-count{font-size:12px;font-weight:800;color:var(--text-3);margin-left:12px;letter-spacing:.14em}
+@media (max-width:760px){
+  .xsl-stage{height:305px}
+  .xsl-card{width:min(86vw,330px);height:295px;margin:-152px 0 0 calc(-1 * min(86vw,330px) / 2);padding:20px 18px 14px}
+  .xsl-nav{width:40px;height:40px}
+  .xsl-prev{left:-12px}
+  .xsl-next{right:-12px}
+}
+@media print{
+  .xsl{max-width:none}
+  .xsl-stage{height:auto;display:block}
+  .xsl-card{position:static;transform:none !important;opacity:1 !important;filter:none !important;width:100%;height:auto;margin:0 0 12px !important;border:1px solid #d1d5db;box-shadow:none;background:#fff;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .xsl-nav,.xsl-foot{display:none !important}
+  #expPanel-campus,#expPanel-practice{display:none !important}
+}
+/* ============================================================
    ★ 项目 · 扇形堆叠轮播（点击切换）
    ============================================================ */
 .car-stage{position:relative;height:330px;max-width:1020px;margin:4px auto 0;user-select:none}
@@ -1988,42 +2023,91 @@ function focusExpCard(card) {
   document.documentElement.style.overflow = "hidden";
 }
 
+/* ============================================================
+   成长经历 · 横向轮播（主卡 + 左右预览 + 点击切换）
+   ============================================================ */
+const EXP_GROUP_ORDER = ["campus", "practice"];
+const expCur = {}; /* 每个面板当前索引 */
+function expListOf(tid) {
+  if (tid === "all") {
+    const list = [];
+    EXP_GROUP_ORDER.forEach((gid) => resume.experience.groups[gid].items.forEach((it) => list.push({ gid: gid, it: it })));
+    return list;
+  }
+  return resume.experience.groups[tid].items.map((it) => ({ gid: tid, it: it }));
+}
+const EXP_ICON = {
+  campus: '<svg class="x-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>',
+  practice: '<svg class="x-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>'
+};
+function paintExp(panel) {
+  const list = expListOf(panel);
+  const n = list.length;
+  if (!n) return;
+  const act = (expCur[panel] || 0) % n;
+  const stage = $("#xsl-stage-" + panel);
+  if (!stage) return;
+  const compact = window.innerWidth < 760;
+  const GEO = compact
+    ? [{ x: 0, s: 1, o: 1 }, { x: 165, s: 0.82, o: 0.9 }, { x: 245, s: 0.66, o: 0.45 }, { x: -165, s: 0.82, o: 0.9 }, { x: -245, s: 0.66, o: 0.35 }]
+    : [{ x: 0, s: 1, o: 1 }, { x: 250, s: 0.88, o: 0.95 }, { x: 395, s: 0.72, o: 0.5 }, { x: -250, s: 0.88, o: 0.95 }, { x: -395, s: 0.72, o: 0.42 }];
+  $$(".xsl-card", stage).forEach((card, i) => {
+    const d = (i - act + n) % n;
+    const g = GEO[d] || GEO[GEO.length - 1];
+    card.style.transform = "translateX(" + g.x + "px) scale(" + g.s + ")";
+    card.style.opacity = g.o;
+    card.style.zIndex = 30 - d;
+    card.classList.toggle("is-act", d === 0);
+  });
+  $$(".xsl-dot", $("#xsl-foot-" + panel)).forEach((d, i) => d.classList.toggle("on", i === act));
+  const cnt = $("#xsl-count-" + panel);
+  if (cnt) cnt.textContent = String(act + 1).padStart(2, "0") + " / " + String(n).padStart(2, "0");
+}
+function expNav(panel, dir) {
+  const n = expListOf(panel).length;
+  if (!n) return;
+  expCur[panel] = (((expCur[panel] || 0) + dir) % n + n) % n;
+  paintExp(panel);
+}
+function expJump(panel, idx) {
+  const n = expListOf(panel).length;
+  if (!n) return;
+  expCur[panel] = ((idx % n) + n) % n;
+  paintExp(panel);
+}
 function renderExperience() {
   unfocusExp();
   const exp = resume.experience;
   /* Tabs */
   $("#expTabs").innerHTML = exp.tabs.map((tb, i) =>
     '<button class="tab-btn" role="tab" id="expTab-' + tb.id + '" aria-selected="' + (tb.id === state.expTab) + '" aria-controls="expPanel-' + tb.id + '" data-id="' + tb.id + '" tabindex="' + (tb.id === state.expTab ? "0" : "-1") + '">' + esc(L(tb.t)) + "</button>").join("");
-  /* 错落浮动卡片墙 */
-  const ICON = {
-    campus: '<svg class="x-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>',
-    practice: '<svg class="x-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>'
-  };
-  const ROTS = [-1.2, 1, -0.6, 1.2, -0.8];
-  let seq = 0;
-  const cardOf = (it, gid) => {
-    const k = seq++;
-    return '<button class="xcard reveal" style="--i:' + k + '" type="button" aria-haspopup="dialog" aria-label="' + esc(L(it.t)) + '">' +
-        '<span class="xfloat" style="--rot:' + ROTS[k % ROTS.length] + "deg;animation-delay:-" + ((k * 1.4) % 7).toFixed(1) + 's">' +
-          '<span class="x-top"><span class="x-date">' + esc(it.date) + "</span>" + ICON[gid] + "</span>" +
-          '<b class="x-title">' + esc(L(it.t)) + "</b>" +
-          '<span class="x-role">' + esc(L(it.role)) + "</span>" +
-          '<ul class="x-pts">' + it.pts.map((p) => "<li>" + esc(L(p)) + "</li>").join("") + "</ul>" +
-        "</span>" +
-      "</button>";
-  };
-  const groupOf = (gid) =>
-    '<div class="xwall-group reveal" style="--i:' + (seq++) + '">' +
-      '<span class="xrow-tag">' + esc(L(exp.groups[gid].title)) + "</span>" +
-      '<div class="xrow">' + exp.groups[gid].items.map((it) => cardOf(it, gid)).join("") + "</div>" +
-    "</div>";
+  /* 每个 Tab 面板：横向轮播 */
   const tabs = exp.tabs.map((tb) => tb.id);
-  $("#expPanels").innerHTML = tabs.map((tid) =>
-    '<div class="tab-panel' + (tid === state.expTab ? " active" : "") + '" id="expPanel-' + tid + '" role="tabpanel" aria-labelledby="expTab-' + tid + '" tabindex="0">' +
-      '<div class="xwall">' +
-        (tid === "all" ? groupOf("campus") + groupOf("practice") : groupOf(tid)) +
-      "</div></div>").join("");
+  $("#expPanels").innerHTML = tabs.map((tid) => {
+    const list = expListOf(tid);
+    expCur[tid] = 0;
+    return '<div class="tab-panel' + (tid === state.expTab ? " active" : "") + '" id="expPanel-' + tid + '" role="tabpanel" aria-labelledby="expTab-' + tid + '" tabindex="0">' +
+      '<div class="xsl">' +
+        '<button class="xsl-nav xsl-prev" type="button" data-panel="' + tid + '" data-dir="-1" aria-label="上一个"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>' +
+        '<div class="xsl-stage" id="xsl-stage-' + tid + '">' +
+          list.map((o, k) =>
+            '<button class="xsl-card" type="button" data-panel="' + tid + '" data-idx="' + k + '" aria-label="' + esc(L(o.it.t)) + '">' +
+              '<span class="x-top"><span class="x-date">' + esc(o.it.date) + "</span>" + EXP_ICON[o.gid] + "</span>" +
+              '<b class="x-title">' + esc(L(o.it.t)) + "</b>" +
+              '<span class="x-role">' + esc(L(o.it.role)) + "</span>" +
+              '<ul class="x-pts">' + o.it.pts.map((p) => "<li>" + esc(L(p)) + "</li>").join("") + "</ul>" +
+            "</button>").join("") +
+        "</div>" +
+        '<button class="xsl-nav xsl-next" type="button" data-panel="' + tid + '" data-dir="1" aria-label="下一个"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>' +
+        '<div class="xsl-foot" id="xsl-foot-' + tid + '">' +
+          list.map((o, k) => '<button class="xsl-dot" type="button" data-panel="' + tid + '" data-idx="' + k + '" aria-label="' + esc(L(o.it.t)) + '"></button>').join("") +
+          '<span class="xsl-count" id="xsl-count-' + tid + '">01 / ' + String(list.length).padStart(2, "0") + "</span>" +
+        "</div>" +
+      "</div></div>";
+  }).join("");
   $("#expNote").innerHTML = T("experience.note");
+  /* 初始定位 */
+  tabs.forEach((tid) => paintExp(tid));
 }
 
 /* ============================================================
@@ -2939,6 +3023,12 @@ function bindGlobal() {
   };
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
+  /* 视口变化时重绘经历轮播与项目轮播几何 */
+  window.addEventListener("resize", () => {
+    Object.keys(expCur).forEach((p) => paintExp(p));
+    const carStage = $("#carStage");
+    if (carStage && carStage.innerHTML) renderCarousel();
+  });
   backTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: prefersReduced ? "auto" : "smooth" }));
 
   /* SPA 导航：brand / 板块链接 → 视图切换（替换原锚点滚动） */
@@ -2961,6 +3051,14 @@ function bindGlobal() {
       const name = go.dataset.go;
       const filter = go.dataset.filter || "";
       showView(name, filter ? { filter: filter } : {});
+      return;
+    }
+    /* 成长经历轮播：卡片/箭头/圆点切换 */
+    const xsl = e.target.closest(".xsl-card, .xsl-nav, .xsl-dot");
+    if (xsl && xsl.dataset.panel) {
+      const p = xsl.dataset.panel;
+      if (xsl.classList.contains("xsl-nav")) expNav(p, +xsl.dataset.dir);
+      else expJump(p, +xsl.dataset.idx);
       return;
     }
     /* 项目轮播：点卡片 / 圆点切换 */
