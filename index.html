@@ -1047,7 +1047,7 @@ html[data-theme="light"] .psec-ghost{-webkit-text-stroke-color:rgba(71,85,105,.2
    ★ LED 像素格纹刷新遮罩（霓虹格子逐块点亮/熄灭，辉光脉冲）
    ============================================================ */
 .pix{position:fixed;inset:0;z-index:860;pointer-events:none;visibility:hidden;display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(9,1fr);gap:3px;background:#020509}
-.pix.cov,.pix.rev,.pix.idle{visibility:visible}
+.pix.cov,.pix.rev{visibility:visible}
 .pix i{opacity:0;transform:scale(.5);border-radius:3px;box-shadow:inset 0 0 14px rgba(255,255,255,.04)}
 .pix.cov i{animation:pxOn .24s ease-out both;animation-delay:var(--d1,0ms)}
 .pix.rev i{animation:pxOff .22s ease-in both;animation-delay:var(--d2,0ms)}
