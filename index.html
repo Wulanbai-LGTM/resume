@@ -1024,6 +1024,39 @@ html[data-theme="light"] .psec-ghost{-webkit-text-stroke-color:rgba(71,85,105,.2
   .psec-desc{max-width:none}
   .psec-go,.psec-line{display:none}
 }
+/* ============================================================
+   ★ 成长经历 · 错落浮动卡片墙（点击居中放大聚焦）
+   ============================================================ */
+.xwall{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:34px 26px;max-width:1140px;margin:0 auto;align-items:start}
+.xcell{position:relative}
+.xcell:nth-child(even){margin-top:56px}
+.xcell:nth-child(3n){margin-top:-8px}
+.xcard{position:relative;z-index:1;display:block;width:100%;padding:0;border:none;background:none;cursor:pointer;font:inherit;color:inherit;text-align:left;transition:transform .55s cubic-bezier(.22,1,.36,1);will-change:transform}
+.xcard.focus{transform:translate(var(--dx,0px),var(--dy,0px)) scale(1.14);z-index:60;cursor:zoom-out}
+.xfloat{display:block;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:22px 20px 18px;animation:floatY 6.5s ease-in-out infinite;box-shadow:var(--shadow-sm);transition:box-shadow .35s ease,border-color .35s ease,opacity .35s ease,filter .35s ease;transform-origin:center;-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4)}
+@keyframes floatY{0%,100%{transform:translateY(-8px) rotate(var(--rot,0deg))}50%{transform:translateY(9px) rotate(var(--rot,0deg))}}
+.xcard:hover .xfloat,.xcard.focus .xfloat{border-color:rgba(34,211,238,.5);box-shadow:0 0 30px rgba(34,211,238,.16),var(--shadow)}
+.xcard.focus .xfloat{animation-play-state:paused}
+.xwall.focusing .xcard:not(.focus) .xfloat{opacity:.25;filter:saturate(.4)}
+.xwall.focusing::after{content:"";position:fixed;inset:0;z-index:55;background:radial-gradient(ellipse at center,transparent 40%,rgba(2,6,23,.55));pointer-events:none}
+html[data-theme="light"] .xwall.focusing::after{background:radial-gradient(ellipse at center,transparent 40%,rgba(15,23,42,.35))}
+.x-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.x-date{font-size:12px;font-weight:800;color:#67e8f9;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.22);padding:3px 12px;border-radius:999px;white-space:nowrap}
+.x-ic{width:20px;height:20px;color:#22d3ee;flex-shrink:0}
+.x-title{display:block;font-size:16.5px;font-weight:800;line-height:1.5;margin-bottom:6px;color:var(--text)}
+.x-role{display:block;font-size:12px;font-weight:600;letter-spacing:.05em;color:var(--text-3);margin-bottom:12px}
+.x-pts{list-style:none;margin:0;padding:0}
+.x-pts li{position:relative;padding-left:17px;font-size:13px;line-height:1.75;color:var(--text-2);margin-bottom:6px}
+.x-pts li::before{content:"";position:absolute;left:1px;top:8px;width:6px;height:6px;border-radius:2px;background:var(--grad)}
+@media (max-width:640px){
+  .xwall{grid-template-columns:1fr;gap:20px}
+  .xcell,.xcell:nth-child(even),.xcell:nth-child(3n){margin-top:0}
+  .xcard.focus{transform:translate(var(--dx,0px),var(--dy,0px)) scale(1.02)}
+}
+@media print{
+  .xfloat{animation:none;background:#fff !important;border:1px solid #d1d5db !important;box-shadow:none !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important}
+  .xcard.focus,.xcard{transform:none !important}
+}
 </style>
 </head>
 <body>
@@ -1826,35 +1859,65 @@ function renderHighlights() {
     "</article>").join("");
 }
 
+/* 经历卡聚焦：点击 → 卡片飞到视口中央放大；点空白/Esc/再点复原 */
+let focusExpEl = null, focusExpY = 0;
+function unfocusExp() {
+  if (!focusExpEl) return;
+  document.documentElement.style.overflow = "";
+  if (Math.abs(window.scrollY - focusExpY) > 1) window.scrollTo(0, focusExpY);
+  focusExpEl.classList.remove("focus");
+  focusExpEl.style.removeProperty("--dx");
+  focusExpEl.style.removeProperty("--dy");
+  const wall = focusExpEl.closest(".xwall");
+  if (wall) wall.classList.remove("focusing");
+  focusExpEl = null;
+}
+function focusExpCard(card) {
+  if (focusExpEl === card) { unfocusExp(); return; }
+  unfocusExp();
+  const wall = card.closest(".xwall");
+  if (wall) wall.classList.add("focusing");
+  const r = card.getBoundingClientRect();
+  const dx = window.innerWidth / 2 - (r.left + r.width / 2);
+  const dy = window.innerHeight / 2 - (r.top + r.height / 2);
+  card.style.setProperty("--dx", dx + "px");
+  card.style.setProperty("--dy", dy + "px");
+  card.classList.add("focus");
+  focusExpEl = card;
+  focusExpY = window.scrollY;
+  document.documentElement.style.overflow = "hidden";
+}
+
 function renderExperience() {
+  unfocusExp();
   const exp = resume.experience;
   /* Tabs */
   $("#expTabs").innerHTML = exp.tabs.map((tb, i) =>
     '<button class="tab-btn" role="tab" id="expTab-' + tb.id + '" aria-selected="' + (tb.id === state.expTab) + '" aria-controls="expPanel-' + tb.id + '" data-id="' + tb.id + '" tabindex="' + (tb.id === state.expTab ? "0" : "-1") + '">' + esc(L(tb.t)) + "</button>").join("");
-  /* Panels */
-  let seq = 0;
-  const panelHtml = (ids) => {
-    const html = ids.map((gid) => {
-      const g = exp.groups[gid];
-      /* Lucide 风格线性图标：校园=毕业帽 / 项目交付=火箭 */
-      const gIcon = gid === "campus"
-        ? '<svg class="tl-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>'
-        : '<svg class="tl-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>';
-      return '<h3 class="tl-group-title reveal" style="--i:' + (seq++) + ';text-align:center;font-size:15px;color:var(--text-3);font-weight:700;letter-spacing:.12em;margin-bottom:20px">' + esc(L(g.title)) + "</h3>" +
-        g.items.map((it) =>
-          '<div class="tl-item card tl-card reveal" style="--i:' + (seq++) + '">' +
-            '<div class="tl-top"><span class="tl-date">' + esc(it.date) + '</span><span class="tl-role">' + esc(L(it.role)) + "</span></div>" +
-            "<h3>" + gIcon + esc(L(it.t)) + "</h3><ul>" +
-            it.pts.map((p) => "<li>" + esc(L(p)) + "</li>").join("") +
-            "</ul></div>").join("");
-    }).join("");
-    return html;
+  /* 错落浮动卡片墙 */
+  const ICON = {
+    campus: '<svg class="x-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>',
+    practice: '<svg class="x-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>'
   };
+  const ROTS = [-2.4, 2, -1.6, 1.8, -2.2];
+  let seq = 0;
+  const wallHtml = (gid) => exp.groups[gid].items.map((it) => {
+    const k = seq++;
+    return '<div class="xcell reveal" style="--i:' + k + '">' +
+      '<button class="xcard" type="button" aria-haspopup="dialog" aria-label="' + esc(L(it.t)) + '">' +
+        '<span class="xfloat" style="--rot:' + ROTS[k % ROTS.length] + "deg;animation-delay:-" + ((k * 1.4) % 7).toFixed(1) + 's">' +
+          '<span class="x-top"><span class="x-date">' + esc(it.date) + "</span>" + ICON[gid] + "</span>" +
+          '<b class="x-title">' + esc(L(it.t)) + "</b>" +
+          '<span class="x-role">' + esc(L(it.role)) + "</span>" +
+          '<ul class="x-pts">' + it.pts.map((p) => "<li>" + esc(L(p)) + "</li>").join("") + "</ul>" +
+        "</span>" +
+      "</button></div>";
+  }).join("");
   const tabs = exp.tabs.map((tb) => tb.id);
   $("#expPanels").innerHTML = tabs.map((tid) =>
     '<div class="tab-panel' + (tid === state.expTab ? " active" : "") + '" id="expPanel-' + tid + '" role="tabpanel" aria-labelledby="expTab-' + tid + '" tabindex="0">' +
-      '<div class="timeline">' +
-        (tid === "all" ? panelHtml(["campus", "practice"]) : panelHtml([tid])) +
+      '<div class="xwall">' +
+        (tid === "all" ? wallHtml("campus") + wallHtml("practice") : wallHtml(tid)) +
       "</div></div>").join("");
   $("#expNote").innerHTML = T("experience.note");
 }
@@ -2001,6 +2064,7 @@ function initInteractions() {
       });
       if (tablist.id === "expTabs") {
         state.expTab = tab.dataset.id;
+        unfocusExp();
         $$("[role='tabpanel']", $("#expPanels")).forEach((p) => p.classList.remove("active"));
         $("#expPanel-" + tab.dataset.id).classList.add("active");
       } else if (tablist.id === "projTabs") {
@@ -2668,6 +2732,7 @@ function bindGlobal() {
   $("#printBtn").addEventListener("click", handlePrint);
   $("#printBtn2").addEventListener("click", handlePrint);
   window.addEventListener("beforeprint", () => {
+    unfocusExp();
     /* 打印前：将经历/项目筛选重置为「全部」并重渲染，确保 PDF 包含全部内容 */
     if (state.expTab !== "all" || state.projTab !== "all") {
       state.expTab = "all";
@@ -2735,10 +2800,19 @@ function bindGlobal() {
   /* 全局视图跳转委托：磁贴 / 作品墙 data-go */
   document.addEventListener("click", (e) => {
     const go = e.target.closest("[data-go]");
-    if (!go) return;
-    const name = go.dataset.go;
-    const filter = go.dataset.filter || "";
-    showView(name, filter ? { filter: filter } : {});
+    if (go) {
+      const name = go.dataset.go;
+      const filter = go.dataset.filter || "";
+      showView(name, filter ? { filter: filter } : {});
+      return;
+    }
+    /* 经历卡片聚焦：点击卡片居中放大 / 点击空白复原 */
+    const xc = e.target.closest(".xcard");
+    if (xc) { focusExpCard(xc); return; }
+    if (focusExpEl && !e.target.closest(".xwall")) unfocusExp();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") unfocusExp();
   });
 
   /* 底部翻页条 */
