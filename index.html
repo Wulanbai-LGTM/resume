@@ -914,6 +914,55 @@ html[data-theme="light"] .vn-btn{background:rgba(255,255,255,.7)}
   .view-nav{display:none !important}
   .portal-card,.sw-card{box-shadow:none !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important}
 }
+/* ============================================================
+   ★ 首页板块横幅秀（大空心编号 + 左右分栏 + 悬停动效）
+   ============================================================ */
+.portal-stack{display:flex;flex-direction:column;gap:20px;max-width:1120px;margin:0 auto}
+.psec{position:relative;display:grid;grid-template-columns:150px 1fr 230px;align-items:center;gap:20px 30px;width:100%;min-height:230px;padding:30px 38px;border-radius:22px;text-align:left;cursor:pointer;font:inherit;color:inherit;background:var(--card);border:1px solid var(--border);-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);box-shadow:var(--shadow-sm);transition:transform .3s ease,box-shadow .3s ease,border-color .3s ease;overflow:hidden}
+.psec::before{content:"";position:absolute;inset:0;background:radial-gradient(620px circle at 82% 50%,rgba(34,211,238,.12),transparent 58%);opacity:0;transition:opacity .4s ease;pointer-events:none}
+.psec:hover::before{opacity:1}
+.psec:hover{transform:translateY(-4px);border-color:rgba(34,211,238,.45);box-shadow:0 0 42px rgba(34,211,238,.15),var(--shadow)}
+/* 大号空心描边编号 */
+.psec-num{font-size:clamp(58px,7vw,100px);font-weight:800;line-height:1;text-align:center;color:transparent;-webkit-text-stroke:1.6px rgba(148,163,184,.38);letter-spacing:-.02em;transition:color .35s ease,-webkit-text-stroke-color .35s ease;user-select:none}
+.psec:hover .psec-num{-webkit-text-stroke-color:#22d3ee}
+html[data-theme="light"] .psec-num{-webkit-text-stroke-color:rgba(71,85,105,.5)}
+/* 文字区 */
+.psec-body{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0;position:relative}
+.psec-eyebrow{font-size:11px;font-weight:800;letter-spacing:.26em;color:#67e8f9;text-transform:uppercase}
+.psec-body>b{font-size:clamp(24px,3vw,34px);font-weight:800;color:var(--text);letter-spacing:-.01em;line-height:1.25;transition:transform .3s ease}
+.psec:hover .psec-body>b{transform:translateX(5px)}
+.psec-desc{font-size:14px;color:var(--text-3);line-height:1.7;max-width:520px}
+.psec-foot{display:flex;align-items:center;gap:14px;margin-top:8px}
+.pc-meta{display:inline-block;font-size:11.5px;font-weight:800;color:#67e8f9;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.22);padding:3px 12px;border-radius:999px;letter-spacing:.05em}
+.psec-go{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:800;color:#22d3ee;opacity:.9;transition:transform .3s ease,opacity .3s ease}
+.psec-go svg{width:15px;height:15px}
+.psec:hover .psec-go{transform:translateX(6px);opacity:1}
+/* 视觉区 */
+.psec-visual{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:160px;border-radius:18px;overflow:hidden;background:linear-gradient(150deg,rgba(34,211,238,.07),rgba(129,140,248,.10));border:1px solid var(--border);transition:box-shadow .3s ease,transform .3s ease}
+.psec-visual::after{content:"";position:absolute;right:10px;top:10px;width:7px;height:7px;border-radius:50%;background:#22d3ee;box-shadow:0 0 10px #22d3ee;opacity:.8}
+.psec .big-ic{width:76px;height:76px;color:#22d3ee;transition:transform .45s cubic-bezier(.22,1,.36,1)}
+.psec:hover .big-ic{transform:scale(1.15) rotate(-5deg)}
+.psec-visual img{width:100%;height:100%;object-fit:cover;transition:transform .55s ease}
+.psec:hover .psec-visual img{transform:scale(1.09)}
+.psec:hover .psec-visual{box-shadow:0 0 26px rgba(34,211,238,.22);transform:translateY(-3px)}
+/* 横幅响应式 */
+@media (max-width:960px){
+  .psec{grid-template-columns:96px 1fr;gap:12px 18px;padding:24px 22px;min-height:0}
+  .psec-num{font-size:58px}
+  .psec-visual{display:none}
+  .psec-desc{font-size:13px}
+}
+@media (max-width:640px){
+  .psec{grid-template-columns:64px 1fr;padding:20px 16px;border-radius:18px}
+  .psec-num{font-size:44px;-webkit-text-stroke-width:1.2px}
+  .psec-eyebrow{letter-spacing:.18em}
+  .psec-foot{flex-wrap:wrap;gap:8px}
+}
+/* 打印：横幅简化 */
+@media print{
+  .psec{display:block;padding:14px;border:1px solid #d1d5db;margin-bottom:8px;page-break-inside:avoid;background:#fff !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important}
+  .psec-num,.psec-visual,.psec-go,.psec-eyebrow{display:none}
+}
 </style>
 </head>
 <body>
@@ -1034,21 +1083,9 @@ html[data-theme="light"] .vn-btn{background:rgba(255,255,255,.7)}
       <div class="section-head reveal">
         <span class="eyebrow"><svg class="eb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span data-i18n="portal.eyebrow">EXPLORE</span></span>
         <h2 class="section-title" data-i18n="portal.title">探索我的档案</h2>
-        <p class="section-sub" data-i18n="portal.sub">点击板块卡片，快速进入对应内容。</p>
+        <p class="section-sub" data-i18n="portal.sub">向下滑动浏览，点击板块进入详情。</p>
       </div>
-      <div class="portal-grid" id="portalGrid"></div>
-    </div>
-  </section>
-
-  <!-- ===== 迷你作品墙（视觉呈现）===== -->
-  <section class="section alt deco-rings" id="showcase">
-    <div class="wrap">
-      <div class="section-head reveal">
-        <span class="eyebrow"><svg class="eb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg><span data-i18n="showcase.eyebrow">SHOWCASE</span></span>
-        <h2 class="section-title" data-i18n="showcase.title">作品速览</h2>
-        <p class="section-sub" data-i18n="showcase.sub">点开任意作品，进入完整项目板块。</p>
-      </div>
-      <div class="showcase-grid" id="showcaseGrid"></div>
+      <div class="portal-stack" id="portalGrid"></div>
     </div>
   </section>
 </div><!-- /view-home -->
@@ -1488,7 +1525,7 @@ const I18N = {
     skills: { eyebrow: "SKILLS", title: "技能矩阵", sub: "以实践项目锤炼出的核心能力，按应用熟练度分级呈现。" },
     education: { eyebrow: "EDUCATION & CREDENTIALS", title: "教育与证书", sub: "扎实的学历背景与行业认可。" },
     contact: { eyebrow: "CONTACT", title: "联系我", dlText: "下载简历文本", copyLink: "复制链接" },
-    portal: { eyebrow: "EXPLORE", title: "探索我的档案", sub: "点击板块卡片，快速进入对应内容。" },
+    portal: { eyebrow: "EXPLORE", title: "探索我的档案", sub: "向下滑动浏览，点击板块进入详情。", enter: "进入板块" },
     showcase: { eyebrow: "SHOWCASE", title: "作品速览", sub: "点开任意作品，进入完整项目板块。" },
     viewNav: { prev: "上一板块", next: "下一板块", home: "首页" },
     certs: { flip: "官方认证 · 2026" },
@@ -1512,7 +1549,7 @@ const I18N = {
     skills: { eyebrow: "SKILLS", title: "Skill Matrix", sub: "Core abilities honed through real projects, presented by proficiency tiers." },
     education: { eyebrow: "EDUCATION & CREDENTIALS", title: "Education & Credentials", sub: "Solid academic background with industry recognition." },
     contact: { eyebrow: "CONTACT", title: "Contact Me", dlText: "Download Resume TXT", copyLink: "Copy Link" },
-    portal: { eyebrow: "EXPLORE", title: "Explore My Profile", sub: "Click a card to jump into a section." },
+    portal: { eyebrow: "EXPLORE", title: "Explore My Profile", sub: "Scroll down to browse, click to dive in.", enter: "Enter" },
     showcase: { eyebrow: "SHOWCASE", title: "Work Preview", sub: "Open any piece to see the full project." },
     viewNav: { prev: "Previous", next: "Next", home: "Home" },
     certs: { flip: "Official Certification" },
@@ -1599,15 +1636,15 @@ const SECTION_NAMES = {
 const VIEW_ORDER = ["objective", "highlights", "experience", "projects", "skills", "education", "contact"];
 let curView = "home";
 
-/* 板块磁贴数据：图标（Lucide 风格线性 SVG）+ 摘要 */
+/* 板块横幅数据：图标 + eyebrow + 摘要 + 徽章（projects 带封面图） */
 const portalItems = [
-  { id: "objective", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>', desc: { zh: "目标岗位与自我定位", en: "Target role & positioning" }, meta: { zh: "01 · 求职意向", en: "01 · Objective" } },
-  { id: "highlights", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>', desc: { zh: "可量化的核心成果", en: "Quantified achievements" }, meta: { zh: "5 项成果", en: "5 Wins" } },
-  { id: "experience", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3 3 5v16l6-2 6 2 6-2V3l-6 2-6-2z"/><path d="M9 3v16M15 5v16"/></svg>', desc: { zh: "校园成长到独立交付", en: "From campus to delivery" }, meta: { zh: "5 段经历", en: "5 Chapters" } },
-  { id: "projects", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>', desc: { zh: "AIGC / 游戏 / 演示视频", en: "AIGC / Games / Demos" }, meta: { zh: "4 个作品", en: "4 Projects" } },
-  { id: "skills", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/></svg>', desc: { zh: "熟练 / 实操 / 工具分级", en: "Proficient / Practice / Tools" }, meta: { zh: "15 项技能", en: "15 Skills" } },
-  { id: "education", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>', desc: { zh: "院校背景与行业认证", en: "Education & credentials" }, meta: { zh: "6 项认证", en: "6 Certs" } },
-  { id: "contact", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>', desc: { zh: "邮箱 / 电话 / GitHub", en: "Email / Phone / GitHub" }, meta: { zh: "随时联系", en: "Reach me" } }
+  { id: "objective", tag: { zh: "求职方向", en: "OBJECTIVE" }, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>', desc: { zh: "AIGC 内容创作 / 教育科技方向，期待把想法打磨成看得见的作品。", en: "AIGC content creation & EdTech — turning ideas into visible work." }, meta: { zh: "目标明确", en: "Focused" } },
+  { id: "highlights", tag: { zh: "数据亮点", en: "HIGHLIGHTS" }, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>', desc: { zh: "人物一致性 +50%、成本 -60%、60 FPS——每项成果都可量化。", en: "Consistency +50%, cost -60%, stable 60 FPS — every win is measured." }, meta: { zh: "5 项成果", en: "5 Wins" } },
+  { id: "experience", tag: { zh: "成长轨迹", en: "JOURNEY" }, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3 3 5v16l6-2 6 2 6-2V3l-6 2-6-2z"/><path d="M9 3v16M15 5v16"/></svg>', desc: { zh: "从高中创新标杆到独立项目交付，每一步都有作品见证。", en: "From high-school innovator to independent delivery — every step counts." }, meta: { zh: "5 段经历", en: "5 Chapters" } },
+  { id: "projects", tag: { zh: "作品集", en: "PORTFOLIO" }, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>', desc: { zh: "AI 视觉生成系统、获奖 PPT、坦克大战、耳机演示视频。", en: "AI visual pipeline, award-winning deck, Tank Battle, headphone demo." }, meta: { zh: "4 个作品", en: "4 Projects" }, cover: "图片/图片生成.webp" },
+  { id: "skills", tag: { zh: "技能矩阵", en: "SKILLS" }, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/></svg>', desc: { zh: "熟练应用 / 项目实操 / 协作工具，按真实项目分级。", en: "Proficient / Practice / Tools — graded by real projects." }, meta: { zh: "15 项技能", en: "15 Skills" } },
+  { id: "education", tag: { zh: "教育认证", en: "CREDENTIALS" }, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>', desc: { zh: "成都师范学院 AI 教育专业，阿里云 / 科大讯飞权威认证。", en: "AI in Education at CNU, certified by Alibaba Cloud & iFlytek." }, meta: { zh: "6 项认证", en: "6 Certs" } },
+  { id: "contact", tag: { zh: "联系方式", en: "CONTACT" }, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>', desc: { zh: "邮箱 / 电话 / GitHub，欢迎实习机会与项目合作。", en: "Email / phone / GitHub — internships & collabs welcome." }, meta: { zh: "随时联系", en: "Reach me" } }
 ];
 
 /* 视图切换 */
@@ -1664,14 +1701,22 @@ function applyProjFilter(fid) {
   $$(".proj-grid .reveal").forEach((el) => { el.classList.add("in"); });
 }
 
-/* 磁贴渲染 */
+/* 板块横幅渲染：大空心编号 + 文字区 + 视觉区（向下滚动逐屏展示） */
 function renderPortal() {
   $("#portalGrid").innerHTML = portalItems.map((it, i) =>
-    '<button class="portal-card reveal" type="button" data-go="' + it.id + '" style="--i:' + i + '">' +
-      '<span class="pc-icon">' + it.icon + "</span>" +
-      "<h3>" + esc(L(SECTION_NAMES[it.id])) + "</h3>" +
-      "<p>" + esc(L(it.desc)) + "</p>" +
-      '<span class="pc-meta">' + esc(L(it.meta)) + "</span>" +
+    '<button class="psec reveal" type="button" data-go="' + it.id + '" style="--i:' + (i % 2) + '" aria-label="' + esc(L(SECTION_NAMES[it.id])) + '">' +
+      '<span class="psec-num" aria-hidden="true">' + String(i + 1).padStart(2, "0") + "</span>" +
+      '<span class="psec-body">' +
+        '<span class="psec-eyebrow">' + esc(L(it.tag)) + "</span>" +
+        "<b>" + esc(L(SECTION_NAMES[it.id])) + "</b>" +
+        '<span class="psec-desc">' + esc(L(it.desc)) + "</span>" +
+        '<span class="psec-foot"><span class="pc-meta">' + esc(L(it.meta)) + "</span><span class='psec-go'>" + esc(T("portal.enter")) + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span></span>' +
+      "</span>" +
+      '<span class="psec-visual">' +
+        (it.cover
+          ? "<img src='" + it.cover + "' alt='" + esc(L(SECTION_NAMES[it.id])) + "' loading='lazy' decoding='async'>"
+          : '<span class="big-ic">' + it.icon + "</span>") +
+      "</span>" +
     "</button>").join("");
 }
 
@@ -1855,7 +1900,6 @@ function renderEducation() {
 function renderAll() {
   renderStaticTexts();
   renderPortal();
-  renderShowcase();
   renderObjective();
   renderHeroBadges();
   renderStats();
