@@ -1057,6 +1057,21 @@ html[data-theme="light"] .xwall.focusing::after{background:radial-gradient(ellip
   .xfloat{animation:none;background:#fff !important;border:1px solid #d1d5db !important;box-shadow:none !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important}
   .xcard.focus,.xcard{transform:none !important}
 }
+/* ============================================================
+   ★ 经历画廊 v2：分行居中（2 卡 + 3 卡），克制错落
+   ============================================================ */
+.xwall{display:flex;flex-direction:column;gap:44px;max-width:1060px;margin:0 auto;align-items:stretch}
+.xwall-group{display:flex;flex-direction:column;align-items:center;gap:20px}
+.xrow-tag{display:inline-flex;align-items:center;gap:16px;font-size:11.5px;font-weight:800;letter-spacing:.34em;text-transform:uppercase;color:var(--text-3)}
+.xrow-tag::before,.xrow-tag::after{content:"";width:40px;height:1px;background:linear-gradient(90deg,transparent,rgba(34,211,238,.65));opacity:.9}
+.xrow-tag::after{background:linear-gradient(90deg,rgba(34,211,238,.65),transparent)}
+.xrow{display:flex;justify-content:center;align-items:center;gap:28px;flex-wrap:wrap;width:100%}
+.xwall .xcell,.xwall .xcell:nth-child(even),.xwall .xcell:nth-child(3n){margin-top:0;width:min(330px,100%)}
+.xrow .xcard{width:min(330px,100%)}
+@media (max-width:720px){
+  .xrow{gap:18px}
+  .xwall{gap:34px}
+}
 </style>
 </head>
 <body>
@@ -1899,25 +1914,29 @@ function renderExperience() {
     campus: '<svg class="x-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>',
     practice: '<svg class="x-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>'
   };
-  const ROTS = [-2.4, 2, -1.6, 1.8, -2.2];
+  const ROTS = [-1.2, 1, -0.6, 1.2, -0.8];
   let seq = 0;
-  const wallHtml = (gid) => exp.groups[gid].items.map((it) => {
+  const cardOf = (it, gid) => {
     const k = seq++;
-    return '<div class="xcell reveal" style="--i:' + k + '">' +
-      '<button class="xcard" type="button" aria-haspopup="dialog" aria-label="' + esc(L(it.t)) + '">' +
+    return '<button class="xcard reveal" style="--i:' + k + '" type="button" aria-haspopup="dialog" aria-label="' + esc(L(it.t)) + '">' +
         '<span class="xfloat" style="--rot:' + ROTS[k % ROTS.length] + "deg;animation-delay:-" + ((k * 1.4) % 7).toFixed(1) + 's">' +
           '<span class="x-top"><span class="x-date">' + esc(it.date) + "</span>" + ICON[gid] + "</span>" +
           '<b class="x-title">' + esc(L(it.t)) + "</b>" +
           '<span class="x-role">' + esc(L(it.role)) + "</span>" +
           '<ul class="x-pts">' + it.pts.map((p) => "<li>" + esc(L(p)) + "</li>").join("") + "</ul>" +
         "</span>" +
-      "</button></div>";
-  }).join("");
+      "</button>";
+  };
+  const groupOf = (gid) =>
+    '<div class="xwall-group reveal" style="--i:' + (seq++) + '">' +
+      '<span class="xrow-tag">' + esc(L(exp.groups[gid].title)) + "</span>" +
+      '<div class="xrow">' + exp.groups[gid].items.map((it) => cardOf(it, gid)).join("") + "</div>" +
+    "</div>";
   const tabs = exp.tabs.map((tb) => tb.id);
   $("#expPanels").innerHTML = tabs.map((tid) =>
     '<div class="tab-panel' + (tid === state.expTab ? " active" : "") + '" id="expPanel-' + tid + '" role="tabpanel" aria-labelledby="expTab-' + tid + '" tabindex="0">' +
       '<div class="xwall">' +
-        (tid === "all" ? wallHtml("campus") + wallHtml("practice") : wallHtml(tid)) +
+        (tid === "all" ? groupOf("campus") + groupOf("practice") : groupOf(tid)) +
       "</div></div>").join("");
   $("#expNote").innerHTML = T("experience.note");
 }
