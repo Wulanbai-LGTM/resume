@@ -963,6 +963,67 @@ html[data-theme="light"] .psec-num{-webkit-text-stroke-color:rgba(71,85,105,.5)}
   .psec{display:block;padding:14px;border:1px solid #d1d5db;margin-bottom:8px;page-break-inside:avoid;background:#fff !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important}
   .psec-num,.psec-visual,.psec-go,.psec-eyebrow{display:none}
 }
+/* ============================================================
+   ★ 首页叙事屏 · 左右交替 + 大面积留白（画册式节奏）
+   ============================================================ */
+.marquee{display:none}
+#portal{padding:0}
+#portal .wrap{padding:0;max-width:none}
+.portal-stack{display:block;max-width:none;margin:0;padding:0 clamp(20px,7vw,120px);gap:0}
+.psec{display:flex;align-items:center;justify-content:flex-start;width:100%;min-height:min(88vh,820px);padding:60px 0;margin:0;background:none;border:none;box-shadow:none;border-radius:0;-webkit-backdrop-filter:none;backdrop-filter:none;overflow:visible}
+.psec::before{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(34,211,238,.22),transparent);opacity:0;transition:opacity .45s ease}
+.psec:hover::before{opacity:1}
+.psec:hover{transform:none;box-shadow:none;border-color:transparent}
+.psec-r{justify-content:flex-end}
+/* 留白侧的超大空心水印编号 */
+.psec-ghost{position:absolute;top:50%;left:0;transform:translateY(-50%);font-size:clamp(150px,20vw,330px);font-weight:800;line-height:1;color:transparent;-webkit-text-stroke:1.5px rgba(148,163,184,.13);letter-spacing:-.03em;pointer-events:none;user-select:none;transition:-webkit-text-stroke-color .5s ease,transform .5s ease;z-index:0}
+.psec-r .psec-ghost{left:auto;right:0}
+.psec:hover .psec-ghost{-webkit-text-stroke-color:rgba(34,211,238,.42);transform:translateY(-50%) translateX(-8px)}
+.psec-r:hover .psec-ghost{transform:translateY(-50%) translateX(8px)}
+html[data-theme="light"] .psec-ghost{-webkit-text-stroke-color:rgba(71,85,105,.2)}
+/* 正文：只占半幅，克制排版 */
+.psec-body{position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-start;width:min(620px,100%);padding:0}
+.psec-eyebrow{display:inline-flex;align-items:baseline;gap:14px;font-size:12px;font-weight:800;letter-spacing:.32em;color:#67e8f9;text-transform:uppercase;margin-bottom:20px}
+.psec-eyebrow i{font-style:normal;color:var(--text-3);letter-spacing:.1em;font-weight:700}
+.psec-title{font-size:clamp(58px,8.5vw,116px);font-weight:800;line-height:1;letter-spacing:-.03em;color:var(--text);transition:transform .4s ease,color .4s ease;white-space:nowrap}
+.psec:hover .psec-title{transform:translateX(6px)}
+.psec-r .psec-body{align-items:flex-end;text-align:right}
+.psec-r:hover .psec-title{transform:translateX(-6px)}
+.psec-sub{font-size:15px;font-weight:700;color:var(--text-2);margin-top:16px;letter-spacing:.02em}
+.psec-desc{font-size:15px;line-height:1.95;color:var(--text-3);margin-top:10px;max-width:440px}
+.psec-r .psec-desc{margin-left:auto}
+.psec-foot{margin-top:30px;display:flex;align-items:center;gap:0;width:100%}
+.psec-go{display:inline-flex;align-items:center;gap:9px;font-size:13.5px;font-weight:800;color:#22d3ee;opacity:0;transform:translateX(-10px);transition:opacity .4s ease,transform .4s ease}
+.psec:hover .psec-go{opacity:1;transform:none}
+.psec-go svg{width:16px;height:16px}
+.psec-line{display:block;height:1.5px;width:0;background:linear-gradient(90deg,#22d3ee,transparent);transition:width .6s ease .08s}
+.psec:hover .psec-line{width:140px}
+.psec-r .psec-foot{justify-content:flex-end}
+.psec-r .psec-line{background:linear-gradient(270deg,#22d3ee,transparent)}
+/* 进入动画：左屏从左侧入 / 右屏从右侧入 */
+.psec.reveal{opacity:0;transform:translateX(-56px);transition:opacity .8s ease,transform .9s cubic-bezier(.22,1,.36,1)}
+.psec-r.reveal{transform:translateX(56px)}
+.psec.reveal.in{opacity:1;transform:none}
+@media (max-width:960px){
+  #portal{padding:0}
+  .portal-stack{padding:0 clamp(16px,5vw,34px)}
+  .psec,.psec-r{justify-content:flex-start;min-height:0;padding:64px 0}
+  .psec-ghost{top:auto;bottom:8px;left:auto;right:4px;transform:none;font-size:clamp(96px,26vw,150px);-webkit-text-stroke-width:1.2px}
+  .psec-r .psec-ghost{right:auto;left:4px}
+  .psec:hover .psec-ghost,.psec-r:hover .psec-ghost{transform:translateX(-4px)}
+  .psec-body,.psec-r .psec-body{align-items:flex-start;text-align:left;width:100%}
+  .psec-title{font-size:clamp(46px,14vw,72px)}
+  .psec-desc{font-size:14px}
+  .psec-foot{justify-content:flex-start}
+  .psec.reveal,.psec-r.reveal{transform:none}
+}
+@media print{
+  .psec{min-height:0;padding:12px 0;display:block}
+  .psec-ghost{display:none}
+  .psec-title{font-size:24px;white-space:normal}
+  .psec-desc{max-width:none}
+  .psec-go,.psec-line{display:none}
+}
 </style>
 </head>
 <body>
@@ -1077,16 +1138,9 @@ html[data-theme="light"] .psec-num{-webkit-text-stroke-color:rgba(71,85,105,.5)}
   <!-- ================= 跑马灯 ================= -->
   <div class="marquee no-print" aria-hidden="true"><div class="marquee-track" id="marqueeTrack"></div></div>
 
-  <!-- ===== 板块入口磁贴（Landing 导览）===== -->
+  <!-- ===== 首页板块叙事屏（左右交替 · 大面积留白）===== -->
   <section class="section" id="portal">
-    <div class="wrap">
-      <div class="section-head reveal">
-        <span class="eyebrow"><svg class="eb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span data-i18n="portal.eyebrow">EXPLORE</span></span>
-        <h2 class="section-title" data-i18n="portal.title">探索我的档案</h2>
-        <p class="section-sub" data-i18n="portal.sub">向下滑动浏览，点击板块进入详情。</p>
-      </div>
-      <div class="portal-stack" id="portalGrid"></div>
-    </div>
+    <div class="portal-stack" id="portalGrid"></div>
   </section>
 </div><!-- /view-home -->
 
@@ -1636,6 +1690,17 @@ const SECTION_NAMES = {
 const VIEW_ORDER = ["objective", "highlights", "experience", "projects", "skills", "education", "contact"];
 let curView = "home";
 
+/* 叙事屏大字标题（首页板块轮播） */
+const PORTAL_BIG = {
+  objective: { zh: "方向", en: "Direction" },
+  highlights: { zh: "成果", en: "Results" },
+  experience: { zh: "轨迹", en: "Journey" },
+  projects: { zh: "作品", en: "Works" },
+  skills: { zh: "能力", en: "Skills" },
+  education: { zh: "根基", en: "Foundation" },
+  contact: { zh: "连接", en: "Connect" }
+};
+
 /* 板块横幅数据：图标 + eyebrow + 摘要 + 徽章（projects 带封面图） */
 const portalItems = [
   { id: "objective", tag: { zh: "求职方向", en: "OBJECTIVE" }, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>', desc: { zh: "AIGC 内容创作 / 教育科技方向，期待把想法打磨成看得见的作品。", en: "AIGC content creation & EdTech — turning ideas into visible work." }, meta: { zh: "目标明确", en: "Focused" } },
@@ -1701,23 +1766,24 @@ function applyProjFilter(fid) {
   $$(".proj-grid .reveal").forEach((el) => { el.classList.add("in"); });
 }
 
-/* 板块横幅渲染：大空心编号 + 文字区 + 视觉区（向下滚动逐屏展示） */
+/* 首页板块叙事屏渲染：奇数次靠左 / 偶数次靠右，对侧大面积留白 */
 function renderPortal() {
-  $("#portalGrid").innerHTML = portalItems.map((it, i) =>
-    '<button class="psec reveal" type="button" data-go="' + it.id + '" style="--i:' + (i % 2) + '" aria-label="' + esc(L(SECTION_NAMES[it.id])) + '">' +
-      '<span class="psec-num" aria-hidden="true">' + String(i + 1).padStart(2, "0") + "</span>" +
+  $("#portalGrid").innerHTML = portalItems.map((it, i) => {
+    const n = String(i + 1).padStart(2, "0");
+    return '<button class="psec reveal' + (i % 2 ? " psec-r" : "") + '" type="button" data-go="' + it.id + '" style="--i:' + (i % 2) + '" aria-label="' + esc(L(SECTION_NAMES[it.id])) + '">' +
+      '<span class="psec-ghost" aria-hidden="true">' + n + "</span>" +
       '<span class="psec-body">' +
-        '<span class="psec-eyebrow">' + esc(L(it.tag)) + "</span>" +
-        "<b>" + esc(L(SECTION_NAMES[it.id])) + "</b>" +
+        '<span class="psec-eyebrow"><i>' + n + "</i>" + esc(L(it.tag)) + "</span>" +
+        '<b class="psec-title">' + esc(L(PORTAL_BIG[it.id])) + "</b>" +
+        '<span class="psec-sub">' + esc(L(SECTION_NAMES[it.id])) + " · " + esc(L(it.meta)) + "</span>" +
         '<span class="psec-desc">' + esc(L(it.desc)) + "</span>" +
-        '<span class="psec-foot"><span class="pc-meta">' + esc(L(it.meta)) + "</span><span class='psec-go'>" + esc(T("portal.enter")) + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span></span>' +
+        '<span class="psec-foot">' +
+          '<span class="psec-go">' + esc(T("portal.enter")) + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>' +
+          '<span class="psec-line" aria-hidden="true"></span>' +
+        "</span>" +
       "</span>" +
-      '<span class="psec-visual">' +
-        (it.cover
-          ? "<img src='" + it.cover + "' alt='" + esc(L(SECTION_NAMES[it.id])) + "' loading='lazy' decoding='async'>"
-          : '<span class="big-ic">' + it.icon + "</span>") +
-      "</span>" +
-    "</button>").join("");
+    "</button>";
+  }).join("");
 }
 
 /* 作品封面辅助（横幅 projects 视觉用图由数据 cover 提供） */
