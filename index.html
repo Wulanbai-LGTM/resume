@@ -1025,6 +1025,29 @@ html[data-theme="light"] .psec-ghost{-webkit-text-stroke-color:rgba(71,85,105,.2
   .psec-go,.psec-line{display:none}
 }
 /* ============================================================
+   ★ 叙事屏悬停预览卡（微斜长方形"页面预览"）
+   ============================================================ */
+.ppv{position:absolute;top:50%;left:calc(100% + 52px);width:300px;min-height:196px;transform:translateY(-50%) rotate(7deg) scale(.9);transform-origin:center;opacity:0;visibility:hidden;transition:opacity .3s ease,transform .45s cubic-bezier(.22,1,.36,1),visibility .3s;z-index:6;display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:16px;background:linear-gradient(160deg,rgba(30,41,59,.72),rgba(10,15,30,.88));border:1px solid rgba(255,255,255,.15);box-shadow:0 20px 54px -14px rgba(0,0,0,.6),0 0 0 1px rgba(34,211,238,.06);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);pointer-events:none}
+.ppv::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;border-radius:16px 16px 0 0;background:linear-gradient(90deg,#22d3ee,#818cf8);opacity:.7}
+.psec:hover .ppv{opacity:1;visibility:visible;transform:translateY(-50%) rotate(2.5deg) scale(1)}
+.psec-r .ppv{left:auto;right:calc(100% + 52px);transform:translateY(-50%) rotate(-7deg) scale(.9)}
+.psec-r:hover .ppv{transform:translateY(-50%) rotate(-2.5deg) scale(1)}
+.ppv .ppv-ic{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:13px;background:linear-gradient(135deg,rgba(34,211,238,.18),rgba(129,140,248,.18));border:1px solid rgba(34,211,238,.3)}
+.ppv .ppv-ic svg{width:22px;height:22px;color:#67e8f9}
+.ppv>b{font-size:17px;font-weight:800;color:#f8fafc;letter-spacing:-.01em}
+.ppv-lines{display:flex;flex-direction:column;gap:7px}
+.ppv-lines s{display:block;height:8px;border-radius:5px;background:rgba(255,255,255,.16)}
+.ppv-lines s:nth-child(2){width:84%;background:rgba(255,255,255,.11)}
+.ppv-lines s:nth-child(3){width:58%;background:rgba(255,255,255,.08)}
+.ppv em{font-style:normal;align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.05em;color:#67e8f9;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.3);padding:3px 11px;border-radius:99px;margin-top:2px}
+.ppv-img{padding:0;overflow:hidden;min-height:0}
+.ppv-img::before{display:none}
+.ppv-img img{width:100%;height:168px;object-fit:cover;display:block}
+.ppv-img i{display:block;position:relative;font-style:normal;font-size:12.5px;font-weight:800;color:#f8fafc;padding:8px 13px 10px;margin-top:-32px;background:linear-gradient(transparent,rgba(2,6,23,.82));text-align:left}
+@media (hover:none),(max-width:1180px){
+  .ppv{display:none}
+}
+/* ============================================================
    ★ 成长经历 · 错落浮动卡片墙（点击居中放大聚焦）
    ============================================================ */
 .xwall{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:34px 26px;max-width:1140px;margin:0 auto;align-items:start}
@@ -1927,6 +1950,15 @@ function updateViewNav() {
 function renderPortal() {
   $("#portalGrid").innerHTML = portalItems.map((it, i) => {
     const n = String(i + 1).padStart(2, "0");
+    /* 悬停预览卡：模拟对应板块页面（项目用真实封面图） */
+    const ppv = it.cover
+      ? '<span class="ppv ppv-img" aria-hidden="true"><img src="' + it.cover + '" alt="" loading="lazy" decoding="async"><i>' + esc(L(SECTION_NAMES[it.id])) + "</i></span>"
+      : '<span class="ppv" aria-hidden="true">' +
+          '<span class="ppv-ic">' + it.icon + "</span>" +
+          "<b>" + esc(L(PORTAL_BIG[it.id])) + "</b>" +
+          '<span class="ppv-lines"><s></s><s></s><s></s></span>' +
+          "<em>" + esc(L(it.meta)) + "</em>" +
+        "</span>";
     return '<button class="psec reveal' + (i % 2 ? " psec-r" : "") + '" type="button" data-go="' + it.id + '" style="--i:' + (i % 2) + '" aria-label="' + esc(L(SECTION_NAMES[it.id])) + '">' +
       '<span class="psec-ghost" aria-hidden="true">' + n + "</span>" +
       '<span class="psec-body">' +
@@ -1939,6 +1971,7 @@ function renderPortal() {
           '<span class="psec-line" aria-hidden="true"></span>' +
         "</span>" +
       "</span>" +
+      ppv +
     "</button>";
   }).join("");
 }
