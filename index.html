@@ -1082,6 +1082,33 @@ html[data-theme="light"] .bgfx{display:none}
   .bgfx{display:none !important}
 }
 /* ============================================================
+   ★ 首页顶部背景 + 叙事屏横幅图带（两边渐隐到中间）
+   ============================================================ */
+/* Hero 顶部星夜背景：顶部实、向下渐隐融入 */
+.hero-top{position:absolute;left:50%;top:0;transform:translateX(-50%);width:min(1180px,100%);height:100%;object-fit:cover;object-position:center top;opacity:.55;z-index:0;-webkit-mask-image:linear-gradient(180deg,#000 52%,transparent 98%);mask-image:linear-gradient(180deg,#000 52%,transparent 98%)}
+.hero::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(90% 70% at 50% 8%,transparent 40%,rgba(3,7,18,.45));z-index:0}
+/* 叙事屏：正文在上、横幅图带在下 */
+.psec{flex-direction:column;align-items:center;justify-content:center;min-height:0;padding:52px 0 36px}
+.psec-body{align-self:flex-start}
+.psec-r .psec-body{align-self:flex-end;text-align:right}
+.psec-r .psec-desc{margin-left:auto}
+.psec-bg{display:block;width:min(1120px,100%);margin-top:34px;overflow:hidden;border-radius:16px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
+.psec-bg img{width:100%;height:300px;object-fit:cover;display:block;transition:transform .7s ease,filter .7s ease}
+.psec:hover .psec-bg img{transform:scale(1.035);filter:brightness(1.12)}
+@media (max-width:960px){
+  .psec{padding:44px 0 26px}
+  .psec-bg{margin-top:22px}
+  .psec-bg img{height:200px}
+}
+@media (max-width:640px){
+  .psec-bg img{height:150px}
+  .psec-r .psec-body{align-self:flex-start;text-align:left}
+  .psec-r .psec-desc{margin-left:0}
+}
+@media print{
+  .hero-top,.psec-bg{display:none !important}
+}
+/* ============================================================
    ★ 成长经历 · 错落浮动卡片墙（点击居中放大聚焦）
    ============================================================ */
 .xwall{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:34px 26px;max-width:1140px;margin:0 auto;align-items:start}
@@ -1293,6 +1320,7 @@ html[data-theme="light"] .car-card.is-act{border-color:#0f172a;box-shadow:0 26px
 <div class="view active" id="view-home">
   <!-- ================= Hero ================= -->
   <section class="hero" id="home">
+    <img class="hero-top" src="图片/bg/herotop.webp" alt="" aria-hidden="true" fetchpriority="high">
     <div class="hero-bg" id="heroBg" aria-hidden="true">
       <div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div>
       <div class="grid"></div>
@@ -2109,6 +2137,7 @@ function renderPortal() {
           '<span class="psec-line" aria-hidden="true"></span>' +
         "</span>" +
       "</span>" +
+      '<span class="psec-bg" aria-hidden="true"><img src="图片/bgsec/' + String(i + 1).padStart(2, "0") + '.webp" alt="" loading="lazy" decoding="async"></span>' +
     "</button>";
   }).join("");
 }
