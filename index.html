@@ -1044,6 +1044,24 @@ html[data-theme="light"] .psec-ghost{-webkit-text-stroke-color:rgba(71,85,105,.2
   .fpv{display:none}
 }
 /* ============================================================
+   ★ 数码波浪刷新遮罩（自下而上覆盖 → 上卷，新页自下而上涌现）
+   ============================================================ */
+.wave{position:fixed;inset:0;z-index:860;pointer-events:none;visibility:hidden;transform:translateY(101%);overflow:hidden}
+.wave::before{content:"";position:absolute;inset:0;background:radial-gradient(70% 55% at 22% 30%,rgba(34,211,238,.14),transparent 62%),radial-gradient(65% 55% at 80% 70%,rgba(99,102,241,.18),transparent 64%)}
+.wave.cov{visibility:visible;transform:translateY(0);transition:transform .34s cubic-bezier(.55,.06,.25,1)}
+.wave.rev{visibility:visible;transform:translateY(-101%);transition:transform .42s cubic-bezier(.55,.06,.25,1)}
+.wave.none{transition:none;transform:translateY(101%);visibility:hidden}
+.wave b,.wave i{position:absolute;inset:0;display:block;pointer-events:none}
+/* 波光层：正弦波纹向上流动 */
+.wave b{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='120' viewBox='0 0 400 120' preserveAspectRatio='none'%3E%3Cpath d='M0 76 Q50 40 100 76 T200 76 T300 76 T400 76 L400 120 L0 120Z' fill='rgba(11,19,48,.92)'/%3E%3Cpath d='M0 34 Q50 66 100 34 T200 34 T300 34 T400 34 L400 120 L0 120Z' fill='rgba(15,26,60,.88)'/%3E%3Cpath d='M0 98 Q50 128 100 98 T200 98 T300 98 T400 98 L400 120 L0 120Z' fill='rgba(7,12,30,.8)'/%3E%3C/svg%3E") repeat-y left top;background-size:auto 120px;animation:flowB .95s linear infinite}
+@keyframes flowB{to{background-position-y:-120px}}
+/* 扫描层：青色亮线循环上滚 */
+.wave i{background:linear-gradient(180deg,rgba(34,211,238,.26) 0 2px,rgba(34,211,238,.08) 2px 4px,transparent 4px 44px);background-size:100% 44px;mix-blend-mode:screen;animation:flowI .5s linear infinite}
+@keyframes flowI{to{background-position-y:-44px}}
+@media print{
+  .wave{display:none !important}
+}
+/* ============================================================
    ★ 成长经历 · 错落浮动卡片墙（点击居中放大聚焦）
    ============================================================ */
 .xwall{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:34px 26px;max-width:1140px;margin:0 auto;align-items:start}
@@ -1517,6 +1535,9 @@ html[data-theme="light"] .car-card.is-act{border-color:#0f172a;box-shadow:0 26px
 <!-- 跟随鼠标的板块预览卡 -->
 <div class="fpv no-print" id="fpv" aria-hidden="true"></div>
 
+<!-- 数码波浪刷新遮罩（层由 JS 注入） -->
+<div class="wave no-print" id="wave" aria-hidden="true"></div>
+
 <!-- ================= Lightbox ================= -->
 <div class="lightbox no-print" id="lightbox" role="dialog" aria-modal="true" aria-label="图片预览">
   <button class="lb-btn lb-close" id="lbClose" aria-label="关闭预览"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -1904,7 +1925,48 @@ const portalItems = [
   { id: "contact", tag: { zh: "联系方式", en: "CONTACT" }, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>', desc: { zh: "邮箱 / 电话 / GitHub，欢迎实习机会与项目合作。", en: "Email / phone / GitHub — internships & collabs welcome." }, meta: { zh: "随时联系", en: "Reach me" } }
 ];
 
-/* 视图切换 */
+/* 视图直接切换（无动画主体） */
+function doSwitchView(name, opts) {
+  const from = $("#view-" + curView);
+  const to = $("#view-" + name);
+  if (!to) return;
+  if (from) from.classList.remove("active");
+  to.classList.add("active");
+  curView = name;
+  window.scrollTo({ top: 0, behavior: "auto" });
+  $$(".nav-links a").forEach((a) => a.classList.toggle("active", name !== "home" && a.getAttribute("href") === "#" + name));
+  updateViewNav();
+  if (opts.filter) applyProjFilter(opts.filter);
+  if (opts.scrollTo) {
+    const el = document.getElementById(opts.scrollTo);
+    if (el) setTimeout(() => el.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth" }), 60);
+  }
+}
+
+/* 数码波浪刷新转场：单层波浪幕布自下而上覆盖 → 切换 → 继续上卷，新页自下而上涌现 */
+let waveEl = null, wBusy = false, wPending = null;
+function initWave() {
+  waveEl = $("#wave");
+  if (!waveEl) return;
+  waveEl.innerHTML = "<b></b><i></i>"; /* b=波光层 i=扫描线层（CSS 绘制） */
+}
+function runWave() {
+  waveEl.classList.remove("none", "rev");
+  void waveEl.offsetWidth;
+  waveEl.classList.add("cov"); /* 自下而上盖满 */
+  setTimeout(() => {
+    waveEl.classList.remove("cov");
+    void waveEl.offsetWidth;
+    waveEl.classList.add("rev"); /* 继续上卷离开 */
+  }, 360);
+  setTimeout(() => {
+    waveEl.classList.add("none");
+    waveEl.classList.remove("rev");
+    wBusy = false;
+    if (wPending) { const p = wPending; wPending = null; showView(p.name, p.opts); }
+  }, 800);
+}
+/* 视图切换（带动画转场壳） */
 function showView(name, opts) {
   opts = opts || {};
   if (name === curView) {
@@ -1915,20 +1977,14 @@ function showView(name, opts) {
     if (opts.filter) applyProjFilter(opts.filter);
     return;
   }
-  const from = $("#view-" + curView);
-  const to = $("#view-" + name);
-  if (!to) return;
-  if (from) from.classList.remove("active");
-  to.classList.add("active");
-  curView = name;
-  window.scrollTo({ top: 0, behavior: "auto" });
-  /* 导航高亮（首页不高亮任何板块） */
-  $$(".nav-links a").forEach((a) => a.classList.toggle("active", name !== "home" && a.getAttribute("href") === "#" + name));
-  updateViewNav();
-  if (opts.filter) applyProjFilter(opts.filter);
-  if (opts.scrollTo) {
-    const el = document.getElementById(opts.scrollTo);
-    if (el) setTimeout(() => el.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth" }), 60);
+  if (!document.getElementById("view-" + name)) return;
+  if (waveEl && !prefersReduced) {
+    if (wBusy) { wPending = { name: name, opts: opts }; return; }
+    wBusy = true;
+    runWave();
+    setTimeout(() => doSwitchView(name, opts), 380); /* 幕布盖满瞬间切换 */
+  } else {
+    doSwitchView(name, opts);
   }
 }
 
@@ -3194,6 +3250,7 @@ bindGlobal();
 bindLightboxControls();
 renderAll();
 initTyped();
+initWave();
 /* URL 锚点直达视图（如 index.html#projects），也为自动截图提供入口 */
 (function () {
   const h = (location.hash || "").replace("#", "");
