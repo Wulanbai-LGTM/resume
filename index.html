@@ -1049,18 +1049,18 @@ html[data-theme="light"] .psec-ghost{-webkit-text-stroke-color:rgba(71,85,105,.2
 .pix{position:fixed;inset:0;z-index:860;pointer-events:none;visibility:hidden;display:grid;grid-template-columns:repeat(18,1fr);grid-template-rows:repeat(12,1fr);gap:2px;background:#020509}
 .pix.cov,.pix.rev{visibility:visible}
 .pix i{opacity:0;transform:scale(.5);border-radius:2px;box-shadow:inset 0 0 10px rgba(255,255,255,.04)}
-.pix.cov i{animation:pxOn .3s ease-out both;animation-delay:var(--d1,0ms)}
-.pix.rev i{animation:pxOff .3s ease-in both;animation-delay:var(--d2,0ms)}
+.pix.cov i{animation-name:pxOn;animation-timing-function:ease-out;animation-fill-mode:both;animation-duration:var(--t1,.3s);animation-delay:var(--d1,0ms)}
+.pix.rev i{animation-name:pxOff;animation-timing-function:ease-in;animation-fill-mode:both;animation-duration:var(--t2,.3s);animation-delay:var(--d2,0ms)}
 .pix.idle i{animation:none !important;opacity:0;transform:scale(.5)}
 @keyframes pxOn{
-  0%{opacity:0;transform:scale(.55);box-shadow:0 0 0 0 rgba(34,211,238,0)}
-  45%{opacity:1;transform:scale(1.08);box-shadow:0 0 0 15px rgba(34,211,238,.30),0 0 34px 8px rgba(129,140,248,.24)}
-  75%{transform:scale(1);box-shadow:0 0 0 7px rgba(34,211,238,.16),0 0 18px 3px rgba(34,211,238,.2)}
-  100%{opacity:1;transform:scale(1);box-shadow:0 0 8px rgba(34,211,238,.22)}
+  0%{opacity:0;transform:scale(.5);box-shadow:0 0 0 0 rgba(34,211,238,0)}
+  45%{opacity:1;transform:scale(var(--sp,1.08));box-shadow:0 0 0 15px rgba(34,211,238,.30),0 0 34px 8px rgba(129,140,248,.24)}
+  75%{transform:scale(var(--sf,1));box-shadow:0 0 0 7px rgba(34,211,238,.16),0 0 18px 3px rgba(34,211,238,.2)}
+  100%{opacity:var(--of,1);transform:scale(var(--sf,1));box-shadow:0 0 8px rgba(34,211,238,.22)}
 }
 @keyframes pxOff{
-  0%{opacity:1;transform:scale(1);box-shadow:0 0 8px rgba(34,211,238,.22)}
-  25%{opacity:.9;box-shadow:0 0 0 10px rgba(34,211,238,.16),0 0 22px 5px rgba(129,140,248,.16)}
+  0%{opacity:var(--of,1);transform:scale(var(--sf,1));box-shadow:0 0 8px rgba(34,211,238,.22)}
+  25%{opacity:calc(var(--of,1) - .1);box-shadow:0 0 0 10px rgba(34,211,238,.16),0 0 22px 5px rgba(129,140,248,.16)}
   100%{opacity:0;transform:scale(.5);box-shadow:0 0 0 0 rgba(34,211,238,0)}
 }
 @media print{
@@ -1955,19 +1955,25 @@ function initPix() {
   pixEl = $("#pix");
   if (!pixEl) return;
   const COLS = 18, ROWS = 12;
-  let s = "";
+  pixEl.innerHTML = '<i style="opacity:0"></i>'.repeat(COLS * ROWS);
+  const cells = pixEl.children;
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
-      const h = Math.round(188 + c * 3.4); /* 每列色相：青 → 靛 → 紫 */
-      s += "<i data-r='" + r + "' data-c='" + c + "' style='background:linear-gradient(165deg,hsl(" + h + " 58% 17%),hsl(" + (h + 16) + " 50% 8%))'></i>";
+      const el = cells[r * COLS + c];
+      /* 个体随机抖动：终态大小/峰值/亮度/明灭时长/色相微差 */
+      const sf = (0.97 + Math.random() * 0.05).toFixed(3);
+      el.style.setProperty("--sf", sf);
+      el.style.setProperty("--sp", (parseFloat(sf) + 0.06 + Math.random() * 0.08).toFixed(3));
+      el.style.setProperty("--of", (0.87 + Math.random() * 0.13).toFixed(2));
+      el.style.setProperty("--t1", Math.round(250 + Math.random() * 90) + "ms");
+      el.style.setProperty("--t2", Math.round(240 + Math.random() * 90) + "ms");
+      const h = Math.round(188 + c * 3.4 + (Math.random() * 16 - 8));
+      el.style.background = "linear-gradient(165deg,hsl(" + h + " 58% " + Math.round(15 + Math.random() * 5) + "%),hsl(" + (h + 16) + " 50% 8%))";
+      el.dataset.r = r;
+      el.dataset.c = c;
+      el.dataset.d1 = (ROWS - 1 - r) * 11 + c * 5; /* 点亮：左下→右上 */
+      el.dataset.d2 = r * 11 + c * 5;              /* 熄灭：左上→右下 */
     }
-  }
-  pixEl.innerHTML = s;
-  const cells = pixEl.children;
-  for (let k = 0; k < cells.length; k++) {
-    const r = +cells[k].dataset.r, c = +cells[k].dataset.c;
-    cells[k].dataset.d1 = (ROWS - 1 - r) * 11 + c * 5; /* 点亮：左下→右上 */
-    cells[k].dataset.d2 = r * 11 + c * 5;              /* 熄灭：左上→右下 */
   }
 }
 function runPix() {
@@ -1981,14 +1987,14 @@ function runPix() {
     pixEl.classList.remove("cov");
     void pixEl.offsetWidth;
     pixEl.classList.add("rev"); /* 逐块熄灭 */
-  }, 590);
+  }, 620);
   setTimeout(() => {
     pixEl.classList.add("idle");
     pixEl.classList.remove("rev");
     void pixEl.offsetWidth;
     wBusy = false;
     if (wPending) { const p = wPending; wPending = null; showView(p.name, p.opts); }
-  }, 1150);
+  }, 1280);
 }
 /* 视图切换（带动画转场壳） */
 function showView(name, opts) {
@@ -2006,7 +2012,7 @@ function showView(name, opts) {
     if (wBusy) { wPending = { name: name, opts: opts }; return; }
     wBusy = true;
     runPix();
-    setTimeout(() => doSwitchView(name, opts), 560); /* 格子盖满瞬间切换 */
+    setTimeout(() => doSwitchView(name, opts), 590); /* 格子盖满瞬间切换 */
   } else {
     doSwitchView(name, opts);
   }
