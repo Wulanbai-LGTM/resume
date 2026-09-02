@@ -1052,8 +1052,17 @@ html[data-theme="light"] .psec-ghost{-webkit-text-stroke-color:rgba(71,85,105,.2
 .pix.cov i{animation:pxOn .2s ease-out both;animation-delay:var(--d1,0ms)}
 .pix.rev i{animation:pxOff .18s ease-in both;animation-delay:var(--d2,0ms)}
 .pix.idle i{animation:none !important;opacity:0;transform:scale(.5)}
-@keyframes pxOn{0%{opacity:0;transform:scale(.55);box-shadow:0 0 0 rgba(34,211,238,0),inset 0 0 14px rgba(255,255,255,.04)}60%{opacity:1;transform:scale(1.07);box-shadow:0 0 18px rgba(34,211,238,.65),inset 0 0 16px rgba(255,255,255,.08)}100%{opacity:1;transform:scale(1);box-shadow:0 0 8px rgba(34,211,238,.25),inset 0 0 14px rgba(255,255,255,.04)}}
-@keyframes pxOff{0%{opacity:1;transform:scale(1);box-shadow:0 0 8px rgba(34,211,238,.25)}100%{opacity:0;transform:scale(.5);box-shadow:0 0 0 rgba(34,211,238,0)}}
+@keyframes pxOn{
+  0%{opacity:0;transform:scale(.55);box-shadow:0 0 0 0 rgba(34,211,238,0)}
+  45%{opacity:1;transform:scale(1.08);box-shadow:0 0 0 15px rgba(34,211,238,.30),0 0 34px 8px rgba(129,140,248,.24)}
+  75%{transform:scale(1);box-shadow:0 0 0 7px rgba(34,211,238,.16),0 0 18px 3px rgba(34,211,238,.2)}
+  100%{opacity:1;transform:scale(1);box-shadow:0 0 8px rgba(34,211,238,.22)}
+}
+@keyframes pxOff{
+  0%{opacity:1;transform:scale(1);box-shadow:0 0 8px rgba(34,211,238,.22)}
+  25%{opacity:.9;box-shadow:0 0 0 10px rgba(34,211,238,.16),0 0 22px 5px rgba(129,140,248,.16)}
+  100%{opacity:0;transform:scale(.5);box-shadow:0 0 0 0 rgba(34,211,238,0)}
+}
 @media print{
   .pix{display:none !important}
 }
