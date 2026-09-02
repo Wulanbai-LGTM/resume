@@ -1044,14 +1044,16 @@ html[data-theme="light"] .psec-ghost{-webkit-text-stroke-color:rgba(71,85,105,.2
   .fpv{display:none}
 }
 /* ============================================================
-   ★ 像素格纹刷新遮罩（格子逐格点亮盖屏 → 逐格熄灭显露新页）
+   ★ LED 像素格纹刷新遮罩（霓虹格子逐块点亮/熄灭，辉光脉冲）
    ============================================================ */
-.pix{position:fixed;inset:0;z-index:860;pointer-events:none;visibility:hidden;display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(9,1fr)}
+.pix{position:fixed;inset:0;z-index:860;pointer-events:none;visibility:hidden;display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(9,1fr);gap:3px;background:#020509}
 .pix.cov,.pix.rev,.pix.idle{visibility:visible}
-.pix i{background:linear-gradient(165deg,#12204a,#070d20 60%,#0a1430);border:1px solid rgba(34,211,238,.09);box-shadow:inset 0 0 16px rgba(34,211,238,.05);opacity:0;transform:scale(.9);transition:none}
-.pix.cov i{opacity:1;transform:scale(1);transition:opacity .17s ease,transform .17s ease}
-.pix.rev i{opacity:0;transform:scale(.95);transition:opacity .15s ease,transform .15s ease}
-.pix.idle i{transition:none !important}
+.pix i{opacity:0;transform:scale(.5);border-radius:3px;box-shadow:inset 0 0 14px rgba(255,255,255,.04)}
+.pix.cov i{animation:pxOn .24s ease-out both;animation-delay:var(--d1,0ms)}
+.pix.rev i{animation:pxOff .22s ease-in both;animation-delay:var(--d2,0ms)}
+.pix.idle i{animation:none !important;opacity:0;transform:scale(.5)}
+@keyframes pxOn{0%{opacity:0;transform:scale(.55);box-shadow:0 0 0 rgba(34,211,238,0),inset 0 0 14px rgba(255,255,255,.04)}60%{opacity:1;transform:scale(1.07);box-shadow:0 0 18px rgba(34,211,238,.65),inset 0 0 16px rgba(255,255,255,.08)}100%{opacity:1;transform:scale(1);box-shadow:0 0 8px rgba(34,211,238,.25),inset 0 0 14px rgba(255,255,255,.04)}}
+@keyframes pxOff{0%{opacity:1;transform:scale(1);box-shadow:0 0 8px rgba(34,211,238,.25)}100%{opacity:0;transform:scale(.5);box-shadow:0 0 0 rgba(34,211,238,0)}}
 @media print{
   .pix{display:none !important}
 }
@@ -1946,36 +1948,38 @@ function initPix() {
   const COLS = 12, ROWS = 9;
   let s = "";
   for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) s += "<i data-r='" + r + "' data-c='" + c + "'></i>";
+    for (let c = 0; c < COLS; c++) {
+      const h = Math.round(188 + c * 5.2); /* 每列色相：青 → 靛 → 紫 */
+      s += "<i data-r='" + r + "' data-c='" + c + "' style='background:linear-gradient(165deg,hsl(" + h + " 58% 17%),hsl(" + (h + 16) + " 50% 8%))'></i>";
+    }
   }
   pixEl.innerHTML = s;
   const cells = pixEl.children;
   for (let k = 0; k < cells.length; k++) {
     const r = +cells[k].dataset.r, c = +cells[k].dataset.c;
-    cells[k].dataset.d1 = ((ROWS - 1 - r) * 9 + c * 5) + "ms"; /* 点亮：左下→右上 */
-    cells[k].dataset.d2 = (r * 9 + c * 5) + "ms";              /* 熄灭：左上→右下 */
+    cells[k].dataset.d1 = (ROWS - 1 - r) * 7 + c * 4; /* 点亮：左下→右上 */
+    cells[k].dataset.d2 = r * 7 + c * 4;              /* 熄灭：左上→右下 */
   }
 }
 function runPix() {
   const cells = pixEl.children;
   pixEl.classList.remove("idle", "rev");
-  for (const el of cells) el.style.transitionDelay = el.dataset.d1;
+  for (const el of cells) el.style.setProperty("--d1", el.dataset.d1 + "ms");
   void pixEl.offsetWidth;
-  pixEl.classList.add("cov"); /* 逐格点亮 */
+  pixEl.classList.add("cov"); /* 霓虹格逐块点亮 */
   setTimeout(() => {
-    for (const el of cells) el.style.transitionDelay = el.dataset.d2;
+    for (const el of cells) el.style.setProperty("--d2", el.dataset.d2 + "ms");
     pixEl.classList.remove("cov");
     void pixEl.offsetWidth;
-    pixEl.classList.add("rev"); /* 逐格熄灭 */
-  }, 400);
+    pixEl.classList.add("rev"); /* 逐块熄灭 */
+  }, 430);
   setTimeout(() => {
     pixEl.classList.add("idle");
     pixEl.classList.remove("rev");
-    for (const el of cells) el.style.transitionDelay = "0ms";
     void pixEl.offsetWidth;
     wBusy = false;
     if (wPending) { const p = wPending; wPending = null; showView(p.name, p.opts); }
-  }, 780);
+  }, 800);
 }
 /* 视图切换（带动画转场壳） */
 function showView(name, opts) {
