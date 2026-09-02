@@ -1720,20 +1720,11 @@ function renderPortal() {
     "</button>").join("");
 }
 
-/* 作品墙渲染：前 3 个项目封面 */
+/* 作品封面辅助（横幅 projects 视觉用图由数据 cover 提供） */
 function projCover(p) {
   if (p.media.type === "video") return p.media.poster || p.media.src;
   if (p.media.type === "gallery") return p.media.items[0].src;
   return p.media.src;
-}
-function renderShowcase() {
-  const items = resume.projects.slice(0, 3);
-  $("#showcaseGrid").innerHTML = items.map((p, i) =>
-    '<button class="sw-card reveal" type="button" data-go="projects" data-filter="' + p.id + '" style="--i:' + i + '">' +
-      '<span class="sw-kind">' + esc(L(p.tags[0])) + "</span>" +
-      "<img src='" + webpOf(projCover(p)) + "' alt='" + esc(L(p.t)) + "' loading='lazy' decoding='async'>" +
-      '<span class="sw-overlay"><b>' + esc(L(p.t)) + "</b><span>" + esc(p.time) + " · " + esc(L(SECTION_NAMES.projects)) + "</span></span>" +
-    "</button>").join("");
 }
 
 function renderObjective() {
