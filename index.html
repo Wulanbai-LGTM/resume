@@ -1072,6 +1072,16 @@ html[data-theme="light"] .xwall.focusing::after{background:radial-gradient(ellip
   .xrow{gap:18px}
   .xwall{gap:34px}
 }
+/* 亮点成果卡片墙（复用经历卡墙基础类） */
+.hl-xfloat{display:flex;flex-direction:column;min-height:170px;justify-content:flex-start}
+.hl-e{font-size:24px;line-height:1;flex-shrink:0;filter:saturate(1.15)}
+.hl-title{font-size:clamp(17px,1.9vw,21px);margin:2px 0 10px;line-height:1.5;background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800;letter-spacing:-.01em}
+.x-desc{display:block;font-size:13.5px;line-height:1.85;color:var(--text-3)}
+.xcard.focus .x-desc{color:var(--text-2)}
+@media print{
+  .hl-title{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:#111827}
+  .x-desc{color:#374151}
+}
 /* ============================================================
    ★ 项目 · 扇形堆叠轮播（点击切换）
    ============================================================ */
@@ -1291,7 +1301,7 @@ html[data-theme="light"] .car-card.is-act{border-color:#0f172a;box-shadow:0 26px
         <h2 class="section-title" data-i18n="highlights.title">用数据说话的成果</h2>
         <p class="section-sub" data-i18n="highlights.sub">每一条都来自真实实践，可验证、可量化。</p>
       </div>
-      <div class="hl-grid" id="hlGrid"></div>
+      <div class="xwall" id="hlGrid"></div>
     </div>
   </section>
 
@@ -1929,13 +1939,24 @@ function renderMarquee() {
 }
 
 function renderHighlights() {
-  $("#hlGrid").innerHTML = resume.highlights.map((h, i) =>
-    '<article class="card hover hl-card reveal" style="--i:' + i + '">' +
-      '<div class="hl-icon">' + h.icon + "</div>" +
-      '<span class="hl-tag">' + esc(L(h.tag)) + "</span>" +
-      "<h3>" + esc(L(h.t)) + "</h3>" +
-      "<p>" + esc(L(h.d)) + "</p>" +
-    "</article>").join("");
+  unfocusExp();
+  /* 与成长经历同款卡片墙：错落分行 + 持续浮动 + 点击居中放大聚焦 */
+  const ROTS = [-1.2, 1, -0.6, 1.2, -0.8];
+  const items = resume.highlights;
+  let seq = 0;
+  const cardOf = (h) => {
+    const k = seq++;
+    return '<button class="xcard reveal" style="--i:' + k + '" type="button" aria-haspopup="dialog" aria-label="' + esc(L(h.t)) + '">' +
+      '<span class="xfloat hl-xfloat" style="--rot:' + ROTS[k % ROTS.length] + "deg;animation-delay:-" + ((k * 1.3) % 7).toFixed(1) + 's">' +
+        '<span class="x-top"><span class="x-date hl-chip">' + esc(L(h.tag)) + '</span><span class="hl-e" aria-hidden="true">' + h.icon + "</span></span>" +
+        '<b class="x-title hl-title">' + esc(L(h.t)) + "</b>" +
+        '<span class="x-desc">' + esc(L(h.d)) + "</span>" +
+      "</span></button>";
+  };
+  /* 5 张卡：上行 3 + 下行 2 居中 */
+  $("#hlGrid").innerHTML =
+    '<div class="xrow">' + items.slice(0, 3).map(cardOf).join("") + "</div>" +
+    '<div class="xrow">' + items.slice(3).map(cardOf).join("") + "</div>";
 }
 
 /* 经历卡聚焦：点击 → 卡片飞到视口中央放大；点空白/Esc/再点复原 */
