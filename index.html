@@ -1044,6 +1044,18 @@ html[data-theme="light"] .psec-ghost{-webkit-text-stroke-color:rgba(71,85,105,.2
   .fpv{display:none}
 }
 /* ============================================================
+   ★ 数码栅格转场遮罩（右→左逐条落下/退去）
+   ============================================================ */
+.xover{position:fixed;inset:0;z-index:850;display:flex;pointer-events:none}
+.xover span{flex:1 1 0;height:100%;background:linear-gradient(180deg,#0b1330,#050a18 55%,#071226);border-right:1px solid rgba(34,211,238,.14);box-shadow:inset 0 0 22px rgba(34,211,238,.05);transform:translateX(102%)}
+.xover.cov span,.xover.rev span{transition:transform .16s cubic-bezier(.7,0,.3,1),box-shadow .16s ease}
+.xover.cov span{transform:translateX(0)}
+.xover.rev span{transform:translateX(-102%);border-right-color:rgba(34,211,238,.2)}
+.xover.none span{transition:none}
+@media print{
+  .xover{display:none !important}
+}
+/* ============================================================
    ★ 成长经历 · 错落浮动卡片墙（点击居中放大聚焦）
    ============================================================ */
 .xwall{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:34px 26px;max-width:1140px;margin:0 auto;align-items:start}
@@ -1514,6 +1526,9 @@ html[data-theme="light"] .car-card.is-act{border-color:#0f172a;box-shadow:0 26px
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<!-- 数码栅格转场遮罩（条带由 JS 注入） -->
+<div class="xover no-print" id="xover" aria-hidden="true"></div>
+
 <!-- 跟随鼠标的板块预览卡 -->
 <div class="fpv no-print" id="fpv" aria-hidden="true"></div>
 
@@ -1904,17 +1919,38 @@ const portalItems = [
   { id: "contact", tag: { zh: "联系方式", en: "CONTACT" }, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>', desc: { zh: "邮箱 / 电话 / GitHub，欢迎实习机会与项目合作。", en: "Email / phone / GitHub — internships & collabs welcome." }, meta: { zh: "随时联系", en: "Reach me" } }
 ];
 
-/* 视图切换 */
-function showView(name, opts) {
-  opts = opts || {};
-  if (name === curView) {
-    if (opts.scrollTo) {
-      const el = document.getElementById(opts.scrollTo);
-      if (el) el.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth" });
-    }
-    if (opts.filter) applyProjFilter(opts.filter);
-    return;
+/* ============================================================
+   数码栅格转场：12 条竖带从右往左逐条落下 → 换页 →
+   从右往左逐条退去，新页随之递进显现（约 0.5s）
+   ============================================================ */
+const XN = 12, XSTEP = 10, XDUR = 260;
+let xoverEl = null, xBusy = false, xPending = null;
+function initXover() {
+  xoverEl = $("#xover");
+  if (!xoverEl) return;
+  for (let i = 0; i < XN; i++) {
+    const b = document.createElement("span");
+    b.style.transitionDelay = ((XN - 1 - i) * XSTEP) + "ms"; /* 最右先动 */
+    xoverEl.appendChild(b);
   }
+}
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+async function playXover() {
+  if (!xoverEl || prefersReduced) return;
+  xoverEl.classList.remove("none");
+  void xoverEl.offsetWidth;
+  xoverEl.classList.add("cov");            /* 覆盖：右→左逐条落下 */
+  await sleep(XDUR);
+  xoverEl.classList.remove("cov");
+  void xoverEl.offsetWidth;
+  xoverEl.classList.add("rev");            /* 退去：右→左逐条显露新页 */
+  await sleep(XDUR);
+  xoverEl.classList.add("none");
+  xoverEl.classList.remove("rev");
+  void xoverEl.offsetWidth;
+}
+/* 直接切换（不带动画的视图交换主体） */
+function directSwitch(name, opts) {
   const from = $("#view-" + curView);
   const to = $("#view-" + name);
   if (!to) return;
@@ -1930,6 +1966,31 @@ function showView(name, opts) {
     const el = document.getElementById(opts.scrollTo);
     if (el) setTimeout(() => el.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth" }), 60);
   }
+}
+/* 视图切换（带动画转场；连续点击自动排队最后一跳） */
+async function showView(name, opts) {
+  opts = opts || {};
+  if (name === curView) {
+    if (opts.scrollTo) {
+      const el = document.getElementById(opts.scrollTo);
+      if (el) el.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth" });
+    }
+    if (opts.filter) applyProjFilter(opts.filter);
+    return;
+  }
+  if (!document.getElementById("view-" + name)) return;
+  if (xBusy) { xPending = { name: name, opts: opts }; return; }
+  xBusy = true;
+  if (prefersReduced) {
+    directSwitch(name, opts);
+    xBusy = false;
+    return;
+  }
+  await playXover();
+  directSwitch(name, opts);
+  await playXover();
+  xBusy = false;
+  if (xPending) { const p = xPending; xPending = null; showView(p.name, p.opts); }
 }
 
 /* 底部翻页条 */
@@ -3194,10 +3255,11 @@ bindGlobal();
 bindLightboxControls();
 renderAll();
 initTyped();
-/* URL 锚点直达视图（如 index.html#projects），也为自动截图提供入口 */
+initXover();
+/* URL 锚点直达视图（如 index.html#projects），初次加载免转场 */
 (function () {
   const h = (location.hash || "").replace("#", "");
-  if (h && h !== "home" && VIEW_ORDER.indexOf(h) !== -1) showView(h);
+  if (h && h !== "home" && VIEW_ORDER.indexOf(h) !== -1) directSwitch(h, {});
 })();
 initTilt();
 initParticles();
