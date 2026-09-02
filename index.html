@@ -1072,6 +1072,42 @@ html[data-theme="light"] .xwall.focusing::after{background:radial-gradient(ellip
   .xrow{gap:18px}
   .xwall{gap:34px}
 }
+/* ============================================================
+   ★ 项目 · 扇形堆叠轮播（点击切换）
+   ============================================================ */
+.car-stage{position:relative;height:330px;max-width:1020px;margin:4px auto 0;user-select:none}
+.car-card{position:absolute;left:50%;top:50%;width:350px;height:256px;margin:-128px 0 0 -175px;border-radius:16px;overflow:hidden;padding:0;border:2px solid var(--border-strong);background:var(--card);box-shadow:var(--shadow-lg);cursor:pointer;transition:transform .55s cubic-bezier(.22,1,.36,1),opacity .45s ease,border-color .3s ease;transform-origin:center;text-align:left;font:inherit}
+.car-card img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.car-name{position:absolute;left:0;right:0;bottom:0;padding:36px 14px 10px;background:linear-gradient(transparent,rgba(2,6,23,.84));color:#fff;display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+.car-name b{font-size:13px;font-weight:800;line-height:1.35}
+.car-name i{font-style:normal;font-size:11px;font-weight:700;color:#67e8f9;white-space:nowrap}
+.car-card.is-act{border-color:#fff;box-shadow:0 26px 64px -16px rgba(0,0,0,.62),0 0 0 3px rgba(34,211,238,.32)}
+.car-card:not(.is-act):hover{border-color:rgba(34,211,238,.65)}
+html[data-theme="light"] .car-card.is-act{border-color:#0f172a;box-shadow:0 26px 64px -16px rgba(15,23,42,.35),0 0 0 3px rgba(6,182,212,.4)}
+.car-dots{display:flex;align-items:center;justify-content:center;gap:9px;margin:12px 0 36px}
+.car-dot{width:9px;height:9px;border-radius:99px;border:none;padding:0;background:rgba(148,163,184,.35);cursor:pointer;transition:all .25s ease}
+.car-dot.on{width:26px;background:var(--grad)}
+.car-dot:hover{background:rgba(34,211,238,.7)}
+.car-count{font-size:12px;font-weight:800;color:var(--text-3);margin-left:12px;letter-spacing:.14em}
+.proj-detail{max-width:1120px;margin:0 auto}
+.proj-print{display:none}
+@media (max-width:720px){
+  .car-stage{height:250px}
+  .car-card{width:min(310px,66vw);height:224px;margin:-112px 0 0 calc(-1 * min(310px,66vw) / 2)}
+  .car-name{padding-top:26px}
+  .car-name b{font-size:11.5px}
+}
+@media print{
+  .car-stage,.car-dots,.proj-detail{display:none !important}
+  .proj-print{display:block !important}
+  .pp-item{border:1px solid #d1d5db;border-radius:8px;padding:10px 12px;margin-bottom:10px;page-break-inside:avoid}
+  .pp-item h4{font-size:14px;margin-bottom:4px}
+  .pp-item h4 span{font-weight:600;color:#6b7280;font-size:12px}
+  .pp-item p{font-size:11.5px;color:#374151;margin:4px 0}
+  .pp-item ul{margin:2px 0;padding-left:18px}
+  .pp-item li{font-size:11px;color:#4b5563}
+  .pp-meta{font-size:11px;color:#6b7280;margin-top:4px}
+}
 </style>
 </head>
 <body>
@@ -1258,10 +1294,15 @@ html[data-theme="light"] .xwall.focusing::after{background:radial-gradient(ellip
         <span class="eyebrow"><svg class="eb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg><span data-i18n="projects.eyebrow">PORTFOLIO</span></span>
         <span class="sec-num">04</span>
         <h2 class="section-title" data-i18n="projects.title">项目作品</h2>
-        <p class="section-sub" data-i18n="projects.sub">独立完成的完整项目，点击图片可放大预览。</p>
+        <p class="section-sub" data-i18n="projects.sub">点击卡片切换项目，下方查看完整详情。</p>
       </div>
-      <div class="tabs" id="projTabs" role="tablist" aria-label="项目筛选"></div>
-      <div class="proj-grid" id="projGrid"></div>
+      <!-- 扇形堆叠轮播 -->
+      <div class="car-stage" id="carStage" aria-label="项目轮播"></div>
+      <div class="car-dots" id="carDots"></div>
+      <!-- 当前项目详情 -->
+      <div class="proj-detail" id="projDetail"></div>
+      <!-- 打印专用：全部项目静态清单 -->
+      <div class="proj-print" id="projPrint"></div>
     </div>
   </section>
 
@@ -1801,19 +1842,6 @@ function updateViewNav() {
   $("#vnNextName").textContent = L(SECTION_NAMES[next]);
 }
 
-/* 项目筛选直达（作品墙点击） */
-function applyProjFilter(fid) {
-  if (fid && resume.projFilters.some((f) => f.id === fid)) {
-    state.projTab = fid;
-    renderProjTabs();
-  }
-  renderProjCards();
-  bindProjectMedia();
-  bindGallery();
-  bindVideos();
-  $$(".proj-grid .reveal").forEach((el) => { el.classList.add("in"); });
-}
-
 /* 首页板块叙事屏渲染：奇数次靠左 / 偶数次靠右，对侧大面积留白 */
 function renderPortal() {
   $("#portalGrid").innerHTML = portalItems.map((it, i) => {
@@ -1941,58 +1969,121 @@ function renderExperience() {
   $("#expNote").innerHTML = T("experience.note");
 }
 
-function renderProjTabs() {
-  /* 筛选 Tabs：仅在整体重渲染时重建（切换筛选时不重建，事件由容器委托保证不丢失） */
-  $("#projTabs").innerHTML = resume.projFilters.map((f, i) =>
-    '<button class="tab-btn" role="tab" id="projTab-' + f.id + '" aria-selected="' + (f.id === state.projTab) + '" aria-controls="projGrid" data-id="' + f.id + '" tabindex="' + (f.id === state.projTab ? "0" : "-1") + '">' + esc(L(f.t)) + "</button>").join("");
+/* ============================================================
+   项目 · 扇形堆叠轮播（点击切换，参考式 fan 交互）
+   ============================================================ */
+let curProjId = resume.projects[0].id;
+function projIndexOf(pid) { return resume.projects.findIndex((p) => p.id === pid); }
+function selectProject(pid, silent) {
+  if (!resume.projects.some((p) => p.id === pid)) return;
+  curProjId = pid;
+  renderCarousel();
+  renderProjDetail();
+  bindProjectMedia();
+  bindGallery();
+  bindVideos();
+  $$("#projDetail .reveal").forEach((el) => { el.classList.add("in"); });
 }
-
-function renderProjCards() {
-  /* 卡片：切换筛选时仅重建此区域 */
-  const cards = resume.projects.filter((p) => state.projTab === "all" || p.id === state.projTab);
-  $("#projGrid").innerHTML = cards.map((p, i) => {
-    let media = "";
-    if (p.media.type === "gallery") {
-      media = '<div class="proj-media gallery" id="gal-' + p.id + '">' +
-        p.media.items.map((it, j) =>
-          '<div class="cell"><picture><source srcset="' + webpOf(it.src) + '" type="image/webp"><img src="' + it.src + '" alt="' + esc(L(it.cap)) + '" loading="lazy" decoding="async" data-gallery="' + p.id + '" data-idx="' + j + '"></picture><div class="media-cap">' + esc(L(it.cap)) + "</div></div>").join("") +
-        '<div class="gal-nav">' +
-          '<button class="gal-arrow prev" type="button" aria-label="' + esc(T("lightbox.prev")) + '" data-gallery="' + p.id + '" data-dir="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>' +
-          '<button class="gal-arrow next" type="button" aria-label="' + esc(T("lightbox.next")) + '" data-gallery="' + p.id + '" data-dir="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>' +
-          '<div class="gal-dots">' + p.media.items.map((_, j) => '<button type="button" data-idx="' + j + '" aria-label="' + (j + 1) + " / " + p.media.items.length + '"></button>').join("") + "</div>" +
-          '<span class="gal-count">1 / ' + p.media.items.length + "</span>" +
-          '<span class="gal-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>' + esc(T("labels.galleryHint")) + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>' +
-        "</div>" +
-      "</div>";
-    } else if (p.media.type === "image") {
-      media = '<div class="proj-media"><picture><source srcset="' + webpOf(p.media.src) + '" type="image/webp"><img src="' + p.media.src + '" alt="' + esc(L(p.media.cap)) + '" loading="lazy" decoding="async" data-gallery="' + p.id + '" data-idx="0"></picture><div class="media-cap">' + esc(L(p.media.cap)) + "</div></div>";
-    } else {
-      media = '<div class="proj-media"><div class="video-wrap" data-video data-src="' + p.media.src + '" data-poster="' + (p.media.poster || "") + '">' +
-        '<button class="video-play" aria-label="' + esc(T("labels.play")) + '"><span class="pb"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span><span class="vt">' + esc(L(p.media.cap)) + "</span></button>" +
-        "</div></div>";
-    }
-    const metrics = p.metrics.map((m) => '<div class="pm"><b>' + esc(m[0]) + "</b><span>" + esc(m[1]) + "</span></div>").join("");
-    const links = p.links.map((lk) =>
-      '<a class="link-btn" href="' + lk.href + '" target="_blank" rel="noopener">' + esc(L(lk.label)) +
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>').join("");
-    const tags = p.tags.map((tg) => '<span class="tag">' + esc(L(tg)) + "</span>").join("");
-    return '<article class="card proj-card reveal tilt" style="--i:' + i + '" data-cat="' + p.id + '">' +
-      media +
-      '<div class="proj-body">' +
-        '<div class="proj-head"><h3>' + p.icon + " " + esc(L(p.t)) + '</h3><span class="proj-time">' + esc(T("labels.time")) + " " + esc(p.time) + "</span></div>" +
-        '<div class="proj-tags">' + tags + "</div>" +
-        '<p class="proj-sum">' + esc(L(p.sum)) + "</p><ul>" +
-        p.pts.map((pt) => "<li>" + esc(L(pt)) + "</li>").join("") + "</ul>" +
-        '<div class="proj-metrics">' + metrics + "</div>" +
-        (links ? '<div class="proj-links">' + links + "</div>" : "") +
-      "</div></article>";
+/* 单项目详情卡片 HTML（轮播下方） */
+function buildProjCard(p, i) {
+  let media = "";
+  if (p.media.type === "gallery") {
+    media = '<div class="proj-media gallery" id="gal-' + p.id + '">' +
+      p.media.items.map((it, j) =>
+        '<div class="cell"><picture><source srcset="' + webpOf(it.src) + '" type="image/webp"><img src="' + it.src + '" alt="' + esc(L(it.cap)) + '" loading="lazy" decoding="async" data-gallery="' + p.id + '" data-idx="' + j + '"></picture><div class="media-cap">' + esc(L(it.cap)) + "</div></div>").join("") +
+      '<div class="gal-nav">' +
+        '<button class="gal-arrow prev" type="button" aria-label="' + esc(T("lightbox.prev")) + '" data-gallery="' + p.id + '" data-dir="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>' +
+        '<button class="gal-arrow next" type="button" aria-label="' + esc(T("lightbox.next")) + '" data-gallery="' + p.id + '" data-dir="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>' +
+        '<div class="gal-dots">' + p.media.items.map((_, j) => '<button type="button" data-idx="' + j + '" aria-label="' + (j + 1) + " / " + p.media.items.length + '"></button>').join("") + "</div>" +
+        '<span class="gal-count">1 / ' + p.media.items.length + "</span>" +
+        '<span class="gal-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>' + esc(T("labels.galleryHint")) + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>' +
+      "</div>" +
+    "</div>";
+  } else if (p.media.type === "image") {
+    media = '<div class="proj-media"><picture><source srcset="' + webpOf(p.media.src) + '" type="image/webp"><img src="' + p.media.src + '" alt="' + esc(L(p.media.cap)) + '" loading="lazy" decoding="async" data-gallery="' + p.id + '" data-idx="0"></picture><div class="media-cap">' + esc(L(p.media.cap)) + "</div></div>";
+  } else {
+    media = '<div class="proj-media"><div class="video-wrap" data-video data-src="' + p.media.src + '" data-poster="' + (p.media.poster || "") + '">' +
+      '<button class="video-play" aria-label="' + esc(T("labels.play")) + '"><span class="pb"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span><span class="vt">' + esc(L(p.media.cap)) + "</span></button>" +
+      "</div></div>";
+  }
+  const metrics = p.metrics.map((m) => '<div class="pm"><b>' + esc(m[0]) + "</b><span>" + esc(m[1]) + "</span></div>").join("");
+  const links = p.links.map((lk) =>
+    '<a class="link-btn" href="' + lk.href + '" target="_blank" rel="noopener">' + esc(L(lk.label)) +
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>').join("");
+  const tags = p.tags.map((tg) => '<span class="tag">' + esc(L(tg)) + "</span>").join("");
+  return '<article class="card proj-card reveal" style="--i:' + (i || 0) + '" data-cat="' + p.id + '">' +
+    media +
+    '<div class="proj-body">' +
+      '<div class="proj-head"><h3>' + p.icon + " " + esc(L(p.t)) + '</h3><span class="proj-time">' + esc(T("labels.time")) + " " + esc(p.time) + "</span></div>" +
+      '<div class="proj-tags">' + tags + "</div>" +
+      '<p class="proj-sum">' + esc(L(p.sum)) + "</p><ul>" +
+      p.pts.map((pt) => "<li>" + esc(L(pt)) + "</li>").join("") + "</ul>" +
+      '<div class="proj-metrics">' + metrics + "</div>" +
+      (links ? '<div class="proj-links">' + links + "</div>" : "") +
+    "</div></article>";
+}
+function renderProjDetail() {
+  const p = resume.projects.find((x) => x.id === curProjId) || resume.projects[0];
+  $("#projDetail").innerHTML = buildProjCard(p);
+}
+/* 扇形几何：桌面左扇堆叠 / 移动端右链露出 */
+const CAR_POS_D = [
+  { x: 70, y: 0, r: 2, s: 1, o: 1 },
+  { x: -115, y: 12, r: -4, s: 0.86, o: 0.92 },
+  { x: -260, y: 26, r: -8, s: 0.72, o: 0.6 },
+  { x: -395, y: 40, r: -12, s: 0.6, o: 0.35 }
+];
+function carPos(i, activeIdx, n, compact) {
+  if (compact) {
+    if (i === activeIdx) return { x: 0, y: 0, r: 0, s: 0.94, o: 1 };
+    const d = (i - activeIdx + n) % n;
+    const P = [
+      { x: 158, y: 8, r: 5, s: 0.72, o: 0.85 },
+      { x: 238, y: 16, r: 9, s: 0.56, o: 0.5 },
+      { x: 300, y: 24, r: 12, s: 0.44, o: 0.28 }
+    ];
+    return P[d - 1] || { x: 320, y: 26, r: 13, s: 0.4, o: 0.2 };
+  }
+  const d = (i - activeIdx + n) % n;
+  return CAR_POS_D[d] || CAR_POS_D[CAR_POS_D.length - 1];
+}
+function renderCarousel() {
+  const stage = $("#carStage");
+  const n = resume.projects.length;
+  const activeIdx = projIndexOf(curProjId);
+  const compact = window.innerWidth < 720;
+  stage.innerHTML = resume.projects.map((p, i) => {
+    const pos = carPos(i, activeIdx, n, compact);
+    const active = i === activeIdx;
+    return '<button class="car-card' + (active ? " is-act" : "") + '" type="button" data-pid="' + p.id + '" aria-label="' + esc(L(p.t)) + '" style="z-index:' + (30 - ((i - activeIdx + n) % n)) + ';opacity:' + pos.o + ';transform:translate(' + pos.x + "px," + pos.y + "px) rotate(" + pos.r + "deg) scale(" + pos.s + ')" aria-hidden="' + !active + '">' +
+      "<img src='" + webpOf(projCover(p)) + "' alt='" + esc(L(p.t)) + "' loading='lazy' decoding='async'>" +
+      '<span class="car-name"><b>' + esc(L(p.t)) + "</b><i>" + esc(p.time) + "</i></span>" +
+    "</button>";
+  }).join("");
+  /* 指示点 */
+  $("#carDots").innerHTML = resume.projects.map((p, i) =>
+    '<button type="button" class="car-dot' + (i === activeIdx ? " on" : "") + '" data-pid="' + p.id + '" aria-label="' + esc(L(p.t)) + '"></button>').join("") +
+    '<span class="car-count">' + String(activeIdx + 1).padStart(2, "0") + " / " + String(n).padStart(2, "0") + "</span>";
+}
+/* 打印专用：全部项目静态清单 */
+function renderProjPrintAll() {
+  $("#projPrint").innerHTML = resume.projects.map((p, i) => {
+    const metrics = p.metrics.map((m) => '<b>' + esc(m[0]) + " " + esc(m[1]) + "</b>").join(" · ");
+    const links = p.links.map((lk) => '<a href="' + lk.href + '">' + esc(L(lk.label)) + "（" + lk.href + "）</a>").join(" ");
+    return '<div class="pp-item"><h4>' + p.icon + " " + esc(L(p.t)) + " <span>" + esc(p.time) + "</span></h4>" +
+      "<p>" + esc(L(p.sum)) + "</p><ul>" +
+      p.pts.map((pt) => "<li>" + esc(L(pt)) + "</li>").join("") + "</ul>" +
+      '<div class="pp-meta">' + metrics + (links ? " · " + links : "") + "</div></div>";
   }).join("");
 }
-
-/* 项目筛选 Tabs + 卡片组合渲染（整体重渲染入口：语言切换等） */
+/* 整体渲染入口 */
 function renderProjects() {
-  renderProjTabs();
-  renderProjCards();
+  renderCarousel();
+  renderProjDetail();
+}
+/* 兼容：筛选直达（showView filter 场景） */
+function applyProjFilter(fid) {
+  selectProject(fid && resume.projects.some((p) => p.id === fid) ? fid : resume.projects[0].id);
 }
 
 function renderSkills() {
@@ -2086,14 +2177,6 @@ function initInteractions() {
         unfocusExp();
         $$("[role='tabpanel']", $("#expPanels")).forEach((p) => p.classList.remove("active"));
         $("#expPanel-" + tab.dataset.id).classList.add("active");
-      } else if (tablist.id === "projTabs") {
-        state.projTab = tab.dataset.id;
-        renderProjCards();
-        /* 重新绑定项目图片灯箱、画廊与视频卡片 */
-        bindProjectMedia();
-        bindGallery();
-        bindVideos();
-        $$(".proj-grid .reveal").forEach((el) => { el.classList.add("in"); });
       }
       if (focus) tab.focus();
     };
@@ -2752,17 +2835,12 @@ function bindGlobal() {
   $("#printBtn2").addEventListener("click", handlePrint);
   window.addEventListener("beforeprint", () => {
     unfocusExp();
-    /* 打印前：将经历/项目筛选重置为「全部」并重渲染，确保 PDF 包含全部内容 */
-    if (state.expTab !== "all" || state.projTab !== "all") {
+    /* 打印前：经历重置「全部」；项目生成全部静态清单（轮播仅显示单项目） */
+    if (state.expTab !== "all") {
       state.expTab = "all";
-      state.projTab = "all";
       renderExperience();
-      renderProjTabs();
-      renderProjCards();
-      bindProjectMedia();
-      bindGallery();
-      bindVideos();
     }
+    renderProjPrintAll();
     /* 展开所有 Tab 面板、定格数字动画 */
     $$("[role='tabpanel']").forEach((p) => { p.classList.add("active"); });
     $$(".num").forEach((el) => { el.textContent = (+el.dataset.count).toLocaleString("en-US"); });
@@ -2823,6 +2901,12 @@ function bindGlobal() {
       const name = go.dataset.go;
       const filter = go.dataset.filter || "";
       showView(name, filter ? { filter: filter } : {});
+      return;
+    }
+    /* 项目轮播：点卡片 / 圆点切换 */
+    const pid = e.target.closest(".car-card, .car-dot");
+    if (pid && pid.dataset.pid) {
+      selectProject(pid.dataset.pid);
       return;
     }
     /* 经历卡片聚焦：点击卡片居中放大 / 点击空白复原 */
