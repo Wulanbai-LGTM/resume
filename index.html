@@ -1038,7 +1038,7 @@ html[data-theme="light"] .psec-ghost{-webkit-text-stroke-color:rgba(71,85,105,.2
 .fpv-lines s:nth-child(2){width:84%;background:rgba(255,255,255,.11)}
 .fpv-lines s:nth-child(3){width:58%;background:rgba(255,255,255,.08)}
 .fpv em{font-style:normal;align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.05em;color:#67e8f9;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.3);padding:3px 11px;border-radius:99px;margin-top:2px}
-.fpv>img{width:100%;height:170px;object-fit:cover;display:block;border-radius:8px}
+.fpv>img{width:100%;height:210px;object-fit:cover;object-position:top;display:block;border-radius:10px;box-shadow:0 0 0 1px rgba(255,255,255,.12) inset}
 .fpv>i{display:block;font-style:normal;font-size:12.5px;font-weight:800;color:#f8fafc;letter-spacing:.02em}
 @media (hover:none){
   .fpv{display:none}
@@ -1945,8 +1945,14 @@ function updateViewNav() {
   $("#vnNextName").textContent = L(SECTION_NAMES[next]);
 }
 
-/* 悬停预览卡内容（跟随鼠标浮动显示；项目板块用真实封面图） */
+/* 板块预览图映射：放入截图后在此登记（图片/preview/xxx.webp 或 .png/.jpg），
+   未登记的板块自动回退为抽象骨架预览 */
+const PORTAL_PREVIEW = {};
+/* 悬停预览卡内容（跟随鼠标浮动显示；优先真实截图，其次项目封面图） */
 function fpvInner(it) {
+  if (PORTAL_PREVIEW[it.id]) {
+    return '<img src="' + PORTAL_PREVIEW[it.id] + '" alt="" loading="lazy" decoding="async"><i>' + esc(L(SECTION_NAMES[it.id])) + "</i>";
+  }
   if (it.cover) {
     return '<img src="' + it.cover + '" alt="" loading="lazy" decoding="async"><i>' + esc(L(SECTION_NAMES[it.id])) + "</i>";
   }
@@ -3188,6 +3194,11 @@ bindGlobal();
 bindLightboxControls();
 renderAll();
 initTyped();
+/* URL 锚点直达视图（如 index.html#projects），也为自动截图提供入口 */
+(function () {
+  const h = (location.hash || "").replace("#", "");
+  if (h && h !== "home" && VIEW_ORDER.indexOf(h) !== -1) showView(h);
+})();
 initTilt();
 initParticles();
 initAvatarParallax();
