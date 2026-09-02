@@ -1049,8 +1049,8 @@ html[data-theme="light"] .psec-ghost{-webkit-text-stroke-color:rgba(71,85,105,.2
 .pix{position:fixed;inset:0;z-index:860;pointer-events:none;visibility:hidden;display:grid;grid-template-columns:repeat(18,1fr);grid-template-rows:repeat(12,1fr);gap:2px;background:#020509}
 .pix.cov,.pix.rev{visibility:visible}
 .pix i{opacity:0;transform:scale(.5);border-radius:2px;box-shadow:inset 0 0 10px rgba(255,255,255,.04)}
-.pix.cov i{animation:pxOn .2s ease-out both;animation-delay:var(--d1,0ms)}
-.pix.rev i{animation:pxOff .18s ease-in both;animation-delay:var(--d2,0ms)}
+.pix.cov i{animation:pxOn .26s ease-out both;animation-delay:var(--d1,0ms)}
+.pix.rev i{animation:pxOff .2s ease-in both;animation-delay:var(--d2,0ms)}
 .pix.idle i{animation:none !important;opacity:0;transform:scale(.5)}
 @keyframes pxOn{
   0%{opacity:0;transform:scale(.55);box-shadow:0 0 0 0 rgba(34,211,238,0)}
@@ -1966,8 +1966,8 @@ function initPix() {
   const cells = pixEl.children;
   for (let k = 0; k < cells.length; k++) {
     const r = +cells[k].dataset.r, c = +cells[k].dataset.c;
-    cells[k].dataset.d1 = (ROWS - 1 - r) * 6 + c * 3; /* 点亮：左下→右上 */
-    cells[k].dataset.d2 = r * 6 + c * 3;              /* 熄灭：左上→右下 */
+    cells[k].dataset.d1 = (ROWS - 1 - r) * 8 + c * 4; /* 点亮：左下→右上 */
+    cells[k].dataset.d2 = r * 8 + c * 4;              /* 熄灭：左上→右下 */
   }
 }
 function runPix() {
@@ -1981,14 +1981,14 @@ function runPix() {
     pixEl.classList.remove("cov");
     void pixEl.offsetWidth;
     pixEl.classList.add("rev"); /* 逐块熄灭 */
-  }, 400);
+  }, 500);
   setTimeout(() => {
     pixEl.classList.add("idle");
     pixEl.classList.remove("rev");
     void pixEl.offsetWidth;
     wBusy = false;
     if (wPending) { const p = wPending; wPending = null; showView(p.name, p.opts); }
-  }, 780);
+  }, 900);
 }
 /* 视图切换（带动画转场壳） */
 function showView(name, opts) {
@@ -2006,7 +2006,7 @@ function showView(name, opts) {
     if (wBusy) { wPending = { name: name, opts: opts }; return; }
     wBusy = true;
     runPix();
-    setTimeout(() => doSwitchView(name, opts), 380); /* 格子盖满瞬间切换 */
+    setTimeout(() => doSwitchView(name, opts), 470); /* 格子盖满瞬间切换 */
   } else {
     doSwitchView(name, opts);
   }
