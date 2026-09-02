@@ -1059,9 +1059,9 @@ html[data-theme="light"] .psec-ghost{-webkit-text-stroke-color:rgba(71,85,105,.2
   100%{opacity:var(--of,1);transform:scale(var(--sf,1));box-shadow:0 0 8px rgba(34,211,238,.22)}
 }
 @keyframes pxOff{
-  0%{opacity:var(--of,1);transform:scale(var(--sf,1));box-shadow:0 0 8px rgba(34,211,238,.22)}
-  25%{opacity:calc(var(--of,1) - .1);box-shadow:0 0 0 10px rgba(34,211,238,.16),0 0 22px 5px rgba(129,140,248,.16)}
-  100%{opacity:0;transform:scale(.5);box-shadow:0 0 0 0 rgba(34,211,238,0)}
+  0%{opacity:var(--of,1);transform:translate(0,0) rotate(0deg) scale(var(--sf,1));box-shadow:0 0 8px rgba(34,211,238,.22)}
+  30%{opacity:calc(var(--of,1) - .08);transform:translate(calc(var(--dx,0px) * .3),calc(var(--dy,0px) * .3)) rotate(calc(var(--rr,0deg) * .3)) scale(var(--sf,1));box-shadow:0 0 0 9px rgba(34,211,238,.15),0 0 20px 4px rgba(129,140,248,.16)}
+  100%{opacity:0;transform:translate(var(--dx,0px),var(--dy,0px)) rotate(var(--rr,0deg)) scale(.3);box-shadow:0 0 0 0 rgba(34,211,238,0)}
 }
 @media print{
   .pix{display:none !important}
@@ -1967,6 +1967,10 @@ function initPix() {
       el.style.setProperty("--of", (0.87 + Math.random() * 0.13).toFixed(2));
       el.style.setProperty("--t1", Math.round(250 + Math.random() * 90) + "ms");
       el.style.setProperty("--t2", Math.round(240 + Math.random() * 90) + "ms");
+      /* 粒子消散参数：随机飘散位移与旋转 */
+      el.style.setProperty("--dx", Math.round(Math.random() * 84 - 42) + "px");
+      el.style.setProperty("--dy", Math.round(Math.random() * 76 - 48) + "px");
+      el.style.setProperty("--rr", Math.round(Math.random() * 110 - 55) + "deg");
       const h = Math.round(188 + c * 3.4 + (Math.random() * 16 - 8));
       el.style.background = "linear-gradient(165deg,hsl(" + h + " 58% " + Math.round(15 + Math.random() * 5) + "%),hsl(" + (h + 16) + " 50% 8%))";
       el.dataset.r = r;
