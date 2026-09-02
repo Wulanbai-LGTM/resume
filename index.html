@@ -843,6 +843,77 @@ body::after{animation:auroraB 22s ease-in-out infinite}
 @media (max-width:640px){
   .music-btn{right:16px;bottom:78px}
 }
+/* ============================================================
+   ★ SPA 视图系统（首页 Landing + 板块视图 + 翻页）
+   ============================================================ */
+.view{display:none}
+.view.active{display:block;animation:viewIn .45s cubic-bezier(.22,1,.36,1) both}
+@keyframes viewIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* Hero 首页全屏呈现 */
+.hero{min-height:100vh;display:flex;align-items:center}
+.hero-inner{width:100%}
+
+/* 板块入口磁贴 */
+.portal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:1080px;margin:0 auto}
+.portal-card{position:relative;padding:28px 22px 24px;border-radius:var(--radius);overflow:hidden;cursor:pointer;text-align:center;background:var(--card);border:1px solid var(--border);-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);box-shadow:var(--shadow-sm);transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+.portal-card:hover{transform:translateY(-5px);box-shadow:0 0 28px rgba(34,211,238,.16),var(--shadow);border-color:rgba(34,211,238,.4)}
+.pc-icon{width:50px;height:50px;margin:0 auto 13px;display:flex;align-items:center;justify-content:center;border-radius:15px;background:linear-gradient(135deg,rgba(34,211,238,.16),rgba(129,140,248,.16));border:1px solid rgba(34,211,238,.22)}
+.pc-icon svg{width:23px;height:23px;color:#22d3ee}
+.portal-card h3{font-size:17px;font-weight:800;margin-bottom:7px;color:var(--text)}
+.portal-card>p{font-size:12.5px;color:var(--text-3);line-height:1.65;margin-bottom:14px}
+.pc-meta{display:inline-block;font-size:11.5px;font-weight:800;color:#67e8f9;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.22);padding:3px 12px;border-radius:999px;letter-spacing:.05em}
+
+/* 迷你作品墙 */
+.showcase-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:1080px;margin:0 auto}
+.sw-card{position:relative;border-radius:var(--radius);overflow:hidden;cursor:pointer;border:1px solid var(--border);aspect-ratio:4/3;background:var(--card);box-shadow:var(--shadow-sm)}
+.sw-card img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
+.sw-card:hover img{transform:scale(1.07)}
+.sw-overlay{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:15px 16px;background:linear-gradient(transparent 35%,rgba(2,6,23,.9));opacity:0;transition:opacity .3s ease}
+.sw-card:hover .sw-overlay{opacity:1}
+.sw-overlay b{color:#fff;font-size:14.5px;line-height:1.4}
+.sw-overlay span{color:#a5b4fc;font-size:11.5px;margin-top:4px;font-weight:600}
+.sw-kind{position:absolute;top:12px;left:12px;font-size:10.5px;font-weight:800;letter-spacing:.08em;color:#fff;background:rgba(34,211,238,.75);padding:3px 10px;border-radius:999px}
+
+/* 板块翻页导航条 */
+.view-nav{max-width:1120px;margin:0 auto 6px;padding:6px 24px 0;display:flex;gap:12px;justify-content:center}
+.view-nav[hidden]{display:none}
+.vn-btn{flex:1;max-width:280px;display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:14px;background:var(--card);border:1px solid var(--border);color:var(--text-2);cursor:pointer;transition:all .22s ease;text-align:left;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);font:inherit}
+.vn-btn svg{width:17px;height:17px;flex-shrink:0;color:#22d3ee}
+.vn-btn:hover{color:var(--text);border-color:rgba(34,211,238,.45);box-shadow:0 0 16px rgba(34,211,238,.15);transform:translateY(-2px)}
+.vn-text{display:flex;flex-direction:column;line-height:1.35;min-width:0}
+.vn-text small{font-size:11px;color:var(--text-3)}
+.vn-text b{font-size:13px;color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vn-next{flex-direction:row-reverse;text-align:right}
+.vn-home{flex:0 0 auto;flex-direction:column;justify-content:center;align-items:center;gap:4px;padding:10px 14px;font-size:12px;font-weight:700}
+.vn-home svg{width:19px;height:19px}
+html[data-theme="light"] .vn-btn{background:rgba(255,255,255,.7)}
+
+@media (max-width:960px){
+  .portal-grid,.showcase-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .hero{min-height:auto}
+  .view-nav{flex-wrap:wrap;padding:6px 16px 0}
+  .vn-btn{max-width:none}
+}
+@media (max-width:640px){
+  .portal-grid{grid-template-columns:1fr}
+  .portal-card{display:flex;align-items:center;gap:14px;text-align:left;padding:15px 16px}
+  .pc-icon{margin:0;flex-shrink:0;width:44px;height:44px}
+  .pc-icon svg{width:20px;height:20px}
+  .portal-card h3{margin-bottom:2px;font-size:15.5px}
+  .portal-card>p{display:none}
+  .pc-meta{display:none}
+  .showcase-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .vn-btn{padding:10px 12px}
+  .vn-text small{display:none}
+}
+
+/* 打印：全部视图平铺输出 */
+@media print{
+  .view{display:block !important;animation:none !important}
+  .view-nav{display:none !important}
+  .portal-card,.sw-card{box-shadow:none !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important}
+}
 </style>
 </head>
 <body>
@@ -887,6 +958,8 @@ body::after{animation:auroraB 22s ease-in-out infinite}
 </header>
 
 <main id="main">
+<!-- ===== SPA 视图 · 首页 Landing ===== -->
+<div class="view active" id="view-home">
   <!-- ================= Hero ================= -->
   <section class="hero" id="home">
     <div class="hero-bg" id="heroBg" aria-hidden="true">
@@ -947,7 +1020,41 @@ body::after{animation:auroraB 22s ease-in-out infinite}
     <div class="scroll-hint" aria-hidden="true"><div class="mouse"></div><span>SCROLL</span></div>
   </section>
 
+  <!-- ================= 数据统计 ================= -->
+  <section class="stats" id="stats" aria-label="核心数据">
+    <div class="wrap"><div class="stats-grid" id="statsGrid"></div></div>
+  </section>
+
+  <!-- ================= 跑马灯 ================= -->
+  <div class="marquee no-print" aria-hidden="true"><div class="marquee-track" id="marqueeTrack"></div></div>
+
+  <!-- ===== 板块入口磁贴（Landing 导览）===== -->
+  <section class="section" id="portal">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow"><svg class="eb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span data-i18n="portal.eyebrow">EXPLORE</span></span>
+        <h2 class="section-title" data-i18n="portal.title">探索我的档案</h2>
+        <p class="section-sub" data-i18n="portal.sub">点击板块卡片，快速进入对应内容。</p>
+      </div>
+      <div class="portal-grid" id="portalGrid"></div>
+    </div>
+  </section>
+
+  <!-- ===== 迷你作品墙（视觉呈现）===== -->
+  <section class="section alt deco-rings" id="showcase">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow"><svg class="eb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg><span data-i18n="showcase.eyebrow">SHOWCASE</span></span>
+        <h2 class="section-title" data-i18n="showcase.title">作品速览</h2>
+        <p class="section-sub" data-i18n="showcase.sub">点开任意作品，进入完整项目板块。</p>
+      </div>
+      <div class="showcase-grid" id="showcaseGrid"></div>
+    </div>
+  </section>
+</div><!-- /view-home -->
+
   <!-- ================= 求职意向 ================= -->
+  <div class="view" id="view-objective">
   <section class="section deco-dots" id="objective">
     <div class="wrap">
       <div class="section-head reveal">
@@ -970,15 +1077,8 @@ body::after{animation:auroraB 22s ease-in-out infinite}
       </div>
     </div>
   </section>
-
-  <!-- ================= 数据统计 ================= -->
-  <section class="stats" id="stats" aria-label="核心数据">
-    <div class="wrap"><div class="stats-grid" id="statsGrid"></div></div>
-  </section>
-
-  <!-- ================= 跑马灯 ================= -->
-  <div class="marquee no-print" aria-hidden="true"><div class="marquee-track" id="marqueeTrack"></div></div>
-
+  </div><!-- /view-objective -->
+  <div class="view" id="view-highlights">
   <!-- ================= 亮点成果 ================= -->
   <section class="section deco-dots" id="highlights">
     <div class="wrap">
@@ -992,6 +1092,8 @@ body::after{animation:auroraB 22s ease-in-out infinite}
     </div>
   </section>
 
+  </div><!-- /view-highlights -->
+  <div class="view" id="view-experience">
   <!-- ================= 成长经历 ================= -->
   <section class="section alt deco-lines" id="experience">
     <div class="wrap">
@@ -1002,11 +1104,14 @@ body::after{animation:auroraB 22s ease-in-out infinite}
         <p class="section-sub" data-i18n="experience.sub">从校园到项目现场，每一步都有作品与成绩见证。</p>
       </div>
       <div class="tabs" id="expTabs" role="tablist" aria-label="经历分类"></div>
+
       <div id="expPanels"></div>
       <div class="exp-note reveal" id="expNote"></div>
     </div>
   </section>
 
+  </div><!-- /view-experience -->
+  <div class="view" id="view-projects">
   <!-- ================= 项目作品 ================= -->
   <section class="section deco-rings" id="projects">
     <div class="wrap">
@@ -1021,6 +1126,8 @@ body::after{animation:auroraB 22s ease-in-out infinite}
     </div>
   </section>
 
+  </div><!-- /view-projects -->
+  <div class="view" id="view-skills">
   <!-- ================= 技能矩阵 ================= -->
   <section class="section alt deco-dots deco-l" id="skills">
     <div class="wrap">
@@ -1034,6 +1141,8 @@ body::after{animation:auroraB 22s ease-in-out infinite}
     </div>
   </section>
 
+  </div><!-- /view-skills -->
+  <div class="view" id="view-education">
   <!-- ================= 教育与证书 ================= -->
   <section class="section deco-rings deco-l" id="education">
     <div class="wrap">
@@ -1048,6 +1157,8 @@ body::after{animation:auroraB 22s ease-in-out infinite}
     </div>
   </section>
 
+  </div><!-- /view-education -->
+  <div class="view" id="view-contact">
   <!-- ================= 联系我 ================= -->
   <section class="section" id="contact">
     <div class="wrap">
@@ -1080,7 +1191,24 @@ body::after{animation:auroraB 22s ease-in-out infinite}
       </div>
     </div>
   </section>
+  </div><!-- /view-contact -->
 </main>
+
+<!-- 板块翻页导航（仅板块视图显示） -->
+<nav class="view-nav no-print" id="viewNav" aria-label="板块导航" hidden>
+  <button class="vn-btn" id="vnPrev">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    <span class="vn-text"><small data-i18n="viewNav.prev">上一板块</small><b id="vnPrevName"></b></span>
+  </button>
+  <button class="vn-btn vn-home" id="vnHome">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span data-i18n="viewNav.home">首页</span>
+  </button>
+  <button class="vn-btn vn-next" id="vnNext">
+    <span class="vn-text"><small data-i18n="viewNav.next">下一板块</small><b id="vnNextName"></b></span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+</nav>
 
 <!-- ================= 页脚 ================= -->
 <footer>
@@ -1360,6 +1488,9 @@ const I18N = {
     skills: { eyebrow: "SKILLS", title: "技能矩阵", sub: "以实践项目锤炼出的核心能力，按应用熟练度分级呈现。" },
     education: { eyebrow: "EDUCATION & CREDENTIALS", title: "教育与证书", sub: "扎实的学历背景与行业认可。" },
     contact: { eyebrow: "CONTACT", title: "联系我", dlText: "下载简历文本", copyLink: "复制链接" },
+    portal: { eyebrow: "EXPLORE", title: "探索我的档案", sub: "点击板块卡片，快速进入对应内容。" },
+    showcase: { eyebrow: "SHOWCASE", title: "作品速览", sub: "点开任意作品，进入完整项目板块。" },
+    viewNav: { prev: "上一板块", next: "下一板块", home: "首页" },
     certs: { flip: "官方认证 · 2026" },
     footer: { rights: "保留所有权利", updated: "最后更新", note: "单文件构建 · 无外部依赖 · 可离线打开" },
     toast: { copied: "邮箱已复制到剪贴板 🎉", fail: "复制失败，请长按手动复制", linkCopied: "链接已复制，快分享给朋友吧 🎉", inspireCopied: "文案已复制 ✨", githubCopied: "已复制 GitHub 链接，请在浏览器中打开 🔗", printIOS: "iOS 请点浏览器分享按钮 → 打印 → 存为 PDF 📄", printWechat: "请在系统浏览器打开后使用打印功能 📄", musicOn: "🎵 音乐播放中", musicOff: "音乐已暂停" },
@@ -1381,6 +1512,9 @@ const I18N = {
     skills: { eyebrow: "SKILLS", title: "Skill Matrix", sub: "Core abilities honed through real projects, presented by proficiency tiers." },
     education: { eyebrow: "EDUCATION & CREDENTIALS", title: "Education & Credentials", sub: "Solid academic background with industry recognition." },
     contact: { eyebrow: "CONTACT", title: "Contact Me", dlText: "Download Resume TXT", copyLink: "Copy Link" },
+    portal: { eyebrow: "EXPLORE", title: "Explore My Profile", sub: "Click a card to jump into a section." },
+    showcase: { eyebrow: "SHOWCASE", title: "Work Preview", sub: "Open any piece to see the full project." },
+    viewNav: { prev: "Previous", next: "Next", home: "Home" },
     certs: { flip: "Official Certification" },
     footer: { rights: "All rights reserved", updated: "Last updated", note: "Single-file build · no external dependencies · works offline" },
     toast: { copied: "Email copied to clipboard 🎉", fail: "Copy failed — please copy manually", linkCopied: "Link copied — share it now 🎉", inspireCopied: "Copied ✨", githubCopied: "GitHub link copied — open it in your browser 🔗", printIOS: "iOS: Share → Print → Save as PDF 📄", printWechat: "Open in your browser to print 📄", musicOn: "🎵 Music playing", musicOff: "Music paused" },
@@ -1447,6 +1581,114 @@ function renderStaticTexts() {
   const now = new Date();
   $("#fUpdated").textContent = T("footer.updated") + "：" + now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-" + String(now.getDate()).padStart(2, "0");
   $$("[data-i18n]").forEach((el) => { el.textContent = T(el.dataset.i18n); });
+  if (typeof updateViewNav === "function") updateViewNav();
+}
+
+/* ============================================================
+   七、SPA 视图系统（Landing 首页 + 板块视图切换）
+   ============================================================ */
+const SECTION_NAMES = {
+  objective: { zh: "求职意向", en: "Objective" },
+  highlights: { zh: "数据亮点", en: "Highlights" },
+  experience: { zh: "成长经历", en: "Journey" },
+  projects: { zh: "项目作品", en: "Projects" },
+  skills: { zh: "技能矩阵", en: "Skills" },
+  education: { zh: "教育证书", en: "Credentials" },
+  contact: { zh: "联系我", en: "Contact" }
+};
+const VIEW_ORDER = ["objective", "highlights", "experience", "projects", "skills", "education", "contact"];
+let curView = "home";
+
+/* 板块磁贴数据：图标（Lucide 风格线性 SVG）+ 摘要 */
+const portalItems = [
+  { id: "objective", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>', desc: { zh: "目标岗位与自我定位", en: "Target role & positioning" }, meta: { zh: "01 · 求职意向", en: "01 · Objective" } },
+  { id: "highlights", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>', desc: { zh: "可量化的核心成果", en: "Quantified achievements" }, meta: { zh: "5 项成果", en: "5 Wins" } },
+  { id: "experience", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3 3 5v16l6-2 6 2 6-2V3l-6 2-6-2z"/><path d="M9 3v16M15 5v16"/></svg>', desc: { zh: "校园成长到独立交付", en: "From campus to delivery" }, meta: { zh: "5 段经历", en: "5 Chapters" } },
+  { id: "projects", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>', desc: { zh: "AIGC / 游戏 / 演示视频", en: "AIGC / Games / Demos" }, meta: { zh: "4 个作品", en: "4 Projects" } },
+  { id: "skills", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/></svg>', desc: { zh: "熟练 / 实操 / 工具分级", en: "Proficient / Practice / Tools" }, meta: { zh: "15 项技能", en: "15 Skills" } },
+  { id: "education", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>', desc: { zh: "院校背景与行业认证", en: "Education & credentials" }, meta: { zh: "6 项认证", en: "6 Certs" } },
+  { id: "contact", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>', desc: { zh: "邮箱 / 电话 / GitHub", en: "Email / Phone / GitHub" }, meta: { zh: "随时联系", en: "Reach me" } }
+];
+
+/* 视图切换 */
+function showView(name, opts) {
+  opts = opts || {};
+  if (name === curView) {
+    if (opts.scrollTo) {
+      const el = document.getElementById(opts.scrollTo);
+      if (el) el.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth" });
+    }
+    if (opts.filter) applyProjFilter(opts.filter);
+    return;
+  }
+  const from = $("#view-" + curView);
+  const to = $("#view-" + name);
+  if (!to) return;
+  if (from) from.classList.remove("active");
+  to.classList.add("active");
+  curView = name;
+  window.scrollTo({ top: 0, behavior: "auto" });
+  /* 导航高亮（首页不高亮任何板块） */
+  $$(".nav-links a").forEach((a) => a.classList.toggle("active", name !== "home" && a.getAttribute("href") === "#" + name));
+  updateViewNav();
+  if (opts.filter) applyProjFilter(opts.filter);
+  if (opts.scrollTo) {
+    const el = document.getElementById(opts.scrollTo);
+    if (el) setTimeout(() => el.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth" }), 60);
+  }
+}
+
+/* 底部翻页条 */
+function updateViewNav() {
+  const nav = $("#viewNav");
+  if (!nav) return;
+  if (curView === "home") { nav.hidden = true; return; }
+  nav.hidden = false;
+  const i = VIEW_ORDER.indexOf(curView);
+  const prev = VIEW_ORDER[(i - 1 + VIEW_ORDER.length) % VIEW_ORDER.length];
+  const next = VIEW_ORDER[(i + 1) % VIEW_ORDER.length];
+  $("#vnPrevName").textContent = L(SECTION_NAMES[prev]);
+  $("#vnNextName").textContent = L(SECTION_NAMES[next]);
+}
+
+/* 项目筛选直达（作品墙点击） */
+function applyProjFilter(fid) {
+  if (fid && resume.projFilters.some((f) => f.id === fid)) {
+    state.projTab = fid;
+    renderProjTabs();
+  }
+  renderProjCards();
+  bindProjectMedia();
+  bindGallery();
+  bindVideos();
+  $$(".proj-grid .reveal").forEach((el) => { el.classList.add("in"); });
+}
+
+/* 磁贴渲染 */
+function renderPortal() {
+  $("#portalGrid").innerHTML = portalItems.map((it, i) =>
+    '<button class="portal-card reveal" type="button" data-go="' + it.id + '" style="--i:' + i + '">' +
+      '<span class="pc-icon">' + it.icon + "</span>" +
+      "<h3>" + esc(L(SECTION_NAMES[it.id])) + "</h3>" +
+      "<p>" + esc(L(it.desc)) + "</p>" +
+      '<span class="pc-meta">' + esc(L(it.meta)) + "</span>" +
+    "</button>").join("");
+}
+
+/* 作品墙渲染：前 3 个项目封面 */
+function projCover(p) {
+  if (p.media.type === "video") return p.media.poster || p.media.src;
+  if (p.media.type === "gallery") return p.media.items[0].src;
+  return p.media.src;
+}
+function renderShowcase() {
+  const items = resume.projects.slice(0, 3);
+  $("#showcaseGrid").innerHTML = items.map((p, i) =>
+    '<button class="sw-card reveal" type="button" data-go="projects" data-filter="' + p.id + '" style="--i:' + i + '">' +
+      '<span class="sw-kind">' + esc(L(p.tags[0])) + "</span>" +
+      "<img src='" + webpOf(projCover(p)) + "' alt='" + esc(L(p.t)) + "' loading='lazy' decoding='async'>" +
+      '<span class="sw-overlay"><b>' + esc(L(p.t)) + "</b><span>" + esc(p.time) + " · " + esc(L(SECTION_NAMES.projects)) + "</span></span>" +
+    "</button>").join("");
 }
 
 function renderObjective() {
@@ -1612,6 +1854,8 @@ function renderEducation() {
 
 function renderAll() {
   renderStaticTexts();
+  renderPortal();
+  renderShowcase();
   renderObjective();
   renderHeroBadges();
   renderStats();
@@ -2374,19 +2618,38 @@ function bindGlobal() {
   onScroll();
   backTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: prefersReduced ? "auto" : "smooth" }));
 
-  /* 滚动高亮导航 */
-  const spy = new IntersectionObserver((entries) => {
-    entries.forEach((en) => {
-      if (en.isIntersecting) {
-        $$(".nav-links a").forEach((a) => a.classList.toggle("active", a.getAttribute("href") === "#" + en.target.id));
-      }
+  /* SPA 导航：brand / 板块链接 → 视图切换（替换原锚点滚动） */
+  $("#navLinks").querySelectorAll("a").forEach((a) => {
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      const id = a.getAttribute("href").slice(1);
+      showView(id === "home" ? "home" : id);
     });
-  }, { rootMargin: "-38% 0px -55% 0px" });
-  ["objective", "highlights", "experience", "projects", "skills", "education", "contact"].forEach((id) => {
-    const sec = document.getElementById(id);
-    if (sec) spy.observe(sec);
   });
-  state.observed.push(spy);
+  $(".brand").addEventListener("click", (e) => {
+    e.preventDefault();
+    showView("home");
+  });
+
+  /* 全局视图跳转委托：磁贴 / 作品墙 data-go */
+  document.addEventListener("click", (e) => {
+    const go = e.target.closest("[data-go]");
+    if (!go) return;
+    const name = go.dataset.go;
+    const filter = go.dataset.filter || "";
+    showView(name, filter ? { filter: filter } : {});
+  });
+
+  /* 底部翻页条 */
+  $("#vnPrev").addEventListener("click", () => {
+    const i = VIEW_ORDER.indexOf(curView);
+    showView(VIEW_ORDER[(i - 1 + VIEW_ORDER.length) % VIEW_ORDER.length]);
+  });
+  $("#vnNext").addEventListener("click", () => {
+    const i = VIEW_ORDER.indexOf(curView);
+    showView(VIEW_ORDER[(i + 1) % VIEW_ORDER.length]);
+  });
+  $("#vnHome").addEventListener("click", () => showView("home"));
 
   /* 移动端汉堡菜单 */
   const burger = $("#hamburger");
