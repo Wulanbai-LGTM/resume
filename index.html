@@ -1083,6 +1083,10 @@ html[data-theme="light"] .xwall.focusing::after{background:radial-gradient(ellip
 .car-nav:active{transform:translateY(-50%) scale(.95)}
 .car-prev{left:4px}
 .car-next{right:4px}
+/* 画廊箭头：始终常显、可连续点击（详情卡同规则） */
+.gal-arrow{opacity:1 !important}
+.gal-arrow.prev{left:10px}
+.gal-arrow.next{right:10px}
 .car-card{position:absolute;left:50%;top:50%;width:350px;height:256px;margin:-128px 0 0 -175px;border-radius:16px;overflow:hidden;padding:0;border:2px solid var(--border-strong);background:var(--card);box-shadow:var(--shadow-lg);cursor:pointer;transition:transform .55s cubic-bezier(.22,1,.36,1),opacity .45s ease,border-color .3s ease;transform-origin:center;text-align:left;font:inherit}
 .car-card img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
 .car-name{position:absolute;left:0;right:0;bottom:0;padding:36px 14px 10px;background:linear-gradient(transparent,rgba(2,6,23,.84));color:#fff;display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
@@ -2276,28 +2280,31 @@ function bindProjectMedia() {
     };
   });
 }
-/* 画廊：箭头翻页（可连续点击）+ 指示点/计数器同步 */
+/* 画廊：箭头翻页（独立索引，可持续连续点击）+ 指示点/计数器同步 */
 function bindGallery() {
   $$(".proj-media.gallery").forEach((gal) => {
     const dots = $$(".gal-dots button", gal);
     const countEl = $(".gal-count", gal);
     const n = dots.length;
-    /* 当前页索引：由 scrollLeft 就近取整 */
-    const curIdx = () => Math.min(n - 1, Math.max(0, Math.round(gal.scrollLeft / Math.max(gal.clientWidth, 1))));
-    const update = () => {
-      const i = curIdx();
-      dots.forEach((d, k) => d.classList.toggle("active", k === i));
-      if (countEl) countEl.textContent = (i + 1) + " / " + n;
+    if (!n) return;
+    /* 当前索引：与滚动同步，但翻页以索引为准（平滑动画中再点也不会错位） */
+    let idx = Math.min(n - 1, Math.max(0, Math.round(gal.scrollLeft / Math.max(gal.clientWidth, 1))));
+    const sync = () => {
+      const real = Math.min(n - 1, Math.max(0, Math.round(gal.scrollLeft / Math.max(gal.clientWidth, 1))));
+      idx = real;
+      dots.forEach((d, k) => d.classList.toggle("active", k === idx));
+      if (countEl) countEl.textContent = (idx + 1) + " / " + n;
     };
-    /* 索引翻页：每次点击都基于最新页索引精确滚动，连续快速点击稳定逐页切换 */
     const go = (i) => {
-      const target = Math.min(n - 1, Math.max(0, i));
-      gal.scrollTo({ left: target * gal.clientWidth, behavior: prefersReduced ? "auto" : "smooth" });
+      idx = Math.min(n - 1, Math.max(0, i));
+      gal.scrollTo({ left: idx * gal.clientWidth, behavior: prefersReduced ? "auto" : "smooth" });
+      dots.forEach((d, k) => d.classList.toggle("active", k === idx));
+      if (countEl) countEl.textContent = (idx + 1) + " / " + n;
     };
-    gal.addEventListener("scroll", update, { passive: true });
-    update();
+    gal.addEventListener("scroll", sync, { passive: true });
+    sync();
     $$(".gal-arrow", gal).forEach((btn) => btn.addEventListener("click", () => {
-      go(curIdx() + (btn.dataset.dir === "1" ? 1 : -1));
+      go(idx + (btn.dataset.dir === "1" ? 1 : -1));
     }));
     dots.forEach((d) => d.addEventListener("click", () => go(+d.dataset.idx)));
 
