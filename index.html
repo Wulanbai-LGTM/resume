@@ -1025,27 +1025,23 @@ html[data-theme="light"] .psec-ghost{-webkit-text-stroke-color:rgba(71,85,105,.2
   .psec-go,.psec-line{display:none}
 }
 /* ============================================================
-   ★ 叙事屏悬停预览卡（微斜长方形"页面预览"）
+   ★ 跟随鼠标的板块预览卡（长方形 · 微斜 · 位于光标旁）
    ============================================================ */
-.ppv{position:absolute;top:50%;left:calc(100% + 52px);width:300px;min-height:196px;transform:translateY(-50%) rotate(7deg) scale(.9);transform-origin:center;opacity:0;visibility:hidden;transition:opacity .3s ease,transform .45s cubic-bezier(.22,1,.36,1),visibility .3s;z-index:6;display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:16px;background:linear-gradient(160deg,rgba(30,41,59,.72),rgba(10,15,30,.88));border:1px solid rgba(255,255,255,.15);box-shadow:0 20px 54px -14px rgba(0,0,0,.6),0 0 0 1px rgba(34,211,238,.06);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);pointer-events:none}
-.ppv::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;border-radius:16px 16px 0 0;background:linear-gradient(90deg,#22d3ee,#818cf8);opacity:.7}
-.psec:hover .ppv{opacity:1;visibility:visible;transform:translateY(-50%) rotate(2.5deg) scale(1)}
-.psec-r .ppv{left:auto;right:calc(100% + 52px);transform:translateY(-50%) rotate(-7deg) scale(.9)}
-.psec-r:hover .ppv{transform:translateY(-50%) rotate(-2.5deg) scale(1)}
-.ppv .ppv-ic{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:13px;background:linear-gradient(135deg,rgba(34,211,238,.18),rgba(129,140,248,.18));border:1px solid rgba(34,211,238,.3)}
-.ppv .ppv-ic svg{width:22px;height:22px;color:#67e8f9}
-.ppv>b{font-size:17px;font-weight:800;color:#f8fafc;letter-spacing:-.01em}
-.ppv-lines{display:flex;flex-direction:column;gap:7px}
-.ppv-lines s{display:block;height:8px;border-radius:5px;background:rgba(255,255,255,.16)}
-.ppv-lines s:nth-child(2){width:84%;background:rgba(255,255,255,.11)}
-.ppv-lines s:nth-child(3){width:58%;background:rgba(255,255,255,.08)}
-.ppv em{font-style:normal;align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.05em;color:#67e8f9;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.3);padding:3px 11px;border-radius:99px;margin-top:2px}
-.ppv-img{padding:0;overflow:hidden;min-height:0}
-.ppv-img::before{display:none}
-.ppv-img img{width:100%;height:168px;object-fit:cover;display:block}
-.ppv-img i{display:block;position:relative;font-style:normal;font-size:12.5px;font-weight:800;color:#f8fafc;padding:8px 13px 10px;margin-top:-32px;background:linear-gradient(transparent,rgba(2,6,23,.82));text-align:left}
-@media (hover:none),(max-width:1180px){
-  .ppv{display:none}
+.fpv{position:fixed;top:0;left:0;z-index:640;width:300px;pointer-events:none;opacity:0;visibility:hidden;transform:rotate(5deg) scale(.94);transform-origin:top left;transition:opacity .22s ease,transform .3s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:16px;background:linear-gradient(160deg,rgba(30,41,59,.78),rgba(10,15,30,.92));border:1px solid rgba(255,255,255,.16);box-shadow:0 22px 58px -14px rgba(0,0,0,.62),0 0 0 1px rgba(34,211,238,.07);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.fpv.on{opacity:1;visibility:visible;transform:rotate(2deg) scale(1)}
+.fpv::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;border-radius:16px 16px 0 0;background:linear-gradient(90deg,#22d3ee,#818cf8);opacity:.75}
+.fpv .fpv-ic{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:13px;background:linear-gradient(135deg,rgba(34,211,238,.18),rgba(129,140,248,.18));border:1px solid rgba(34,211,238,.3)}
+.fpv .fpv-ic svg{width:22px;height:22px;color:#67e8f9}
+.fpv>b{font-size:17px;font-weight:800;color:#f8fafc;letter-spacing:-.01em}
+.fpv-lines{display:flex;flex-direction:column;gap:7px}
+.fpv-lines s{display:block;height:8px;border-radius:5px;background:rgba(255,255,255,.16)}
+.fpv-lines s:nth-child(2){width:84%;background:rgba(255,255,255,.11)}
+.fpv-lines s:nth-child(3){width:58%;background:rgba(255,255,255,.08)}
+.fpv em{font-style:normal;align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.05em;color:#67e8f9;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.3);padding:3px 11px;border-radius:99px;margin-top:2px}
+.fpv>img{width:100%;height:170px;object-fit:cover;display:block;border-radius:8px}
+.fpv>i{display:block;font-style:normal;font-size:12.5px;font-weight:800;color:#f8fafc;letter-spacing:.02em}
+@media (hover:none){
+  .fpv{display:none}
 }
 /* ============================================================
    ★ 成长经历 · 错落浮动卡片墙（点击居中放大聚焦）
@@ -1518,6 +1514,9 @@ html[data-theme="light"] .car-card.is-act{border-color:#0f172a;box-shadow:0 26px
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<!-- 跟随鼠标的板块预览卡 -->
+<div class="fpv no-print" id="fpv" aria-hidden="true"></div>
+
 <!-- ================= Lightbox ================= -->
 <div class="lightbox no-print" id="lightbox" role="dialog" aria-modal="true" aria-label="图片预览">
   <button class="lb-btn lb-close" id="lbClose" aria-label="关闭预览"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -1946,19 +1945,20 @@ function updateViewNav() {
   $("#vnNextName").textContent = L(SECTION_NAMES[next]);
 }
 
+/* 悬停预览卡内容（跟随鼠标浮动显示；项目板块用真实封面图） */
+function fpvInner(it) {
+  if (it.cover) {
+    return '<img src="' + it.cover + '" alt="" loading="lazy" decoding="async"><i>' + esc(L(SECTION_NAMES[it.id])) + "</i>";
+  }
+  return '<span class="fpv-ic">' + it.icon + "</span>" +
+    "<b>" + esc(L(PORTAL_BIG[it.id])) + "</b>" +
+    '<span class="fpv-lines"><s></s><s></s><s></s></span>' +
+    "<em>" + esc(L(it.meta)) + "</em>";
+}
 /* 首页板块叙事屏渲染：奇数次靠左 / 偶数次靠右，对侧大面积留白 */
 function renderPortal() {
   $("#portalGrid").innerHTML = portalItems.map((it, i) => {
     const n = String(i + 1).padStart(2, "0");
-    /* 悬停预览卡：模拟对应板块页面（项目用真实封面图） */
-    const ppv = it.cover
-      ? '<span class="ppv ppv-img" aria-hidden="true"><img src="' + it.cover + '" alt="" loading="lazy" decoding="async"><i>' + esc(L(SECTION_NAMES[it.id])) + "</i></span>"
-      : '<span class="ppv" aria-hidden="true">' +
-          '<span class="ppv-ic">' + it.icon + "</span>" +
-          "<b>" + esc(L(PORTAL_BIG[it.id])) + "</b>" +
-          '<span class="ppv-lines"><s></s><s></s><s></s></span>' +
-          "<em>" + esc(L(it.meta)) + "</em>" +
-        "</span>";
     return '<button class="psec reveal' + (i % 2 ? " psec-r" : "") + '" type="button" data-go="' + it.id + '" style="--i:' + (i % 2) + '" aria-label="' + esc(L(SECTION_NAMES[it.id])) + '">' +
       '<span class="psec-ghost" aria-hidden="true">' + n + "</span>" +
       '<span class="psec-body">' +
@@ -1971,7 +1971,6 @@ function renderPortal() {
           '<span class="psec-line" aria-hidden="true"></span>' +
         "</span>" +
       "</span>" +
-      ppv +
     "</button>";
   }).join("");
 }
@@ -2920,6 +2919,40 @@ function initMusic() {
   });
 }
 
+/* 鼠标跟随板块预览：光标位于首页板块上时，在鼠标旁浮现微斜预览小图 */
+function initFpv() {
+  const fpv = $("#fpv");
+  if (!fpv || prefersReduced || window.matchMedia("(hover: none)").matches) return;
+  const cache = {};
+  let cur = null;
+  document.addEventListener("mousemove", (e) => {
+    const p = e.target.closest(".psec[data-go]");
+    if (!p) {
+      if (cur) { cur = null; fpv.classList.remove("on"); }
+      return;
+    }
+    const id = p.dataset.go;
+    if (cur !== id) {
+      cur = id;
+      const key = id + "|" + state.lang;
+      if (!(key in cache)) {
+        const it = portalItems.find((x) => x.id === id);
+        cache[key] = it ? fpvInner(it) : "";
+      }
+      fpv.innerHTML = cache[key];
+      fpv.classList.add("on");
+    }
+    const w = fpv.offsetWidth || 300;
+    const h = fpv.offsetHeight || 210;
+    let x = e.clientX + 24, y = e.clientY + 18;
+    if (x + w > window.innerWidth - 10) x = e.clientX - w - 24;
+    if (y + h > window.innerHeight - 10) y = e.clientY - h - 20;
+    fpv.style.left = x + "px";
+    fpv.style.top = y + "px";
+  }, { passive: true });
+  document.addEventListener("mouseleave", () => { if (cur) { cur = null; fpv.classList.remove("on"); } });
+}
+
 /* 外链跳转兜底：部分移动端浏览器（含微信内置）会静默拦截 target="_blank" 新窗口，
    点击无反应——此时自动复制链接 + 提示 + 尝试当前页跳转，保证一定反馈 */
 function initExternalLinks() {
@@ -3159,6 +3192,7 @@ initTilt();
 initParticles();
 initAvatarParallax();
 initRipple();
+initFpv();
 initExternalLinks();
 initMusic();
 bindInspire();
