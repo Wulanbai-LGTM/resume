@@ -1044,22 +1044,16 @@ html[data-theme="light"] .psec-ghost{-webkit-text-stroke-color:rgba(71,85,105,.2
   .fpv{display:none}
 }
 /* ============================================================
-   ★ 数码波浪刷新遮罩（自下而上覆盖 → 上卷，新页自下而上涌现）
+   ★ 像素格纹刷新遮罩（格子逐格点亮盖屏 → 逐格熄灭显露新页）
    ============================================================ */
-.wave{position:fixed;inset:0;z-index:860;pointer-events:none;visibility:hidden;transform:translateY(101%);overflow:hidden}
-.wave::before{content:"";position:absolute;inset:0;background:radial-gradient(70% 55% at 22% 30%,rgba(34,211,238,.14),transparent 62%),radial-gradient(65% 55% at 80% 70%,rgba(99,102,241,.18),transparent 64%)}
-.wave.cov{visibility:visible;transform:translateY(0);transition:transform .34s cubic-bezier(.55,.06,.25,1)}
-.wave.rev{visibility:visible;transform:translateY(-101%);transition:transform .42s cubic-bezier(.55,.06,.25,1)}
-.wave.none{transition:none;transform:translateY(101%);visibility:hidden}
-.wave b,.wave i{position:absolute;inset:0;display:block;pointer-events:none}
-/* 波光层：正弦波纹向上流动 */
-.wave b{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='120' viewBox='0 0 400 120' preserveAspectRatio='none'%3E%3Cpath d='M0 76 Q50 40 100 76 T200 76 T300 76 T400 76 L400 120 L0 120Z' fill='rgba(11,19,48,.92)'/%3E%3Cpath d='M0 34 Q50 66 100 34 T200 34 T300 34 T400 34 L400 120 L0 120Z' fill='rgba(15,26,60,.88)'/%3E%3Cpath d='M0 98 Q50 128 100 98 T200 98 T300 98 T400 98 L400 120 L0 120Z' fill='rgba(7,12,30,.8)'/%3E%3C/svg%3E") repeat-y left top;background-size:auto 120px;animation:flowB .95s linear infinite}
-@keyframes flowB{to{background-position-y:-120px}}
-/* 扫描层：青色亮线循环上滚 */
-.wave i{background:linear-gradient(180deg,rgba(34,211,238,.26) 0 2px,rgba(34,211,238,.08) 2px 4px,transparent 4px 44px);background-size:100% 44px;mix-blend-mode:screen;animation:flowI .5s linear infinite}
-@keyframes flowI{to{background-position-y:-44px}}
+.pix{position:fixed;inset:0;z-index:860;pointer-events:none;visibility:hidden;display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(9,1fr)}
+.pix.cov,.pix.rev,.pix.idle{visibility:visible}
+.pix i{background:linear-gradient(165deg,#12204a,#070d20 60%,#0a1430);border:1px solid rgba(34,211,238,.09);box-shadow:inset 0 0 16px rgba(34,211,238,.05);opacity:0;transform:scale(.9);transition:none}
+.pix.cov i{opacity:1;transform:scale(1);transition:opacity .17s ease,transform .17s ease}
+.pix.rev i{opacity:0;transform:scale(.95);transition:opacity .15s ease,transform .15s ease}
+.pix.idle i{transition:none !important}
 @media print{
-  .wave{display:none !important}
+  .pix{display:none !important}
 }
 /* ============================================================
    ★ 成长经历 · 错落浮动卡片墙（点击居中放大聚焦）
@@ -1535,8 +1529,8 @@ html[data-theme="light"] .car-card.is-act{border-color:#0f172a;box-shadow:0 26px
 <!-- 跟随鼠标的板块预览卡 -->
 <div class="fpv no-print" id="fpv" aria-hidden="true"></div>
 
-<!-- 数码波浪刷新遮罩（层由 JS 注入） -->
-<div class="wave no-print" id="wave" aria-hidden="true"></div>
+<!-- 像素格纹刷新遮罩（格子由 JS 注入） -->
+<div class="pix no-print" id="pix" aria-hidden="true"></div>
 
 <!-- ================= Lightbox ================= -->
 <div class="lightbox no-print" id="lightbox" role="dialog" aria-modal="true" aria-label="图片预览">
@@ -1943,28 +1937,45 @@ function doSwitchView(name, opts) {
   }
 }
 
-/* 数码波浪刷新转场：单层波浪幕布自下而上覆盖 → 切换 → 继续上卷，新页自下而上涌现 */
-let waveEl = null, wBusy = false, wPending = null;
-function initWave() {
-  waveEl = $("#wave");
-  if (!waveEl) return;
-  waveEl.innerHTML = "<b></b><i></i>"; /* b=波光层 i=扫描线层（CSS 绘制） */
+/* 像素格纹刷新转场：格子逐格点亮盖屏（左下→右上）→ 切换 →
+   逐格熄灭显露新页（左上→右下），约 0.75s */
+let pixEl = null, wBusy = false, wPending = null;
+function initPix() {
+  pixEl = $("#pix");
+  if (!pixEl) return;
+  const COLS = 12, ROWS = 9;
+  let s = "";
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) s += "<i data-r='" + r + "' data-c='" + c + "'></i>";
+  }
+  pixEl.innerHTML = s;
+  const cells = pixEl.children;
+  for (let k = 0; k < cells.length; k++) {
+    const r = +cells[k].dataset.r, c = +cells[k].dataset.c;
+    cells[k].dataset.d1 = ((ROWS - 1 - r) * 9 + c * 5) + "ms"; /* 点亮：左下→右上 */
+    cells[k].dataset.d2 = (r * 9 + c * 5) + "ms";              /* 熄灭：左上→右下 */
+  }
 }
-function runWave() {
-  waveEl.classList.remove("none", "rev");
-  void waveEl.offsetWidth;
-  waveEl.classList.add("cov"); /* 自下而上盖满 */
+function runPix() {
+  const cells = pixEl.children;
+  pixEl.classList.remove("idle", "rev");
+  for (const el of cells) el.style.transitionDelay = el.dataset.d1;
+  void pixEl.offsetWidth;
+  pixEl.classList.add("cov"); /* 逐格点亮 */
   setTimeout(() => {
-    waveEl.classList.remove("cov");
-    void waveEl.offsetWidth;
-    waveEl.classList.add("rev"); /* 继续上卷离开 */
-  }, 360);
+    for (const el of cells) el.style.transitionDelay = el.dataset.d2;
+    pixEl.classList.remove("cov");
+    void pixEl.offsetWidth;
+    pixEl.classList.add("rev"); /* 逐格熄灭 */
+  }, 400);
   setTimeout(() => {
-    waveEl.classList.add("none");
-    waveEl.classList.remove("rev");
+    pixEl.classList.add("idle");
+    pixEl.classList.remove("rev");
+    for (const el of cells) el.style.transitionDelay = "0ms";
+    void pixEl.offsetWidth;
     wBusy = false;
     if (wPending) { const p = wPending; wPending = null; showView(p.name, p.opts); }
-  }, 800);
+  }, 780);
 }
 /* 视图切换（带动画转场壳） */
 function showView(name, opts) {
@@ -1978,11 +1989,11 @@ function showView(name, opts) {
     return;
   }
   if (!document.getElementById("view-" + name)) return;
-  if (waveEl && !prefersReduced) {
+  if (pixEl && !prefersReduced) {
     if (wBusy) { wPending = { name: name, opts: opts }; return; }
     wBusy = true;
-    runWave();
-    setTimeout(() => doSwitchView(name, opts), 380); /* 幕布盖满瞬间切换 */
+    runPix();
+    setTimeout(() => doSwitchView(name, opts), 380); /* 格子盖满瞬间切换 */
   } else {
     doSwitchView(name, opts);
   }
@@ -3250,7 +3261,7 @@ bindGlobal();
 bindLightboxControls();
 renderAll();
 initTyped();
-initWave();
+initPix();
 /* URL 锚点直达视图（如 index.html#projects），也为自动截图提供入口 */
 (function () {
   const h = (location.hash || "").replace("#", "");
