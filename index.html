@@ -1110,9 +1110,50 @@ html[data-theme="light"] .bgfx{display:none}
 /* 动态星野层：贴住视口、不挡鼠标；在背景图（z0）之上、内容（z1）之下 */
 .fxstars{position:fixed;inset:0;z-index:0;width:100%;height:100%;pointer-events:none}
 html[data-theme="light"] .fxstars{display:none}
+/* 光标星尘拖尾层：内容之上（z90）、导航/音乐钮之下，不挡交互 */
+.ctrail{position:fixed;inset:0;z-index:90;width:100%;height:100%;pointer-events:none}
+html[data-theme="light"] .ctrail{display:none}
+/* 视差子层 */
+.plx-ghost{display:inline-block;will-change:transform}
+/* ============================================================
+   标题流光（深色主题）：浅淡渐变字 + 周期性斜向亮带扫过
+   浅色主题/打印/减弱动效均回退为原样式
+   ============================================================ */
+html[data-theme="dark"] #heroName,
+html[data-theme="dark"] .section-title,
+html[data-theme="dark"] .psec-title{
+  color:transparent;
+  background-image:
+    linear-gradient(115deg,rgba(240,249,255,0) 42%,rgba(255,255,255,.95) 50%,rgba(240,249,255,0) 58%),
+    linear-gradient(115deg,#7dd3fc 0%,#f0f9ff 30%,#a5b4fc 64%,#ddd6fe 100%);
+  background-size:230% 100%,100% 100%;
+  background-position:220% 0,0 0;
+  background-repeat:no-repeat;
+  -webkit-background-clip:text;
+  background-clip:text;
+  animation:titleShine 6.5s ease-in-out infinite;
+}
+@keyframes titleShine{
+  0%,38%{background-position:220% 0,0 0}
+  72%,100%{background-position:-120% 0,0 0}
+}
+@media (prefers-reduced-motion:reduce){
+  html[data-theme="dark"] #heroName,html[data-theme="dark"] .section-title,html[data-theme="dark"] .psec-title{
+    animation:none;
+    background-image:linear-gradient(115deg,#7dd3fc 0%,#f0f9ff 30%,#a5b4fc 64%,#ddd6fe 100%);
+    background-size:100% 100%;
+  }
+}
+@media print{
+  html[data-theme="dark"] #heroName,html[data-theme="dark"] .section-title,html[data-theme="dark"] .psec-title{
+    background:none !important;-webkit-background-clip:border-box !important;background-clip:border-box !important;
+    color:#111827 !important;animation:none !important;
+  }
+}
 @media print{
   .bgfx{display:none !important}
   .fxstars{display:none !important}
+  .ctrail{display:none !important}
 }
 /* ============================================================
    ★ 首页顶部背景 + 叙事屏横幅图带 v2（文字上/图带下，紧凑对齐）
@@ -1135,9 +1176,12 @@ html[data-theme="light"] .fxstars{display:none}
 /* 玻璃窗横幅：辉光衬底 + 收敛尺寸照片 + 柔焦胶片质感 */
 .psec-bg{position:relative;display:block;width:min(940px,94%);aspect-ratio:3.5/1;margin-top:16px;overflow:hidden;border-radius:20px;box-shadow:0 22px 60px -22px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.07)}
 .psec-glow{position:absolute;inset:-18%;background-size:cover;background-position:center;filter:blur(30px) brightness(.62) saturate(1.15);transform:scale(1.15)}
-.psec-bg img{position:relative;width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.96) contrast(1.03) blur(.35px);transition:transform .9s ease,filter .9s ease}
+.psec-bg img{position:absolute;left:0;top:-6%;width:100%;height:112%;object-fit:cover;display:block;filter:saturate(.96) contrast(1.03) blur(.35px);transition:filter .9s ease;will-change:transform}
+/* 视差容器：悬停缩放放在此层，与图片自身平移互不干扰 */
+.psec-ph{position:absolute;inset:0;will-change:transform;transition:transform .9s cubic-bezier(.22,1,.36,1)}
+.psec:hover .psec-ph{transform:scale(1.045)}
 .psec-bg::after{content:"";position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");opacity:.05;mix-blend-mode:overlay;pointer-events:none}
-.psec:hover .psec-bg img{transform:scale(1.035);filter:saturate(1.05) contrast(1.04) blur(.35px) brightness(1.12)}
+.psec:hover .psec-bg img{filter:saturate(1.05) contrast(1.04) blur(.35px) brightness(1.12)}
 @media (max-width:960px){
   .psec{padding:24px 0 8px}
   .psec-bg{margin-top:14px;width:min(860px,96%);aspect-ratio:3.3/1}
@@ -1319,6 +1363,8 @@ html[data-theme="light"] .car-card.is-act{border-color:#0f172a;box-shadow:0 26px
 </div>
 <!-- 动态星野画布：漫闪星点 + 右上角星轨弧 + 低频流星（背景图之上、内容之下） -->
 <canvas class="fxstars no-print" id="fxstars" aria-hidden="true"></canvas>
+<!-- 光标星尘拖尾（桌面端 · 内容之上） -->
+<canvas class="ctrail no-print" id="ctrail" aria-hidden="true"></canvas>
 <!-- 加载开场动画 -->
 <div class="loader" id="loader" aria-hidden="true">
   <div class="loader-inner">
@@ -2207,7 +2253,7 @@ function renderPortal() {
   $("#portalGrid").innerHTML = portalItems.map((it, i) => {
     const n = String(i + 1).padStart(2, "0");
     return '<button class="psec reveal' + (i % 2 ? " psec-r" : "") + '" type="button" data-go="' + it.id + '" style="--i:' + (i % 2) + '" aria-label="' + esc(L(SECTION_NAMES[it.id])) + '">' +
-      '<span class="psec-ghost" aria-hidden="true">' + n + "</span>" +
+      '<span class="psec-ghost" aria-hidden="true"><span class="plx-ghost" aria-hidden="true">' + n + "</span></span>" +
       '<span class="psec-body">' +
         '<span class="psec-eyebrow"><i>' + n + "</i>" + esc(L(it.tag)) + "</span>" +
         '<b class="psec-title">' + esc(L(PORTAL_BIG[it.id])) + "</b>" +
@@ -2220,7 +2266,7 @@ function renderPortal() {
       "</span>" +
       "<span class='psec-bg' aria-hidden='true'>" +
         "<i class='psec-glow' style=\"background-image:url('图片/bgsec/" + String(i + 1).padStart(2, "0") + ".webp')\"></i>" +
-        "<img src='图片/bgsec/" + String(i + 1).padStart(2, "0") + ".webp' alt='' loading='lazy' decoding='async'>" +
+        "<span class='psec-ph'><img data-plx='1' src='图片/bgsec/" + String(i + 1).padStart(2, "0") + ".webp' alt='' loading='lazy' decoding='async'></span>" +
       "</span>" +
     "</button>";
   }).join("");
@@ -3238,7 +3284,7 @@ function initStarField() {
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
   const TAU = Math.PI * 2;
   const rnd = (a, b) => a + Math.random() * (b - a);
-  let W = 0, H = 0, stars = [], trails = [], met = null, nextMet = 0, rafId = 0;
+  let W = 0, H = 0, stars = [], trails = [], neb = [], met = null, nextMet = 0, rafId = 0;
   const COLORS = ["#f8fafc", "#e2e8f0", "#67e8f9", "#a5b4fc", "#fde68a"];
 
   function pickColor(warmChance) {
@@ -3249,6 +3295,38 @@ function initStarField() {
   function hexToRgba(hex, a) {
     const n = parseInt(hex.slice(1), 16);
     return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")";
+  }
+  /* 星云柔光精灵：预烘焙径向渐变贴图，每帧只做 drawImage（省去每帧重建大渐变） */
+  function makeSprite(rgb) {
+    const S = 512, c = document.createElement("canvas");
+    c.width = S; c.height = S;
+    const g = c.getContext("2d");
+    const gr = g.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+    gr.addColorStop(0, "rgba(" + rgb + ",0.8)");
+    gr.addColorStop(0.35, "rgba(" + rgb + ",0.4)");
+    gr.addColorStop(0.7, "rgba(" + rgb + ",0.12)");
+    gr.addColorStop(1, "rgba(" + rgb + ",0)");
+    g.fillStyle = gr;
+    g.fillRect(0, 0, S, S);
+    return c;
+  }
+  const NEB_SPR = {
+    cyan: makeSprite("34,211,238"), violet: makeSprite("129,140,248"),
+    indigo: makeSprite("99,102,241"), sky: makeSprite("125,211,252")
+  };
+  function drawNebula(now) {
+    const t = now / 1000;
+    const amp = Math.min(W, H) * 0.10;
+    for (const nb of neb) {
+      const w1 = (TAU / nb.tp) * t + nb.ph;
+      const x = nb.ax + Math.sin(w1) * amp;
+      const y = nb.ay + Math.cos(w1 * 0.83 + nb.ph2) * amp * 0.9;
+      const br = 0.6 + 0.4 * Math.sin(w1 * 0.55 + nb.ph2 * 2);
+      const R = nb.R * (1 + 0.10 * Math.sin(w1 * 0.4 + nb.ph));
+      ctx.globalAlpha = 0.075 + 0.055 * br;
+      ctx.drawImage(NEB_SPR[nb.sp], x - R, y - R, R * 2, R * 2);
+    }
+    ctx.globalAlpha = 1;
   }
 
   function build() {
@@ -3286,6 +3364,14 @@ function initStarField() {
       }
       trails.push(star);
     }
+    /* 星云漂移光斑：四团大柔光在各自锚点附近游走 + 明暗呼吸 + 尺寸缓胀缩 */
+    const minS = Math.min(W, H);
+    neb = [
+      { ax: W * 0.30, ay: H * 0.26, R: minS * 0.50, sp: "cyan" },
+      { ax: W * 0.74, ay: H * 0.20, R: minS * 0.42, sp: "violet" },
+      { ax: W * 0.52, ay: H * 0.84, R: minS * 0.56, sp: "indigo" },
+      { ax: W * 0.14, ay: H * 0.70, R: minS * 0.40, sp: "sky" }
+    ].map((o) => Object.assign(o, { ph: rnd(0, TAU), ph2: rnd(0, TAU), tp: rnd(30, 52) }));
     met = null;
     nextMet = performance.now() + rnd(3500, 8000);
   }
@@ -3373,6 +3459,7 @@ function initStarField() {
     if (document.documentElement.getAttribute("data-theme") === "light") return;
     ctx.clearRect(0, 0, W, H);
     const t = now / 1000;
+    drawNebula(now);
     /* 星点漫闪：正弦呼吸，相位各不同 */
     for (const s of stars) {
       const tw = 0.5 + 0.5 * Math.sin(s.sp * t + s.ph);
@@ -3406,6 +3493,135 @@ function initStarField() {
     rsT = setTimeout(resize, 160);
   }, { passive: true });
   resize();
+  rafId = requestAnimationFrame(frame);
+}
+
+/* ============================================================
+   光标星尘拖尾（桌面端 hover:fine 才启用；浅色主题不画）
+   ============================================================ */
+function initCursorTrail() {
+  const cv = document.getElementById("ctrail");
+  if (!cv || prefersReduced) return;
+  if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+  const ctx = cv.getContext("2d");
+  if (!ctx) return;
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  const COLS = ["#67e8f9", "#a5b4fc", "#f8fafc", "#7dd3fc"];
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const TAU = Math.PI * 2;
+  let W = 0, H = 0, parts = [], rafId = 0, lastT = 0;
+
+  function resize() {
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = Math.max(1, Math.round(W * DPR));
+    cv.height = Math.max(1, Math.round(H * DPR));
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  function spawn(x, y, speed) {
+    if (parts.length > 200) parts.shift();
+    const a = Math.random() * TAU;
+    parts.push({
+      x: x + rnd(-2, 2), y: y + rnd(-2, 2),
+      vx: Math.cos(a) * rnd(2, 14) + rnd(-8, 8),
+      vy: Math.sin(a) * rnd(2, 14) - rnd(4, 10),   /* 轻微上浮感 */
+      r: rnd(0.7, 2.2),
+      age: 0, ttl: rnd(700, 1500),
+      c: COLS[Math.floor(Math.random() * COLS.length)]
+    });
+  }
+  let px = null, py = null;
+  document.addEventListener("mousemove", (e) => {
+    if (document.documentElement.getAttribute("data-theme") === "light") return;
+    if (px === null) { px = e.clientX; py = e.clientY; return; }
+    const dx = e.clientX - px, dy = e.clientY - py;
+    const dist = Math.hypot(dx, dy);
+    if (dist > 5) {
+      const step = Math.min(3, Math.ceil(dist / 9));   /* 快移时沿线补点 */
+      for (let i = 0; i < step; i++) spawn(px + dx * ((i + 1) / (step + 1)), py + dy * ((i + 1) / (step + 1)), dist);
+    }
+    px = e.clientX; py = e.clientY;
+  }, { passive: true });
+  document.addEventListener("mouseleave", () => { parts.length = 0; px = null; py = null; });
+
+  function frame(now) {
+    rafId = requestAnimationFrame(frame);
+    if (document.documentElement.getAttribute("data-theme") === "light") { parts.length = 0; return; }
+    const dt = lastT ? Math.min(0.05, (now - lastT) / 1000) : 0.016;
+    lastT = now;
+    if (!parts.length) return;
+    ctx.clearRect(0, 0, W, H);
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+      p.age += dt * 1000;
+      if (p.age >= p.ttl) { parts.splice(i, 1); continue; }
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      p.vx *= 0.985; p.vy *= 0.985;
+      const k = 1 - p.age / p.ttl;
+      const al = k * k * 0.62;
+      if (p.r > 1.6) {
+        ctx.fillStyle = hexA(p.c, al * 0.14);
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 3.4, 0, TAU); ctx.fill();
+      }
+      ctx.fillStyle = hexA(p.c, al);
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r * (0.7 + 0.6 * k), 0, TAU); ctx.fill();
+    }
+  }
+  function hexA(hex, a) {
+    const n = parseInt(hex.slice(1), 16);
+    return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")";
+  }
+  let rsT = 0;
+  window.addEventListener("resize", () => { clearTimeout(rsT); rsT = setTimeout(resize, 160); }, { passive: true });
+  resize();
+  rafId = requestAnimationFrame(frame);
+}
+
+/* ============================================================
+   滚动深度视差：水印编号(慢 0.085)与横幅内图(慢 0.05)按滚动错层
+   远离视口自动归零；MutationObserver 兜底重渲染后的元素刷新
+   ============================================================ */
+function initParallax() {
+  if (prefersReduced) return;
+  let list = [], dirty = true, rafId = 0, lastM = 0;
+  function refresh() {
+    list = [];
+    document.querySelectorAll(".plx-ghost,[data-plx]").forEach((el) => {
+      list.push({ el: el, k: el.classList.contains("plx-ghost") ? 0 : 1, c: null });
+    });
+  }
+  function measure() {
+    const sy = window.scrollY || 0;
+    for (const o of list) {
+      if (!o.el.isConnected) { dirty = true; continue; }
+      const r = o.el.getBoundingClientRect();
+      o.c = r.top + sy + r.height / 2;
+    }
+  }
+  function frame() {
+    rafId = requestAnimationFrame(frame);
+    if (dirty) { refresh(); measure(); dirty = false; lastM = performance.now(); }
+    const now = performance.now();
+    if (now - lastM > 500) { measure(); lastM = now; }
+    const sy = window.scrollY || 0, vh = window.innerHeight, cy = sy + vh / 2;
+    for (const o of list) {
+      if (o.c === null) continue;
+      let sh;
+      if (Math.abs(o.c - cy) > vh * 1.15 + 400) {
+        sh = 0;                                        /* 远离视口：归零防残留 */
+      } else {
+        const g = o.k === 0 ? 0.085 : 0.05;
+        const mx = o.k === 0 ? 46 : 13;
+        sh = Math.max(-mx, Math.min(mx, (sy - (o.c - vh / 2)) * g));
+      }
+      const tr = "translateY(" + sh.toFixed(2) + "px)";
+      if (o.el.style.transform !== tr) o.el.style.transform = tr;
+    }
+  }
+  refresh();
+  measure();
+  const mo = new MutationObserver(() => { dirty = true; });
+  mo.observe(document.body, { childList: true, subtree: true });
+  window.addEventListener("resize", () => { dirty = true; }, { passive: true });
   rafId = requestAnimationFrame(frame);
 }
 
@@ -3658,6 +3874,8 @@ initAvatarParallax();
 initRipple();
 initFpv();
 initStarField();
+initCursorTrail();
+initParallax();
 initExternalLinks();
 initMusic();
 bindInspire();
