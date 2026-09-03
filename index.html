@@ -3520,15 +3520,15 @@ function initFxOverlay() {
   function build() {
     const area = W * H;
     /* 星星频繁闪亮：小而密的闪烁点布满全图（画面上方也覆盖），快节奏独立相位呼吸 */
-    const gn = Math.min(240, Math.max(40, Math.round(area / 30000)));
+    const gn = Math.min(500, Math.max(60, Math.round(area / 14000)));
     glints = [];
     for (let i = 0; i < gn; i++) {
       const r = Math.random();
       glints.push({
         x: rnd(0, W), y: rnd(0, H),
-        r: rnd(0.7, 1.9),
-        a: rnd(0.14, 0.36),
-        w: rnd(2.2, 5.5), ph: rnd(0, TAU),
+        r: rnd(0.7, 2.0),
+        a: rnd(0.18, 0.45),
+        w: rnd(2.0, 5.0), ph: rnd(0, TAU),
         c: r < 0.14 ? "#7dd3fc" : r < 0.26 ? "#c7d2fe" : "#f8fafc"
       });
     }
@@ -3581,23 +3581,23 @@ function initFxOverlay() {
       const hx = m.x0 + m.vx * m.dur * p;
       const hy = m.y0 + m.vy * m.dur * p;
       const hSp = Math.hypot(m.vx, m.vy);
-      const tail = Math.min(96, hSp * 0.2);
+      const tail = Math.min(130, hSp * 0.26);
       const tx = hx - m.vx / hSp * tail;
       const ty = hy - m.vy / hSp * tail;
       const g = ctx.createLinearGradient(hx, hy, tx, ty);
-      g.addColorStop(0, "rgba(240,250,255," + (0.95 * fade) + ")");
-      g.addColorStop(0.25, "rgba(160,214,255," + (0.55 * fade) + ")");
+      g.addColorStop(0, "rgba(248,252,255," + (0.95 * fade) + ")");
+      g.addColorStop(0.3, "rgba(160,214,255," + (0.6 * fade) + ")");
       g.addColorStop(1, "rgba(160,214,255,0)");
       ctx.strokeStyle = g;
-      ctx.lineWidth = 1.8;
+      ctx.lineWidth = 2.2;
       ctx.lineCap = "round";
       ctx.beginPath();
       ctx.moveTo(hx, hy);
       ctx.lineTo(tx, ty);
       ctx.stroke();
-      ctx.fillStyle = "rgba(255,255,255," + (0.95 * fade) + ")";
+      ctx.fillStyle = "rgba(255,255,255," + (0.98 * fade) + ")";
       ctx.beginPath();
-      ctx.arc(hx, hy, 1.6, 0, TAU);
+      ctx.arc(hx, hy, 2.0, 0, TAU);
       ctx.fill();
     }
   }
@@ -3607,8 +3607,8 @@ function initFxOverlay() {
     for (const s of glints) {
       const pulse = 0.55 + 0.45 * Math.sin(s.w * t + s.ph);
       const al = s.a * pulse;
-      if (s.r > 1.5) {                                     /* 光晕只给较大的星，避免糊成一片 */
-        ctx.fillStyle = hexA(s.c, al * 0.22);
+      if (s.r > 1.6) {                                     /* 光晕只给较大的星，避免糊成一片 */
+        ctx.fillStyle = hexA(s.c, al * 0.25);
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.r * 3.0, 0, TAU);
         ctx.fill();
