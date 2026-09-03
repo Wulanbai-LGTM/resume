@@ -3352,7 +3352,7 @@ function initStarField() {
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
   const TAU = Math.PI * 2;
   const rnd = (a, b) => a + Math.random() * (b - a);
-  let W = 0, H = 0, stars = [], trails = [], neb = [], specs = [], rafId = 0;
+  let W = 0, H = 0, stars = [], trails = [], neb = [], specs = [], rafId = 0, lastF = 0;
   const COLORS = ["#f8fafc", "#e2e8f0", "#67e8f9", "#a5b4fc", "#fde68a"];
 
   function pickColor(warmChance) {
@@ -3505,6 +3505,9 @@ function initStarField() {
     rafId = requestAnimationFrame(frame);
     /* 浅色主题下画布已隐藏：跳过绘制省电（rAF 在后台标签页本就会暂停） */
     if (document.documentElement.getAttribute("data-theme") === "light") return;
+    /* 约 30fps 节流：星野为氛围层，无需满帧 */
+    if (lastF && now - lastF < 34) return;
+    lastF = now;
     ctx.clearRect(0, 0, W, H);
     const t = now / 1000;
     drawNebula(now);
@@ -3556,12 +3559,12 @@ function initFxOverlay() {
   if (!cv || prefersReduced) return;
   const ctx = cv.getContext("2d");
   if (!ctx) return;
-  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  const DPR = Math.min(window.devicePixelRatio || 1, 1.5); /* 光效层柔光为主，1.5 封顶省一半填充量 */
   const COLS = ["#67e8f9", "#a5b4fc", "#f8fafc", "#7dd3fc"];
   const rnd = (a, b) => a + Math.random() * (b - a);
   const TAU = Math.PI * 2;
   const HOVER = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-  let W = 0, H = 0, glints = [], mets = [], parts = [], rafId = 0, lastT = 0;
+  let W = 0, H = 0, glints = [], mets = [], parts = [], rafId = 0, lastT = 0, lastF = 0;
   let nextMet = 0;
   const isLight = () => document.documentElement.getAttribute("data-theme") === "light";
   const hexA = (hex, a) => {
@@ -3705,29 +3708,12 @@ function initFxOverlay() {
   function frame(now) {
     rafId = requestAnimationFrame(frame);
     if (isLight()) { parts.length = 0; return; }
+    /* 约 30fps 节流：氛围光效无需满帧，长空闲期 CPU/GPU 减半 */
+    if (lastF && now - lastF < 34) return;
+    lastF = now;
     const dt = lastT ? Math.min(0.05, (now - lastT) / 1000) : 0.016;
     lastT = now;
     ctx.clearRect(0, 0, W, H);
-    /* 【自检】加载后前 5 秒画一条青色测试流星：用于确认叠加画布是否真实可见（调试后删除） */
-    if (now < 5000) {
-      const k = now / 5000;
-      const tx = k * (W + 240) - 120;
-      const ty = H * 0.45 + Math.sin(k * Math.PI) * H * 0.05;
-      const tg = ctx.createLinearGradient(tx, ty, tx - 150, ty);
-      tg.addColorStop(0, "rgba(103,232,249,0.95)");
-      tg.addColorStop(1, "rgba(103,232,249,0)");
-      ctx.strokeStyle = tg;
-      ctx.lineWidth = 3;
-      ctx.lineCap = "round";
-      ctx.beginPath();
-      ctx.moveTo(tx, ty);
-      ctx.lineTo(tx - 150, ty);
-      ctx.stroke();
-      ctx.fillStyle = "rgba(224,247,255,0.98)";
-      ctx.beginPath();
-      ctx.arc(tx, ty, 2.4, 0, TAU);
-      ctx.fill();
-    }
     drawGlints(now);
     drawMeteors(now);
     if (parts.length) {
