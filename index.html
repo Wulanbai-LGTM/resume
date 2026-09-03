@@ -3544,14 +3544,16 @@ function initFxOverlay() {
     build();
   }
   /* —— 流星雨：持续中等频率 · 每颗缓慢横穿全屏 —— */
+  let metLog = false;
   function launchMeteor(now) {
+    if (!metLog) { metLog = true; console.info("[fx] 流星雨引擎就绪，首颗流星发射"); }
     const right = Math.random() < 0.5;             /* 左右两侧随机入场 */
     const sp = W / rnd(3.8, 6.4);                  /* 横跨整屏约 3.8~6.4 秒：速度缓慢 */
-    const vy = rnd(10, 34);                        /* 轻微下垂，全程略带斜度 */
+    const vy = rnd(6, 22);                         /* 轻微下垂，全程略带斜度 */
     const margin = rnd(70, 160);
     const dist = W + margin * 2;
     const dur = dist / sp;
-    const yMax = Math.max(H * 0.06, Math.min(H * 0.85, H - dur * vy - 30)); /* 保证不提前出底边 */
+    const yMax = Math.max(H * 0.06, Math.min(H * 0.9, H - dur * vy - 30)); /* 保证不提前出底边 */
     const x0 = right ? -margin : W + margin;       /* 从屏幕外入场 */
     const y0 = rnd(H * 0.05, yMax);
     mets.push({
@@ -3563,12 +3565,14 @@ function initFxOverlay() {
     if (mets.length > 5) mets.shift();
   }
   function scheduleMeteors(now) {
-    if (now < nextMet) return;
-    if (mets.length < 4) {                         /* 持续中频：1.2~2.6 秒一颗 */
-      launchMeteor(now);
-      nextMet = now + rnd(1200, 2600);
-    } else {
-      nextMet = now + 400;                         /* 屏上已满，稍后再补 */
+    /* 保底：屏上没流星时立即补发，绝不空场 */
+    if (mets.length === 0 || now >= nextMet) {
+      if (mets.length < 4) {                         /* 持续中频：1.3~2.4 秒一颗 */
+        launchMeteor(now);
+        nextMet = now + rnd(1300, 2400);
+      } else {
+        nextMet = now + 400;                         /* 屏上已满，稍后再补 */
+      }
     }
   }
   function drawMeteors(now) {
