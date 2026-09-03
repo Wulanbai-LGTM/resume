@@ -1099,15 +1099,26 @@ html[data-theme="light"] .psec-ghost{-webkit-text-stroke-color:rgba(71,85,105,.2
    ★ 全局星尘背景（含暗化遮罩、慢速呼吸）
    ============================================================ */
 .bgfx{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:#030712}
-.bgfx img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.1s ease}
-.bgfx img.on{opacity:1;animation:bgBreathe 30s ease-in-out infinite alternate}
+.bgfx img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0}
+/* 底图轮换：bgA 常驻；bgB 以 44s 周期在中间段淡入约 22s 再淡出 */
+.bgfx img.bgA{opacity:1;animation:bgBreathe 30s ease-in-out infinite alternate}
+.bgfx img.bgB{animation:bgBreathe 30s ease-in-out infinite alternate,bgSwap 44s linear infinite}
+@keyframes bgSwap{
+  0%,43%{opacity:0}
+  50%,93%{opacity:1}
+  100%{opacity:0}
+}
+@media (prefers-reduced-motion:reduce){
+  .bgfx img.bgA{animation:none}
+  .bgfx img.bgB{animation:none;opacity:0}
+}
 /* 缓移而非放大：底图保持 1.06 固定倍率，仅在对角 ±1.1% 内漂移（运动掩盖模糊，不再二次放大） */
 @keyframes bgBreathe{
   0%{transform:scale(1.06) translate3d(-1.1%,-0.65%,0)}
   100%{transform:scale(1.06) translate3d(1.1%,0.65%,0)}
 }
 /* 暗化 + 底部渐深遮罩，保证文字可读 */
-.bgfx::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,7,18,.30) 0%,rgba(3,7,18,.14) 30%,rgba(3,7,18,.26) 62%,rgba(3,7,18,.52) 100%),radial-gradient(120% 90% at 50% 40%,transparent 55%,rgba(2,4,12,.26));z-index:1}
+.bgfx::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,7,18,.34) 0%,rgba(3,7,18,.20) 30%,rgba(3,7,18,.30) 62%,rgba(3,7,18,.56) 100%),radial-gradient(120% 90% at 50% 40%,transparent 55%,rgba(2,4,12,.28));z-index:1}
 /* 极光光斑上移到背景图之上（内容之下） */
 body::before,body::after{z-index:1}
 html[data-theme="light"] .bgfx{display:none}
@@ -1361,9 +1372,10 @@ html[data-theme="light"] .car-card.is-act{border-color:#0f172a;box-shadow:0 26px
 </style>
 </head>
 <body>
-<!-- 全局星尘背景（毛玻璃内容层之上透出） -->
+<!-- 全局星尘背景：bgA=2号黑洞底常驻；bgB=1号旋涡底每 44s 周期淡入淡出轮换 -->
 <div class="bgfx no-print" aria-hidden="true">
-  <img data-bg="dark" src="图片/bg/dark.webp" alt="" decoding="async">
+  <img class="bgA" src="图片/bg/bg2.webp" alt="" decoding="async">
+  <img class="bgB" src="图片/bg/bg1.webp" alt="" decoding="async">
 </div>
 <!-- 动态星野画布：漫闪星点 + 细星覆盖 + 右上角星轨弧（背景图之上、内容之下） -->
 <canvas class="fxstars no-print" id="fxstars" aria-hidden="true"></canvas>
@@ -2079,9 +2091,9 @@ const portalItems = [
   { id: "contact", tag: { zh: "联系方式", en: "CONTACT" }, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>', desc: { zh: "邮箱 / 电话 / GitHub，欢迎实习机会与项目合作。", en: "Email / phone / GitHub — internships & collabs welcome." }, meta: { zh: "随时联系", en: "Reach me" } }
 ];
 
-/* 全视图统一星尘底纹（未来如需按视图差异化，在此加回映射即可） */
-const BG_SRC = { dark: "图片/bg/dark.webp" };
-const BG_OF = { home: "dark", objective: "dark", highlights: "dark", experience: "dark", projects: "dark", skills: "dark", education: "dark", contact: "dark" };
+/* 底图轮换由 CSS 控制（bgA 常驻 + bgB 周期淡入淡出）；视图差异化映射已弃用 */
+const BG_SRC = {};
+const BG_OF = {};
 let curBgKey = null;
 function setBg(view) {
   const key = BG_OF[view] || "dark"; /* 浅色模式由 CSS 隐藏背景层 */
