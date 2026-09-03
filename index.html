@@ -1107,8 +1107,12 @@ html[data-theme="light"] .psec-ghost{-webkit-text-stroke-color:rgba(71,85,105,.2
 /* 极光光斑上移到背景图之上（内容之下） */
 body::before,body::after{z-index:1}
 html[data-theme="light"] .bgfx{display:none}
+/* 动态星野层：贴住视口、不挡鼠标；在背景图（z0）之上、内容（z1）之下 */
+.fxstars{position:fixed;inset:0;z-index:0;width:100%;height:100%;pointer-events:none}
+html[data-theme="light"] .fxstars{display:none}
 @media print{
   .bgfx{display:none !important}
+  .fxstars{display:none !important}
 }
 /* ============================================================
    ★ 首页顶部背景 + 叙事屏横幅图带 v2（文字上/图带下，紧凑对齐）
@@ -1313,6 +1317,8 @@ html[data-theme="light"] .car-card.is-act{border-color:#0f172a;box-shadow:0 26px
 <div class="bgfx no-print" aria-hidden="true">
   <img data-bg="dark" src="图片/bg/dark.webp" alt="" decoding="async">
 </div>
+<!-- 动态星野画布：漫闪星点 + 右上角星轨弧 + 低频流星（背景图之上、内容之下） -->
+<canvas class="fxstars no-print" id="fxstars" aria-hidden="true"></canvas>
 <!-- 加载开场动画 -->
 <div class="loader" id="loader" aria-hidden="true">
   <div class="loader-inner">
@@ -3220,6 +3226,189 @@ function initFpv() {
   document.addEventListener("mouseleave", () => { if (cur) { cur = null; fpv.classList.remove("on"); } });
 }
 
+/* ============================================================
+   动态星野（单画布 · 克制淡雅）：星点漫闪 + 右上角星轨弧 + 低频流星
+   层级：背景图之上、内容之下；浅色/打印/减弱动效偏好时停用
+   ============================================================ */
+function initStarField() {
+  const cv = document.getElementById("fxstars");
+  if (!cv || prefersReduced) return;
+  const ctx = cv.getContext("2d");
+  if (!ctx) return;
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  const TAU = Math.PI * 2;
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  let W = 0, H = 0, stars = [], trails = [], met = null, nextMet = 0, rafId = 0;
+  const COLORS = ["#f8fafc", "#e2e8f0", "#67e8f9", "#a5b4fc", "#fde68a"];
+
+  function pickColor(warmChance) {
+    const w = Math.random();
+    if (warmChance && w < 0.06) return COLORS[4];
+    return COLORS[Math.random() < 0.16 ? 2 + (Math.random() < 0.5 ? 1 : 0) : Math.random() < 0.5 ? 0 : 1];
+  }
+  function hexToRgba(hex, a) {
+    const n = parseInt(hex.slice(1), 16);
+    return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")";
+  }
+
+  function build() {
+    const area = W * H;
+    /* 漫闪星点：按屏幕面积取密度，疏而不密，克制亮度 */
+    const n = Math.max(18, Math.min(110, Math.round(area / 22000)));
+    stars = [];
+    for (let i = 0; i < n; i++) {
+      stars.push({
+        x: rnd(0, W), y: rnd(0, H),
+        r: rnd(0.5, 1.6),
+        a: rnd(0.15, 0.42),               /* 基础亮度很低 */
+        sp: rnd(0.7, 2.3),                /* 呼吸速度 rad/s */
+        ph: rnd(0, TAU),
+        c: pickColor(true)
+      });
+    }
+    /* 星轨弧：极心在右上（86% 宽 / 15% 高），半径上限按短边控制，弧自然裁出画面 */
+    const px = W * 0.86, py = H * 0.15, m = Math.min(W, H);
+    const rMin = m * 0.05, rMax = m * 0.30;
+    const tn = Math.max(8, Math.min(14, Math.round(m / 105)));
+    trails = [];
+    for (let i = 0; i < tn; i++) {
+      const rad = rnd(rMin, rMax);
+      const T = rnd(160, 460);            /* 公转周期秒：越慢越像长曝光 */
+      const star = {
+        rad: rad, ang0: rnd(0, TAU), sp: TAU / T,
+        r: rnd(1.0, 1.9), a: rnd(0.2, 0.4),
+        c: pickColor(false), pts: []
+      };
+      /* 预填 1.2 秒轨迹，首帧即有弧线 */
+      for (let k = -40; k <= 0; k++) {
+        const ang = star.ang0 + star.sp * k * 0.03;
+        star.pts.push([px + Math.cos(ang) * rad, py + Math.sin(ang) * rad]);
+      }
+      trails.push(star);
+    }
+    met = null;
+    nextMet = performance.now() + rnd(3500, 8000);
+  }
+
+  function drawTrails(now) {
+    const t = now / 1000;
+    for (const s of trails) {
+      const ang = s.ang0 + s.sp * t;
+      const x = W * 0.86 + Math.cos(ang) * s.rad;
+      const y = H * 0.15 + Math.sin(ang) * s.rad;
+      s.pts.push([x, y]);
+      if (s.pts.length > 44) s.pts.shift();
+      /* 弧线主体：整体淡描 */
+      if (s.pts.length > 2) {
+        ctx.strokeStyle = hexToRgba(s.c, s.a * 0.16);
+        ctx.lineWidth = s.r * 0.8;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(s.pts[0][0], s.pts[0][1]);
+        for (let i = 1; i < s.pts.length; i++) ctx.lineTo(s.pts[i][0], s.pts[i][1]);
+        ctx.stroke();
+        /* 头部亮段：最近 10 点 */
+        ctx.strokeStyle = hexToRgba(s.c, s.a * 0.6);
+        ctx.lineWidth = s.r * 1.1;
+        ctx.beginPath();
+        const head = s.pts.slice(-10);
+        ctx.moveTo(head[0][0], head[0][1]);
+        for (let i = 1; i < head.length; i++) ctx.lineTo(head[i][0], head[i][1]);
+        ctx.stroke();
+      }
+      ctx.fillStyle = hexToRgba(s.c, s.a);
+      ctx.beginPath();
+      ctx.arc(x, y, s.r * 1.15, 0, TAU);
+      ctx.fill();
+    }
+  }
+
+  function fireMeteor(now) {
+    const L = Math.min(W, H) * rnd(0.42, 0.68);
+    const right = Math.random() < 0.5;
+    const ang = rnd(0.30, 0.62);            /* 与水平夹角 17°~35° */
+    let x0 = right ? rnd(W * 0.12, W * 0.45) : rnd(W * 0.55, W * 0.88);
+    let y0 = rnd(H * 0.06, H * 0.30);
+    if (right) { x0 = x0 - Math.cos(ang) * L * 0.5; }   /* 从画外入画 */
+    else { x0 = x0 + Math.cos(ang) * L * 0.5; y0 = y0 - Math.sin(ang) * L * 0.35; }
+    const dur = rnd(0.9, 1.4);
+    const vx = Math.cos(ang) * (right ? L / dur : -L / dur);
+    const vy = Math.sin(ang) * L / dur;
+    met = { x0: x0, y0: y0, vx: vx, vy: vy, t0: now, dur: dur, L: L, right: right };
+  }
+
+  function drawMeteor(now) {
+    if (!met) {
+      if (now >= nextMet) fireMeteor(now);
+      return;
+    }
+    const p = (now - met.t0) / met.dur;
+    if (p >= 1) { met = null; nextMet = now + rnd(7000, 16000); return; }
+    const fade = p > 0.72 ? 1 - (p - 0.72) / 0.28 : 1;   /* 尾段渐隐 */
+    const hx = met.x0 + met.vx * (met.dur * p);
+    const hy = met.y0 + met.vy * (met.dur * p);
+    const tail = Math.min(110, met.L * 0.3);
+    const tx = hx - met.vx / Math.hypot(met.vx, met.vy) * tail;
+    const ty = hy - met.vy / Math.hypot(met.vx, met.vy) * tail;
+    const g = ctx.createLinearGradient(hx, hy, tx, ty);
+    g.addColorStop(0, "rgba(240,250,255," + (0.9 * fade) + ")");
+    g.addColorStop(0.25, "rgba(160,214,255," + (0.5 * fade) + ")");
+    g.addColorStop(1, "rgba(160,214,255,0)");
+    ctx.strokeStyle = g;
+    ctx.lineWidth = 1.6;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(hx, hy);
+    ctx.lineTo(tx, ty);
+    ctx.stroke();
+    ctx.fillStyle = "rgba(255,255,255," + (0.95 * fade) + ")";
+    ctx.beginPath();
+    ctx.arc(hx, hy, 1.4, 0, TAU);
+    ctx.fill();
+  }
+
+  function frame(now) {
+    rafId = requestAnimationFrame(frame);
+    /* 浅色主题下画布已隐藏：跳过绘制省电（rAF 在后台标签页本就会暂停） */
+    if (document.documentElement.getAttribute("data-theme") === "light") return;
+    ctx.clearRect(0, 0, W, H);
+    const t = now / 1000;
+    /* 星点漫闪：正弦呼吸，相位各不同 */
+    for (const s of stars) {
+      const tw = 0.5 + 0.5 * Math.sin(s.sp * t + s.ph);
+      const al = s.a * (0.35 + 0.65 * tw);
+      if (s.r > 1.35) {                       /* 少数较亮的星带一圈极淡光晕 */
+        ctx.fillStyle = hexToRgba(s.c, al * 0.14);
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r * 3.2, 0, TAU);
+        ctx.fill();
+      }
+      ctx.fillStyle = hexToRgba(s.c, al);
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, TAU);
+      ctx.fill();
+    }
+    drawTrails(now);
+    drawMeteor(now);
+  }
+
+  function resize() {
+    W = window.innerWidth;
+    H = window.innerHeight;
+    cv.width = Math.max(1, Math.round(W * DPR));
+    cv.height = Math.max(1, Math.round(H * DPR));
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    build();
+  }
+  let rsT = 0;
+  window.addEventListener("resize", () => {
+    clearTimeout(rsT);
+    rsT = setTimeout(resize, 160);
+  }, { passive: true });
+  resize();
+  rafId = requestAnimationFrame(frame);
+}
+
 /* 外链跳转兜底：部分移动端浏览器（含微信内置）会静默拦截 target="_blank" 新窗口，
    点击无反应——此时自动复制链接 + 提示 + 尝试当前页跳转，保证一定反馈 */
 function initExternalLinks() {
@@ -3468,6 +3657,7 @@ initParticles();
 initAvatarParallax();
 initRipple();
 initFpv();
+initStarField();
 initExternalLinks();
 initMusic();
 bindInspire();
