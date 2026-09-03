@@ -670,6 +670,8 @@ html[data-theme="light"]{
 
 /* 字体：Plus Jakarta Sans 风格字体栈（Google Fonts 国内不可达，以几何无衬线系统字体等效呈现） */
 body{font-family:"Plus Jakarta Sans","Segoe UI",-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;background:var(--bg)}
+/* 去掉移动端点按默认高亮（安卓蓝/灰闪屏），保留元素自身反馈 */
+*{-webkit-tap-highlight-color:transparent}
 main,footer{position:relative;z-index:1}
 
 /* 背景光斑：左上 Cyan、右下 Indigo，blur 140px，低透明度 */
@@ -1162,6 +1164,10 @@ html[data-theme="light"] .fxstars{display:none}
 /* 光效叠加层（呼吸亮星/流星雨/光标拖尾）：内容之上（z90）、导航/音乐钮之下，不挡交互 */
 .ctrail{position:fixed;inset:0;z-index:90;width:100%;height:100%;pointer-events:none}
 html[data-theme="light"] .ctrail{display:none}
+/* 移动端轻量转场遮罩：深空色快速暗场，替代像素格（约 0.2s 淡入 → 切换 → 淡出） */
+.vxfade{position:fixed;inset:0;z-index:850;visibility:hidden;opacity:0;pointer-events:none;background:radial-gradient(130% 100% at 50% 40%,#0a1428 0%,#04070f 60%,#020409 100%);transition:opacity .2s ease,visibility 0s linear .2s}
+.vxfade.on{visibility:visible;opacity:1;transition:opacity .16s ease,visibility 0s linear 0s}
+@media print{.vxfade{display:none !important}}
 /* 视差子层 */
 .plx-ghost{display:inline-block;will-change:transform}
 /* ============================================================
@@ -1740,6 +1746,8 @@ html[data-theme="light"] .car-card.is-act{border-color:#0f172a;box-shadow:0 26px
 
 <!-- 像素格纹刷新遮罩（格子由 JS 注入） -->
 <div class="pix no-print" id="pix" aria-hidden="true"></div>
+<!-- 移动端轻量转场遮罩（快速暗场淡入淡出，替代像素格） -->
+<div class="vxfade no-print" id="vxfade" aria-hidden="true"></div>
 
 <!-- 板块导览入场仪式：两侧竖光带高速汇聚 -->
 <div class="gate no-print" id="gate" aria-hidden="true"><span class="gtext" id="gateText"></span></div>
@@ -2203,6 +2211,27 @@ function doSwitchView(name, opts) {
   }
 }
 
+/* 移动端轻量转场：深空暗场快速淡入 → 切换 → 淡出（无 216 格像素动画，低端机不卡） */
+function mobileSwitch(name, opts) {
+  const vf = $("#vxfade");
+  if (prefersReduced || !vf) { doSwitchView(name, opts); return; }
+  if (wBusy) { wPending = { name: name, opts: opts }; return; }
+  wBusy = true;
+  document.body.classList.add("fx-pause");
+  vf.classList.add("on");
+  setTimeout(() => {
+    doSwitchView(name, opts);
+    setTimeout(() => {
+      vf.classList.remove("on");
+      setTimeout(() => {
+        document.body.classList.remove("fx-pause");
+        wBusy = false;
+        if (wPending) { const p = wPending; wPending = null; showView(p.name, p.opts); }
+      }, 230);
+    }, 60);
+  }, 180);
+}
+
 /* 像素格纹刷新转场：格子逐格点亮盖屏（左下→右上）→ 切换 →
    逐格熄灭显露新页（左上→右下），约 0.75s */
 let pixEl = null, wBusy = false, wPending = null;
@@ -2247,6 +2276,7 @@ function initPix() {
 }
 function runPix() {
   const cells = pixEl.children;
+  document.body.classList.add("fx-pause"); /* 转场期间暂停画布动效，把 GPU 让给像素格 */
   pixEl.classList.remove("idle", "rev");
   for (const el of cells) el.style.setProperty("--d1", el.dataset.d1 + "ms");
   void pixEl.offsetWidth;
@@ -2261,6 +2291,7 @@ function runPix() {
     pixEl.classList.add("idle");
     pixEl.classList.remove("rev");
     void pixEl.offsetWidth;
+    document.body.classList.remove("fx-pause");
     wBusy = false;
     if (wPending) { const p = wPending; wPending = null; showView(p.name, p.opts); }
   }, 1280);
@@ -2277,13 +2308,14 @@ function showView(name, opts) {
     return;
   }
   if (!document.getElementById("view-" + name)) return;
-  if (pixEl && !prefersReduced) {
+  const touchUI = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+  if (pixEl && !prefersReduced && !touchUI) {
     if (wBusy) { wPending = { name: name, opts: opts }; return; }
     wBusy = true;
     runPix();
     setTimeout(() => doSwitchView(name, opts), 590); /* 格子盖满瞬间切换 */
   } else {
-    doSwitchView(name, opts);
+    mobileSwitch(name, opts);
   }
 }
 
@@ -3503,6 +3535,8 @@ function initStarField() {
 
   function frame(now) {
     rafId = requestAnimationFrame(frame);
+    /* 视图转场期间整体暂停，避免与像素格抢 GPU */
+    if (document.body.classList.contains("fx-pause")) return;
     /* 浅色主题下画布已隐藏：跳过绘制省电（rAF 在后台标签页本就会暂停） */
     if (document.documentElement.getAttribute("data-theme") === "light") return;
     /* 约 30fps 节流：星野为氛围层，无需满帧 */
@@ -3707,6 +3741,8 @@ function initFxOverlay() {
   }
   function frame(now) {
     rafId = requestAnimationFrame(frame);
+    /* 视图转场期间整体暂停，避免与遮罩动画抢 GPU */
+    if (document.body.classList.contains("fx-pause")) return;
     if (isLight()) { parts.length = 0; return; }
     /* 约 30fps 节流：氛围光效无需满帧，长空闲期 CPU/GPU 减半 */
     if (lastF && now - lastF < 34) return;
