@@ -1365,7 +1365,7 @@ html[data-theme="light"] .car-card.is-act{border-color:#0f172a;box-shadow:0 26px
 <div class="bgfx no-print" aria-hidden="true">
   <img data-bg="dark" src="图片/bg/dark.webp" alt="" decoding="async">
 </div>
-<!-- 动态星野画布：漫闪星点 + 右上角星轨弧 + 低频流星（背景图之上、内容之下） -->
+<!-- 动态星野画布：漫闪星点 + 右上角星轨弧 + 流星雨（背景图之上、内容之下） -->
 <canvas class="fxstars no-print" id="fxstars" aria-hidden="true"></canvas>
 <!-- 光标星尘拖尾（桌面端 · 内容之上） -->
 <canvas class="ctrail no-print" id="ctrail" aria-hidden="true"></canvas>
@@ -3277,7 +3277,7 @@ function initFpv() {
 }
 
 /* ============================================================
-   动态星野（单画布 · 克制淡雅）：星点漫闪 + 右上角星轨弧 + 低频流星
+   动态星野（单画布 · 克制淡雅）：星点漫闪 + 右上角星轨弧 + 单颗流星与周期性流星雨
    层级：背景图之上、内容之下；浅色/打印/减弱动效偏好时停用
    ============================================================ */
 function initStarField() {
@@ -3288,7 +3288,7 @@ function initStarField() {
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
   const TAU = Math.PI * 2;
   const rnd = (a, b) => a + Math.random() * (b - a);
-  let W = 0, H = 0, stars = [], trails = [], neb = [], specs = [], met = null, nextMet = 0, rafId = 0;
+  let W = 0, H = 0, stars = [], trails = [], neb = [], specs = [], mets = [], nextMet = 0, nextShower = 0, showerEnd = 0, showerNext = 0, rafId = 0;
   const COLORS = ["#f8fafc", "#e2e8f0", "#67e8f9", "#a5b4fc", "#fde68a"];
 
   function pickColor(warmChance) {
@@ -3400,8 +3400,11 @@ function initStarField() {
         halo: Math.random() < 0.05
       });
     }
-    met = null;
-    nextMet = performance.now() + rnd(3500, 8000);
+    mets.length = 0;
+    nextMet = performance.now() + rnd(8000, 16000);      /* 平时单颗流星 */
+    nextShower = performance.now() + rnd(9000, 20000);   /* 首场流星雨早到，便于观察 */
+    showerEnd = 0;
+    showerNext = 0;
   }
 
   function drawTrails(now) {
@@ -3437,48 +3440,68 @@ function initStarField() {
     }
   }
 
-  function fireMeteor(now) {
-    const L = Math.min(W, H) * rnd(0.42, 0.68);
-    const right = Math.random() < 0.5;
-    const ang = rnd(0.30, 0.62);            /* 与水平夹角 17°~35° */
-    let x0 = right ? rnd(W * 0.12, W * 0.45) : rnd(W * 0.55, W * 0.88);
-    let y0 = rnd(H * 0.06, H * 0.30);
-    if (right) { x0 = x0 - Math.cos(ang) * L * 0.5; }   /* 从画外入画 */
-    else { x0 = x0 + Math.cos(ang) * L * 0.5; y0 = y0 - Math.sin(ang) * L * 0.35; }
-    const dur = rnd(0.9, 1.4);
-    const vx = Math.cos(ang) * (right ? L / dur : -L / dur);
-    const vy = Math.sin(ang) * L / dur;
-    met = { x0: x0, y0: y0, vx: vx, vy: vy, t0: now, dur: dur, L: L, right: right };
+  /* 发射一颗流星：wide=true 属流星雨场——角度窄带趋同（像同源辐射）、更密更快 */
+  function fireMeteor(now, wide) {
+    const sp = Math.min(W, H) * (wide ? rnd(0.52, 0.78) : rnd(0.40, 0.62));
+    const ang = wide ? rnd(0.54, 0.70) : rnd(0.32, 0.62); /* 与水平夹角：雨场 31°~40°，单颗 18°~36° */
+    const left = Math.random() < (wide ? 0.5 : 0.5);
+    const vx = Math.cos(ang) * sp * (left ? -1 : 1);
+    const vy = Math.sin(ang) * sp;
+    const x0 = wide
+      ? (left ? rnd(W * 0.86, W * 1.08) : rnd(W * -0.08, W * 0.14))
+      : (left ? rnd(W * 0.70, W * 0.98) : rnd(W * 0.02, W * 0.30));
+    const y0 = rnd(H * (wide ? 0.00 : 0.05), H * (wide ? 0.22 : 0.26));
+    const dur = rnd(0.7, 1.25);
+    mets.push({ x0: x0, y0: y0, vx: vx, vy: vy, t0: now, dur: dur });
+    if (mets.length > 9) mets.shift();
   }
 
   function drawMeteor(now) {
-    if (!met) {
-      if (now >= nextMet) fireMeteor(now);
-      return;
+    /* —— 流星雨调度 —— */
+    if (showerEnd && now >= showerEnd) {            /* 一场结束：场间休整 */
+      showerEnd = 0;
+      nextShower = now + rnd(45000, 85000);
     }
-    const p = (now - met.t0) / met.dur;
-    if (p >= 1) { met = null; nextMet = now + rnd(7000, 16000); return; }
-    const fade = p > 0.72 ? 1 - (p - 0.72) / 0.28 : 1;   /* 尾段渐隐 */
-    const hx = met.x0 + met.vx * (met.dur * p);
-    const hy = met.y0 + met.vy * (met.dur * p);
-    const tail = Math.min(110, met.L * 0.3);
-    const tx = hx - met.vx / Math.hypot(met.vx, met.vy) * tail;
-    const ty = hy - met.vy / Math.hypot(met.vx, met.vy) * tail;
-    const g = ctx.createLinearGradient(hx, hy, tx, ty);
-    g.addColorStop(0, "rgba(240,250,255," + (0.9 * fade) + ")");
-    g.addColorStop(0.25, "rgba(160,214,255," + (0.5 * fade) + ")");
-    g.addColorStop(1, "rgba(160,214,255,0)");
-    ctx.strokeStyle = g;
-    ctx.lineWidth = 1.6;
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.moveTo(hx, hy);
-    ctx.lineTo(tx, ty);
-    ctx.stroke();
-    ctx.fillStyle = "rgba(255,255,255," + (0.95 * fade) + ")";
-    ctx.beginPath();
-    ctx.arc(hx, hy, 1.4, 0, TAU);
-    ctx.fill();
+    if (!showerEnd && now >= nextShower) {          /* 开一场：持续 6~9 秒 */
+      showerEnd = now + rnd(6000, 9000);
+      showerNext = now + 250;
+    }
+    if (showerEnd && now >= showerNext && mets.length < 7) { /* 雨场内每 0.24~0.56s 一颗 */
+      fireMeteor(now, true);
+      showerNext = now + rnd(240, 560);
+    }
+    if (!showerEnd && mets.length < 3 && now >= nextMet) {   /* 平时单颗低频 */
+      fireMeteor(now, false);
+      nextMet = now + rnd(9000, 19000);
+    }
+    /* —— 绘制在场流星 —— */
+    for (let i = mets.length - 1; i >= 0; i--) {
+      const m = mets[i];
+      const p = (now - m.t0) / m.dur;
+      if (p >= 1) { mets.splice(i, 1); continue; }
+      const fade = p > 0.7 ? 1 - (p - 0.7) / 0.3 : 1;      /* 尾段渐隐 */
+      const hx = m.x0 + m.vx * (m.dur * p);
+      const hy = m.y0 + m.vy * (m.dur * p);
+      const hSp = Math.hypot(m.vx, m.vy);
+      const tail = Math.min(96, hSp * 0.16);
+      const tx = hx - m.vx / hSp * tail;
+      const ty = hy - m.vy / hSp * tail;
+      const g = ctx.createLinearGradient(hx, hy, tx, ty);
+      g.addColorStop(0, "rgba(240,250,255," + (0.9 * fade) + ")");
+      g.addColorStop(0.25, "rgba(160,214,255," + (0.5 * fade) + ")");
+      g.addColorStop(1, "rgba(160,214,255,0)");
+      ctx.strokeStyle = g;
+      ctx.lineWidth = 1.6;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(hx, hy);
+      ctx.lineTo(tx, ty);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(255,255,255," + (0.95 * fade) + ")";
+      ctx.beginPath();
+      ctx.arc(hx, hy, 1.4, 0, TAU);
+      ctx.fill();
+    }
   }
 
   function frame(now) {
