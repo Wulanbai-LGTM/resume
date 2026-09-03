@@ -1306,11 +1306,9 @@ html[data-theme="light"] .car-card.is-act{border-color:#0f172a;box-shadow:0 26px
 </style>
 </head>
 <body>
-<!-- 视图联动背景图（毛玻璃内容层之上透出；按视图交叉渐变） -->
+<!-- 全局星尘背景（毛玻璃内容层之上透出） -->
 <div class="bgfx no-print" aria-hidden="true">
   <img data-bg="dark" src="图片/bg/dark.webp" alt="" decoding="async">
-  <img data-bg="teal" alt="" decoding="async">
-  <img data-bg="frost" alt="" decoding="async">
 </div>
 <!-- 加载开场动画 -->
 <div class="loader" id="loader" aria-hidden="true">
@@ -2022,9 +2020,9 @@ const portalItems = [
   { id: "contact", tag: { zh: "联系方式", en: "CONTACT" }, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>', desc: { zh: "邮箱 / 电话 / GitHub，欢迎实习机会与项目合作。", en: "Email / phone / GitHub — internships & collabs welcome." }, meta: { zh: "随时联系", en: "Reach me" } }
 ];
 
-/* 视图联动背景：三张纹理按视图轮换（深色打底统一，避免过多图拖慢加载） */
-const BG_SRC = { dark: "图片/bg/dark.webp", teal: "图片/bg/teal.webp", frost: "图片/bg/frost.webp" };
-const BG_OF = { home: "dark", objective: "dark", highlights: "teal", experience: "frost", projects: "dark", skills: "teal", education: "frost", contact: "dark" };
+/* 全视图统一星尘底纹（未来如需按视图差异化，在此加回映射即可） */
+const BG_SRC = { dark: "图片/bg/dark.webp" };
+const BG_OF = { home: "dark", objective: "dark", highlights: "dark", experience: "dark", projects: "dark", skills: "dark", education: "dark", contact: "dark" };
 let curBgKey = null;
 function setBg(view) {
   const key = BG_OF[view] || "dark"; /* 浅色模式由 CSS 隐藏背景层 */
