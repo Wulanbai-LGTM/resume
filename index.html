@@ -3495,7 +3495,7 @@ function initStarField() {
 /* ============================================================
    光效叠加层（内容之上 z90、不挡交互，canvas #ctrail 承载）：
    · 呼吸亮星：画面内星点的“呼吸闪亮”高光点缀（全场稀疏）
-   · 流星雨：平时单颗低频 + 周期性密集流星雨事件
+   · 流星雨：持续中等频率 · 每颗缓慢横穿全屏
    · 光标星尘拖尾：仅桌面 hover:fine 设备
    浅色主题 / 减弱动效停用；打印由 CSS 隐藏
    ============================================================ */
@@ -3510,7 +3510,7 @@ function initFxOverlay() {
   const TAU = Math.PI * 2;
   const HOVER = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   let W = 0, H = 0, glints = [], mets = [], parts = [], rafId = 0, lastT = 0;
-  let nextMet = 0, nextShower = 0, showerEnd = 0, showerNext = 0;
+  let nextMet = 0;
   const isLight = () => document.documentElement.getAttribute("data-theme") === "light";
   const hexA = (hex, a) => {
     const n = parseInt(hex.slice(1), 16);
@@ -3519,26 +3519,22 @@ function initFxOverlay() {
 
   function build() {
     const area = W * H;
-    /* 呼吸亮星：稀疏大光点带光晕，独立相位呼吸——叠加在内容之上，
-       会“点亮”底图/照片里的星点，形成呼吸闪亮观感 */
-    const gn = Math.min(72, Math.max(16, Math.round(area / 52000)));
+    /* 星星频繁闪亮：小而密的闪烁点布满全图（画面上方也覆盖），快节奏独立相位呼吸 */
+    const gn = Math.min(240, Math.max(40, Math.round(area / 30000)));
     glints = [];
     for (let i = 0; i < gn; i++) {
       const r = Math.random();
       glints.push({
         x: rnd(0, W), y: rnd(0, H),
-        r: rnd(1.1, 2.6),
-        a: rnd(0.16, 0.38),
-        w: rnd(1.3, 3.1), ph: rnd(0, TAU),
+        r: rnd(0.7, 1.9),
+        a: rnd(0.14, 0.36),
+        w: rnd(2.2, 5.5), ph: rnd(0, TAU),
         c: r < 0.14 ? "#7dd3fc" : r < 0.26 ? "#c7d2fe" : "#f8fafc"
       });
     }
     mets.length = 0;
     parts.length = 0;
-    nextMet = performance.now() + rnd(2000, 5000);
-    nextShower = performance.now() + rnd(6000, 12000);  /* 首场流星雨尽快到达 */
-    showerEnd = 0;
-    showerNext = 0;
+    nextMet = performance.now() + 1200;      /* 开场即有第一颗 */
   }
   function resize() {
     W = window.innerWidth; H = window.innerHeight;
@@ -3547,39 +3543,32 @@ function initFxOverlay() {
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     build();
   }
-  /* —— 流星与流星雨 —— */
-  function launchMeteor(now, wide) {
-    const sp = Math.min(W, H) * (wide ? rnd(0.55, 0.85) : rnd(0.42, 0.64));
-    const ang = wide ? rnd(0.55, 0.72) : rnd(0.34, 0.64);  /* 雨场窄角趋同，单颗宽泛 */
-    const left = Math.random() < 0.5;
-    const x0 = wide
-      ? (left ? rnd(W * 0.86, W * 1.1) : rnd(W * -0.1, W * 0.14))
-      : (left ? rnd(W * 0.70, W * 0.98) : rnd(W * 0.02, W * 0.30));
-    const y0 = rnd(H * (wide ? 0.00 : 0.03), H * (wide ? 0.24 : 0.28));
+  /* —— 流星雨：持续中等频率 · 每颗缓慢横穿全屏 —— */
+  function launchMeteor(now) {
+    const right = Math.random() < 0.5;             /* 左右两侧随机入场 */
+    const sp = W / rnd(3.8, 6.4);                  /* 横跨整屏约 3.8~6.4 秒：速度缓慢 */
+    const vy = rnd(10, 34);                        /* 轻微下垂，全程略带斜度 */
+    const margin = rnd(70, 160);
+    const dist = W + margin * 2;
+    const dur = dist / sp;
+    const yMax = Math.max(H * 0.06, Math.min(H * 0.85, H - dur * vy - 30)); /* 保证不提前出底边 */
+    const x0 = right ? -margin : W + margin;       /* 从屏幕外入场 */
+    const y0 = rnd(H * 0.05, yMax);
     mets.push({
       x0: x0, y0: y0,
-      vx: Math.cos(ang) * sp * (left ? -1 : 1),
-      vy: Math.sin(ang) * sp,
-      t0: now, dur: rnd(0.75, 1.35)
+      vx: (right ? 1 : -1) * sp,
+      vy: vy,
+      t0: now, dur: dur
     });
-    if (mets.length > 8) mets.shift();
+    if (mets.length > 5) mets.shift();
   }
   function scheduleMeteors(now) {
-    if (showerEnd && now >= showerEnd) {                    /* 一场结束：场间休整 */
-      showerEnd = 0;
-      nextShower = now + rnd(30000, 60000);
-    }
-    if (!showerEnd && now >= nextShower) {                  /* 开一场：7~11 秒 */
-      showerEnd = now + rnd(7000, 11000);
-      showerNext = now + 200;
-    }
-    if (showerEnd && now >= showerNext && mets.length < 8) {
-      launchMeteor(now, true);
-      showerNext = now + rnd(200, 460);
-    }
-    if (!showerEnd && mets.length < 3 && now >= nextMet) {
-      launchMeteor(now, false);
-      nextMet = now + rnd(6000, 12000);
+    if (now < nextMet) return;
+    if (mets.length < 4) {                         /* 持续中频：1.2~2.6 秒一颗 */
+      launchMeteor(now);
+      nextMet = now + rnd(1200, 2600);
+    } else {
+      nextMet = now + 400;                         /* 屏上已满，稍后再补 */
     }
   }
   function drawMeteors(now) {
@@ -3588,11 +3577,11 @@ function initFxOverlay() {
       const m = mets[i];
       const p = (now - m.t0) / m.dur;
       if (p >= 1) { mets.splice(i, 1); continue; }
-      const fade = p > 0.7 ? 1 - (p - 0.7) / 0.3 : 1;
+      const fade = p < 0.08 ? p / 0.08 : p > 0.9 ? (1 - p) / 0.1 : 1;   /* 入画渐显/出画渐隐 */
       const hx = m.x0 + m.vx * m.dur * p;
       const hy = m.y0 + m.vy * m.dur * p;
       const hSp = Math.hypot(m.vx, m.vy);
-      const tail = Math.min(110, hSp * 0.17);
+      const tail = Math.min(96, hSp * 0.2);
       const tx = hx - m.vx / hSp * tail;
       const ty = hy - m.vy / hSp * tail;
       const g = ctx.createLinearGradient(hx, hy, tx, ty);
@@ -3612,16 +3601,18 @@ function initFxOverlay() {
       ctx.fill();
     }
   }
-  /* —— 呼吸亮星 —— */
+  /* —— 全图星星频繁闪亮 —— */
   function drawGlints(now) {
     const t = now / 1000;
     for (const s of glints) {
       const pulse = 0.55 + 0.45 * Math.sin(s.w * t + s.ph);
       const al = s.a * pulse;
-      ctx.fillStyle = hexA(s.c, al * 0.22);                /* 光晕 */
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r * 3.2, 0, TAU);
-      ctx.fill();
+      if (s.r > 1.5) {                                     /* 光晕只给较大的星，避免糊成一片 */
+        ctx.fillStyle = hexA(s.c, al * 0.22);
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r * 3.0, 0, TAU);
+        ctx.fill();
+      }
       ctx.fillStyle = hexA(s.c, al);
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r * (0.85 + 0.25 * pulse), 0, TAU);
