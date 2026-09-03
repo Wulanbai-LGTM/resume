@@ -3164,7 +3164,8 @@ function initMusic() {
   });
 }
 
-/* 鼠标跟随板块预览：光标位于首页板块上时，在鼠标旁浮现微斜预览小图 */
+/* 鼠标跟随板块预览：光标靠近板块「标题区」（眉标/大标题/副题，含宽松边距）时，在鼠标旁浮现微斜预览小图；
+   横幅图、留白、描述等其余区域不触发，避免预览卡遮挡板块画面 */
 function initFpv() {
   const fpv = $("#fpv");
   if (!fpv || prefersReduced || window.matchMedia("(hover: none)").matches) return;
@@ -3172,7 +3173,28 @@ function initFpv() {
   let cur = null;
   document.addEventListener("mousemove", (e) => {
     const p = e.target.closest(".psec[data-go]");
-    if (!p) {
+    /* 标题区命中检测：眉标/大标题/副题的并集矩形 + 宽松边距 */
+    let nearTitle = false;
+    if (p) {
+      const zone = p.querySelectorAll(".psec-eyebrow,.psec-title,.psec-sub");
+      if (zone.length) {
+        const b = { l: Infinity, t: Infinity, r: -Infinity, b: -Infinity };
+        zone.forEach((el) => {
+          const rc = el.getBoundingClientRect();
+          if (rc.left < b.l) b.l = rc.left;
+          if (rc.top < b.t) b.t = rc.top;
+          if (rc.right > b.r) b.r = rc.right;
+          if (rc.bottom > b.b) b.b = rc.bottom;
+        });
+        const padX = Math.max(48, (b.r - b.l) * 0.16);
+        nearTitle =
+          e.clientX >= b.l - padX && e.clientX <= b.r + padX &&
+          e.clientY >= b.t - 26 && e.clientY <= b.b + 30;
+      } else {
+        nearTitle = true; /* 兜底：无标题结构的旧卡维持整卡触发 */
+      }
+    }
+    if (!nearTitle) {
       if (cur) { cur = null; fpv.classList.remove("on"); }
       return;
     }
