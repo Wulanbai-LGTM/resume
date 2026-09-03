@@ -3652,6 +3652,26 @@ function initFxOverlay() {
     const dt = lastT ? Math.min(0.05, (now - lastT) / 1000) : 0.016;
     lastT = now;
     ctx.clearRect(0, 0, W, H);
+    /* 【自检】加载后前 5 秒画一条青色测试流星：用于确认叠加画布是否真实可见（调试后删除） */
+    if (now < 5000) {
+      const k = now / 5000;
+      const tx = k * (W + 240) - 120;
+      const ty = H * 0.45 + Math.sin(k * Math.PI) * H * 0.05;
+      const tg = ctx.createLinearGradient(tx, ty, tx - 150, ty);
+      tg.addColorStop(0, "rgba(103,232,249,0.95)");
+      tg.addColorStop(1, "rgba(103,232,249,0)");
+      ctx.strokeStyle = tg;
+      ctx.lineWidth = 3;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(tx, ty);
+      ctx.lineTo(tx - 150, ty);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(224,247,255,0.98)";
+      ctx.beginPath();
+      ctx.arc(tx, ty, 2.4, 0, TAU);
+      ctx.fill();
+    }
     drawGlints(now);
     drawMeteors(now);
     if (parts.length) {
