@@ -1067,18 +1067,26 @@ html[data-theme="light"] .psec-ghost{-webkit-text-stroke-color:rgba(71,85,105,.2
   .pix{display:none !important}
 }
 /* ============================================================
-   ★ 板块导览入场仪式：左右竖光带高速汇聚 + 引导文字
+   ★ 板块导览入场仪式：横向帘条上下合拢成亮线（闸门开合）
    ============================================================ */
 .gate{position:fixed;inset:0;z-index:720;pointer-events:none;visibility:hidden;opacity:0;transition:opacity .25s ease}
-.gate.play{visibility:visible;opacity:1}
-.gate .gbar{position:absolute;top:50%;left:50%;width:5px;margin-left:-2.5px;border-radius:99px;background:linear-gradient(180deg,transparent,rgba(34,211,238,.85) 26%,#eafcff 50%,rgba(129,140,248,.9) 74%,transparent);box-shadow:0 0 20px rgba(34,211,238,.85),0 0 46px rgba(129,140,248,.45);opacity:0;transition:transform .46s cubic-bezier(.18,.85,.24,1.12),opacity .32s ease}
-.gate .gbar.l{transform:translateX(-58vw) scaleY(.5)}
-.gate .gbar.r{transform:translateX(58vw) scaleY(.5)}
-.gate.play .gbar{opacity:1;transform:translateX(0) scaleY(1);transition-delay:var(--gd,0ms)}
-.gate .gtext{position:absolute;left:0;right:0;top:58%;text-align:center;color:#b9f5ff;font-size:13px;font-weight:700;letter-spacing:.4em;text-transform:uppercase;text-shadow:0 0 16px rgba(34,211,238,.8);opacity:0;transform:translateY(10px);transition:opacity .5s ease,transform .5s ease}
-.gate.play .gtext{opacity:.95;transform:none;transition-delay:.7s}
+.gate.play,.gate.go{visibility:visible;opacity:1}
+/* 帘条：横向发光短带（上叠/下叠，错落水平排布） */
+.gate .gbar{position:absolute;top:50%;height:5px;border-radius:99px;background:linear-gradient(90deg,transparent,rgba(34,211,238,.9) 26%,#eafcff 50%,rgba(129,140,248,.95) 74%,transparent);box-shadow:0 0 18px rgba(34,211,238,.8),0 0 40px rgba(129,140,248,.35);opacity:0;transform:translateY(calc(var(--gy,0vh) + var(--gs,0px))) scaleX(.4);transition:transform .46s cubic-bezier(.18,.85,.24,1.12),opacity .32s ease}
+.gate .gbar.top{--gy:-56vh}
+.gate .gbar.btm{--gy:56vh}
+.gate.play .gbar{opacity:1;transform:translateY(var(--gs,0px)) scaleX(1);transition-delay:var(--gd,0ms)}
+/* 展开阶段：帘条继续越线退散 */
+.gate.go .gbar{opacity:0;transform:translateY(calc(var(--gy2,0vh) + var(--gs,0px))) scaleX(.35);transition:transform .38s ease-in,opacity .3s ease}
+.gate .gbar.top{--gy2:-46vh}
+.gate .gbar.btm{--gy2:46vh}
+/* 中央亮线：闸开后横向展开 */
+.gate .gline{position:absolute;left:12%;right:12%;top:50%;height:2px;margin-top:-1px;border-radius:99px;background:linear-gradient(90deg,transparent,#67e8f9,#fff,#a5b4fc,transparent);box-shadow:0 0 22px rgba(34,211,238,.9),0 0 60px rgba(129,140,248,.5);opacity:0;transform:scaleX(0)}
+.gate.go .gline{opacity:1;transform:scaleX(1);transition:transform .3s cubic-bezier(.2,.8,.2,1) .12s,opacity .2s ease .12s}
+.gate .gtext{position:absolute;left:0;right:0;bottom:21%;text-align:center;color:#b9f5ff;font-size:13px;font-weight:700;letter-spacing:.4em;text-transform:uppercase;text-shadow:0 0 16px rgba(34,211,238,.8);opacity:0;transform:translateY(10px);transition:opacity .5s ease,transform .5s ease}
+.gate.go .gtext{opacity:.95;transform:none;transition-delay:.28s}
 @media (max-width:640px){
-  .gate .gbar{width:4px;margin-left:-2px}
+  .gate .gbar{height:4px}
   .gate .gtext{letter-spacing:.24em;font-size:12px}
 }
 @media print{
@@ -2033,16 +2041,17 @@ function setBg(view) {
     img.classList.add("on");
   }
 }
-/* 板块导览入场仪式：下拉经过 Hero 时，左右竖光带高速汇聚 + 引导文字 */
+/* 板块导览入场仪式：下拉经过 Hero 时，横向帘条上下合拢成亮线（闸门开合） */
 let gateEl = null, gatePlayed = false;
 function initGate() {
   gateEl = $("#gate");
   if (!gateEl || prefersReduced) return;
-  const HS = [190, 130, 92];
-  let html = "";
+  /* 上叠/下叠各 3 条横帘：宽 400/260/140，水平 -70/0/70px，垂向叠偏移 */
+  const GW = [400, 260, 140], GX = [-70, 0, 70], GS = [-12, 0, 12];
+  let html = '<s class="gline"></s>';
   for (let i = 0; i < 3; i++) {
-    html += "<i class='gbar l' style='height:" + HS[i] + "px;margin-top:-" + (HS[i] / 2) + "px;--gd:" + (i * 55) + "ms'></i>";
-    html += "<i class='gbar r' style='height:" + HS[2 - i] + "px;margin-top:-" + (HS[2 - i] / 2) + "px;--gd:" + (100 + i * 55) + "ms'></i>";
+    html += "<i class='gbar top' style='--gw:" + GW[i] + "px;--gx:" + GX[i] + "px;--gs:" + GS[i] + "px;--gd:" + (i * 60) + "ms;left:calc(50% + " + GX[i] + "px - " + (GW[i] / 2) + "px);width:" + GW[i] + "px'></i>";
+    html += "<i class='gbar btm' style='--gw:" + GW[2 - i] + "px;--gx:" + (-GX[i]) + "px;--gs:" + (-GS[i]) + "px;--gd:" + (110 + i * 60) + "ms;left:calc(50% - " + GX[i] + "px - " + (GW[2 - i] / 2) + "px);width:" + GW[2 - i] + "px'></i>";
   }
   gateEl.insertAdjacentHTML("afterbegin", html);
   const text = $("#gateText");
@@ -2054,9 +2063,12 @@ function initGate() {
     if (y < 6) { gatePlayed = false; return; }
     if (!gatePlayed && y > window.innerHeight * 0.6 && y < window.innerHeight * 2.4) {
       gatePlayed = true;
-      gateEl.classList.add("play");
-      const bars = gateEl.querySelectorAll(".gbar");
-      setTimeout(() => { bars.forEach((b) => { b.style.setProperty("--gd", "0ms"); }); gateEl.classList.remove("play"); }, 2500);
+      gateEl.classList.add("play");                       /* 帘条上下合拢 */
+      setTimeout(() => gateEl.classList.add("go"), 540);  /* 闸开：亮线展开 + 帘条退散 + 文字 */
+      setTimeout(() => {
+        gateEl.querySelectorAll(".gbar").forEach((b) => { b.style.setProperty("--gd", "0ms"); });
+        gateEl.classList.remove("play", "go");
+      }, 2650);
     }
   }, { passive: true });
 }
