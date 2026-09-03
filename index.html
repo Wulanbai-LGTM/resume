@@ -595,7 +595,7 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
    深色主视觉：Slate-950 底 + Cyan/Indigo 光斑 + 毛玻璃卡片
    ============================================================ */
 :root{
-  --bg:#030712; --bg-soft:#0b1120; --card:rgba(15,23,42,.62); --card-2:rgba(15,23,42,.5);
+  --bg:#030712; --bg-soft:#0b1120; --card:rgba(15,23,42,.5); --card-2:rgba(15,23,42,.38);
   --text:#f8fafc; --text-2:#cbd5e1; --text-3:#64748b;
   --primary:#22d3ee; --primary-600:#0891b2; --violet:#818cf8; --accent:#22d3ee; --ok:#34d399; --warn:#fbbf24;
   --grad:linear-gradient(135deg,#22d3ee 0%,#818cf8 60%,#a78bfa 120%);
@@ -609,7 +609,7 @@ html[data-theme="dark"] .toast{background:#fff;color:#0b1020}
   color-scheme:dark;
 }
 html[data-theme="dark"]{
-  --bg:#030712; --bg-soft:#0b1120; --card:rgba(15,23,42,.62); --card-2:rgba(15,23,42,.5);
+  --bg:#030712; --bg-soft:#0b1120; --card:rgba(15,23,42,.5); --card-2:rgba(15,23,42,.38);
   --text:#f8fafc; --text-2:#cbd5e1; --text-3:#64748b;
   --primary:#22d3ee; --primary-600:#0891b2; --violet:#818cf8; --accent:#22d3ee; --ok:#34d399; --warn:#fbbf24;
   --grad:linear-gradient(135deg,#22d3ee 0%,#818cf8 60%,#a78bfa 120%);
@@ -621,6 +621,9 @@ html[data-theme="dark"]{
   --nav-bg:rgba(3,7,18,.72);
   color-scheme:dark;
 }
+/* 深色主题下 alt 板块透明化：星尘贯穿板块内容区（浅色/打印维持不透明底色） */
+html[data-theme="dark"] .section.alt{background:rgba(9,14,26,.5)}
+@media print{html[data-theme="dark"] .section.alt{background:var(--bg-soft)}}
 html[data-theme="light"]{
   --bg:#f1f5f9; --bg-soft:#e2e8f0; --card:rgba(255,255,255,.66); --card-2:rgba(255,255,255,.55);
   --text:#0f172a; --text-2:#334155; --text-3:#64748b;
@@ -1093,14 +1096,14 @@ html[data-theme="light"] .psec-ghost{-webkit-text-stroke-color:rgba(71,85,105,.2
   .gate{display:none !important}
 }
 /* ============================================================
-   ★ 视图联动背景图（含暗化遮罩、极光光斑叠层、慢速呼吸）
+   ★ 全局星尘背景（含暗化遮罩、慢速呼吸）
    ============================================================ */
 .bgfx{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:#030712}
 .bgfx img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.1s ease}
 .bgfx img.on{opacity:1;animation:bgBreathe 26s ease-in-out infinite alternate}
 @keyframes bgBreathe{from{transform:scale(1.02)}to{transform:scale(1.09)}}
 /* 暗化 + 底部渐深遮罩，保证文字可读 */
-.bgfx::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,7,18,.52) 0%,rgba(3,7,18,.28) 30%,rgba(3,7,18,.42) 62%,rgba(3,7,18,.78) 100%),radial-gradient(120% 90% at 50% 40%,transparent 55%,rgba(2,4,12,.4));z-index:1}
+.bgfx::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,7,18,.30) 0%,rgba(3,7,18,.14) 30%,rgba(3,7,18,.26) 62%,rgba(3,7,18,.52) 100%),radial-gradient(120% 90% at 50% 40%,transparent 55%,rgba(2,4,12,.26));z-index:1}
 /* 极光光斑上移到背景图之上（内容之下） */
 body::before,body::after{z-index:1}
 html[data-theme="light"] .bgfx{display:none}
