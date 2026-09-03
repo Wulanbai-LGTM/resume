@@ -1067,6 +1067,24 @@ html[data-theme="light"] .psec-ghost{-webkit-text-stroke-color:rgba(71,85,105,.2
   .pix{display:none !important}
 }
 /* ============================================================
+   ★ 板块导览入场仪式：左右竖光带高速汇聚 + 引导文字
+   ============================================================ */
+.gate{position:fixed;inset:0;z-index:720;pointer-events:none;visibility:hidden;opacity:0;transition:opacity .25s ease}
+.gate.play{visibility:visible;opacity:1}
+.gate .gbar{position:absolute;top:50%;left:50%;width:5px;margin-left:-2.5px;border-radius:99px;background:linear-gradient(180deg,transparent,rgba(34,211,238,.85) 26%,#eafcff 50%,rgba(129,140,248,.9) 74%,transparent);box-shadow:0 0 20px rgba(34,211,238,.85),0 0 46px rgba(129,140,248,.45);opacity:0;transition:transform .46s cubic-bezier(.18,.85,.24,1.12),opacity .32s ease}
+.gate .gbar.l{transform:translateX(-58vw) scaleY(.5)}
+.gate .gbar.r{transform:translateX(58vw) scaleY(.5)}
+.gate.play .gbar{opacity:1;transform:translateX(0) scaleY(1);transition-delay:var(--gd,0ms)}
+.gate .gtext{position:absolute;left:0;right:0;top:58%;text-align:center;color:#b9f5ff;font-size:13px;font-weight:700;letter-spacing:.4em;text-transform:uppercase;text-shadow:0 0 16px rgba(34,211,238,.8);opacity:0;transform:translateY(10px);transition:opacity .5s ease,transform .5s ease}
+.gate.play .gtext{opacity:.95;transform:none;transition-delay:.7s}
+@media (max-width:640px){
+  .gate .gbar{width:4px;margin-left:-2px}
+  .gate .gtext{letter-spacing:.24em;font-size:12px}
+}
+@media print{
+  .gate{display:none !important}
+}
+/* ============================================================
    ★ 视图联动背景图（含暗化遮罩、极光光斑叠层、慢速呼吸）
    ============================================================ */
 .bgfx{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:#030712}
@@ -1604,6 +1622,9 @@ html[data-theme="light"] .car-card.is-act{border-color:#0f172a;box-shadow:0 26px
 <!-- 像素格纹刷新遮罩（格子由 JS 注入） -->
 <div class="pix no-print" id="pix" aria-hidden="true"></div>
 
+<!-- 板块导览入场仪式：两侧竖光带高速汇聚 -->
+<div class="gate no-print" id="gate" aria-hidden="true"><span class="gtext" id="gateText"></span></div>
+
 <!-- ================= Lightbox ================= -->
 <div class="lightbox no-print" id="lightbox" role="dialog" aria-modal="true" aria-label="图片预览">
   <button class="lb-btn lb-close" id="lbClose" aria-label="关闭预览"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -1861,6 +1882,7 @@ const I18N = {
     portal: { eyebrow: "EXPLORE", title: "探索我的档案", sub: "向下滑动浏览，点击板块进入详情。", enter: "进入板块" },
     showcase: { eyebrow: "SHOWCASE", title: "作品速览", sub: "点开任意作品，进入完整项目板块。" },
     viewNav: { prev: "上一板块", next: "下一板块", home: "首页" },
+    gateEnter: "下滑进入板块导览",
     certs: { flip: "官方认证 · 2026" },
     footer: { rights: "保留所有权利", updated: "最后更新", note: "单文件构建 · 无外部依赖 · 可离线打开" },
     toast: { copied: "邮箱已复制到剪贴板 🎉", fail: "复制失败，请长按手动复制", linkCopied: "链接已复制，快分享给朋友吧 🎉", inspireCopied: "文案已复制 ✨", githubCopied: "已复制 GitHub 链接，请在浏览器中打开 🔗", printIOS: "iOS 请点浏览器分享按钮 → 打印 → 存为 PDF 📄", printWechat: "请在系统浏览器打开后使用打印功能 📄", musicOn: "🎵 音乐播放中", musicOff: "音乐已暂停" },
@@ -1885,6 +1907,7 @@ const I18N = {
     portal: { eyebrow: "EXPLORE", title: "Explore My Profile", sub: "Scroll down to browse, click to dive in.", enter: "Enter" },
     showcase: { eyebrow: "SHOWCASE", title: "Work Preview", sub: "Open any piece to see the full project." },
     viewNav: { prev: "Previous", next: "Next", home: "Home" },
+    gateEnter: "Scroll to Explore",
     certs: { flip: "Official Certification" },
     footer: { rights: "All rights reserved", updated: "Last updated", note: "Single-file build · no external dependencies · works offline" },
     toast: { copied: "Email copied to clipboard 🎉", fail: "Copy failed — please copy manually", linkCopied: "Link copied — share it now 🎉", inspireCopied: "Copied ✨", githubCopied: "GitHub link copied — open it in your browser 🔗", printIOS: "iOS: Share → Print → Save as PDF 📄", printWechat: "Open in your browser to print 📄", musicOn: "🎵 Music playing", musicOff: "Music paused" },
@@ -2010,6 +2033,34 @@ function setBg(view) {
     img.classList.add("on");
   }
 }
+/* 板块导览入场仪式：下拉经过 Hero 时，左右竖光带高速汇聚 + 引导文字 */
+let gateEl = null, gatePlayed = false;
+function initGate() {
+  gateEl = $("#gate");
+  if (!gateEl || prefersReduced) return;
+  const HS = [190, 130, 92];
+  let html = "";
+  for (let i = 0; i < 3; i++) {
+    html += "<i class='gbar l' style='height:" + HS[i] + "px;margin-top:-" + (HS[i] / 2) + "px;--gd:" + (i * 55) + "ms'></i>";
+    html += "<i class='gbar r' style='height:" + HS[2 - i] + "px;margin-top:-" + (HS[2 - i] / 2) + "px;--gd:" + (100 + i * 55) + "ms'></i>";
+  }
+  gateEl.insertAdjacentHTML("afterbegin", html);
+  const text = $("#gateText");
+  if (text) text.textContent = T("gateEnter");
+  /* 从顶部下拉触发；回顶后重置可重播 */
+  window.addEventListener("scroll", () => {
+    if (!gateEl || curView !== "home") return;
+    const y = window.scrollY;
+    if (y < 6) { gatePlayed = false; return; }
+    if (!gatePlayed && y > window.innerHeight * 0.6 && y < window.innerHeight * 2.4) {
+      gatePlayed = true;
+      gateEl.classList.add("play");
+      const bars = gateEl.querySelectorAll(".gbar");
+      setTimeout(() => { bars.forEach((b) => { b.style.setProperty("--gd", "0ms"); }); gateEl.classList.remove("play"); }, 2500);
+    }
+  }, { passive: true });
+}
+
 /* 视图直接切换（无动画主体） */
 function doSwitchView(name, opts) {
   const from = $("#view-" + curView);
@@ -3370,6 +3421,7 @@ bindLightboxControls();
 renderAll();
 initTyped();
 initPix();
+initGate();
 setBg("home");
 /* URL 锚点直达视图（如 index.html#projects），也为自动截图提供入口 */
 (function () {
