@@ -1100,8 +1100,12 @@ html[data-theme="light"] .psec-ghost{-webkit-text-stroke-color:rgba(71,85,105,.2
    ============================================================ */
 .bgfx{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:#030712}
 .bgfx img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.1s ease}
-.bgfx img.on{opacity:1;animation:bgBreathe 26s ease-in-out infinite alternate}
-@keyframes bgBreathe{from{transform:scale(1.02)}to{transform:scale(1.09)}}
+.bgfx img.on{opacity:1;animation:bgBreathe 30s ease-in-out infinite alternate}
+/* 缓移而非放大：底图保持 1.06 固定倍率，仅在对角 ±1.1% 内漂移（运动掩盖模糊，不再二次放大） */
+@keyframes bgBreathe{
+  0%{transform:scale(1.06) translate3d(-1.1%,-0.65%,0)}
+  100%{transform:scale(1.06) translate3d(1.1%,0.65%,0)}
+}
 /* 暗化 + 底部渐深遮罩，保证文字可读 */
 .bgfx::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,7,18,.30) 0%,rgba(3,7,18,.14) 30%,rgba(3,7,18,.26) 62%,rgba(3,7,18,.52) 100%),radial-gradient(120% 90% at 50% 40%,transparent 55%,rgba(2,4,12,.26));z-index:1}
 /* 极光光斑上移到背景图之上（内容之下） */
@@ -3284,7 +3288,7 @@ function initStarField() {
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
   const TAU = Math.PI * 2;
   const rnd = (a, b) => a + Math.random() * (b - a);
-  let W = 0, H = 0, stars = [], trails = [], neb = [], met = null, nextMet = 0, rafId = 0;
+  let W = 0, H = 0, stars = [], trails = [], neb = [], specs = [], met = null, nextMet = 0, rafId = 0;
   const COLORS = ["#f8fafc", "#e2e8f0", "#67e8f9", "#a5b4fc", "#fde68a"];
 
   function pickColor(warmChance) {
@@ -3327,6 +3331,17 @@ function initStarField() {
       ctx.drawImage(NEB_SPR[nb.sp], x - R, y - R, R * 2, R * 2);
     }
     ctx.globalAlpha = 1;
+  }
+  /* 静态细星覆盖：直接矩形绘制，无插值、无模糊 */
+  function drawSpecs() {
+    for (const s of specs) {
+      if (s.halo) {
+        ctx.fillStyle = hexToRgba(s.c, s.a * 0.16);
+        ctx.fillRect(s.x - s.s, s.y - s.s, s.s * 3, s.s * 3);
+      }
+      ctx.fillStyle = hexToRgba(s.c, s.a);
+      ctx.fillRect(s.x, s.y, s.s, s.s);
+    }
   }
 
   function build() {
@@ -3372,6 +3387,19 @@ function initStarField() {
       { ax: W * 0.52, ay: H * 0.84, R: minS * 0.56, sp: "indigo" },
       { ax: W * 0.14, ay: H * 0.70, R: minS * 0.40, sp: "sky" }
     ].map((o) => Object.assign(o, { ph: rnd(0, TAU), ph2: rnd(0, TAU), tp: rnd(30, 52) }));
+    /* 细星覆盖层：程序化微星（整数像素级），以清晰锐利纹理压过底图放大的模糊感 */
+    const spN = Math.min(1500, Math.max(70, Math.round(area / 6000)));
+    specs = [];
+    for (let i = 0; i < spN; i++) {
+      const r = Math.random();
+      specs.push({
+        x: Math.floor(rnd(0, W)), y: Math.floor(rnd(0, H)),
+        s: Math.random() < 0.68 ? 1 : 2,
+        a: rnd(0.05, 0.22),
+        c: r < 0.08 ? "#67e8f9" : r < 0.16 ? "#a5b4fc" : Math.random() < 0.5 ? "#f8fafc" : "#e2e8f0",
+        halo: Math.random() < 0.05
+      });
+    }
     met = null;
     nextMet = performance.now() + rnd(3500, 8000);
   }
@@ -3460,6 +3488,7 @@ function initStarField() {
     ctx.clearRect(0, 0, W, H);
     const t = now / 1000;
     drawNebula(now);
+    drawSpecs();
     /* 星点漫闪：正弦呼吸，相位各不同 */
     for (const s of stars) {
       const tw = 0.5 + 0.5 * Math.sin(s.sp * t + s.ph);
