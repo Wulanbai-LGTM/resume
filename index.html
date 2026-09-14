@@ -4089,6 +4089,7 @@ function initWlbx() {
   }
   function open() {
     applyLang();
+    panel.inert = false;
     if (!opened) {
       opened = true;
       bubble("bot", T2().greet);
@@ -4099,8 +4100,11 @@ function initWlbx() {
     setTimeout(() => input.focus(), 220);
   }
   function close() {
+    /* 先把焦点交还触发器，再隐藏面板：避免“aria-hidden 内含焦点”的无障碍告警 */
+    if (panel.contains(document.activeElement)) btn.focus();
     panel.classList.remove("on");
     panel.setAttribute("aria-hidden", "true");
+    panel.inert = true;
     btn.setAttribute("aria-expanded", "false");
   }
   btn.addEventListener("click", () => (panel.classList.contains("on") ? close() : open()));
@@ -4211,6 +4215,7 @@ function initWlbx() {
     }
   }
   applyLang();
+  panel.inert = true; /* 收起状态：面板不可聚焦/点击（比 aria-hidden 更彻底） */
   /* 语言切换后同步助手文案 */
   const langBtn = $("#langBtn");
   if (langBtn) langBtn.addEventListener("click", () => setTimeout(applyLang, 60));
