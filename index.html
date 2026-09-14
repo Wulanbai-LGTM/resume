@@ -3914,7 +3914,7 @@ function initParallax() {
    · 密钥不落在前端：请求走 Cloudflare Worker 代理（见 wlbx-worker/README.md）
    · 本地调试：localStorage 里设 "wlbx-endpoint"（代理地址）或 "wlbx-key"（直连，仅自用）
    ============================================================ */
-const WLBX_ENDPOINT = ""; /* ← 部署 Worker 后把地址填这里，例如 https://wlbx.xxx.workers.dev/chat */
+const WLBX_ENDPOINT = "https://wlbx-proxy.aurelio-estan.workers.dev/chat"; /* Cloudflare Worker 代理（密钥存在服务端） */
 const WLBX_MODEL = "deepseek-chat";
 
 const WX_I18N = {
