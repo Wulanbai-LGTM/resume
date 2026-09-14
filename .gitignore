@@ -6,3 +6,10 @@
 版本备份/
 # Visual Studio 临时目录
 .vs/
+# 密钥与环境变量（绝对禁止进仓库：GitHub Pages 上的任何文件都是公开可下载的）
+.env
+.env.*
+*.env
+!*.env.example
+# 本地代理/密钥注入文件
+wlbx.config.local.js
