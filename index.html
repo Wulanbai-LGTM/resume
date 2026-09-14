@@ -2324,36 +2324,32 @@ function initPix() {
   const COLS = 18, ROWS = 12;
   pixEl.innerHTML = '<i style="opacity:0"></i>'.repeat(COLS * ROWS);
   const cells = pixEl.children;
+  const MAXD = (ROWS - 1) * 11 + (COLS - 1) * 5; /* 波前最大延迟，用作色相进度基准 */
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       const el = cells[r * COLS + c];
-      /* 个体随机抖动：终态大小/峰值/亮度/明灭时长/色相微差 */
-      const sf = (0.97 + Math.random() * 0.05).toFixed(3);
-      el.style.setProperty("--sf", sf);
-      el.style.setProperty("--sp", (parseFloat(sf) + 0.07 + Math.random() * 0.09).toFixed(3));
-      el.style.setProperty("--of", (0.87 + Math.random() * 0.13).toFixed(2));
-      /* 时长全格统一（频率一致波前顺滑，避免“碎卡”感）；差异性交给延迟与随机抖动 */
+      const d1 = (ROWS - 1 - r) * 11 + c * 5;   /* 点亮波前：左下 → 右上 */
+      const d2 = r * 11 + c * 5;                /* 熄灭波前：左上 → 右下 */
+      /* 统一节奏：全格同速（差异只来自波前延迟），避免忽快忽慢的杂乱感 */
       el.style.setProperty("--t1", "300ms");
       el.style.setProperty("--t2", "280ms");
-      /* 粒子消散参数：随机飘散位移（略带上浮）与旋转 */
-      el.style.setProperty("--dx", Math.round(Math.random() * 84 - 42) + "px");
-      el.style.setProperty("--dy", Math.round(Math.random() * 60 - 52) + "px");
-      el.style.setProperty("--rr", Math.round(Math.random() * 110 - 55) + "deg");
-      /* 格子底色：斜向波带色流（沿 r+c 流动）；约 7% “热星”用高亮白青 */
-      const hot = Math.random() < 0.07;
-      let bg;
-      if (hot) {
-        bg = "linear-gradient(160deg,hsl(192 95% 44%),hsl(203 85% 22%) 55%,hsl(215 72% 9%) 100%)";
-      } else {
-        const hh = 186 + Math.round(((r + c) % 14) * 3.1 + (Math.random() * 6 - 3));
-        const h2 = hh + 18;
-        bg = "linear-gradient(160deg,hsl(" + hh + " 66% 27%),hsl(" + h2 + " 58% 14%) 55%,hsl(" + (h2 + 12) + " 54% 6%) 100%)";
-      }
-      el.style.background = bg;
+      /* 极小的终态差异（仅保留一点呼吸感，不再随机色相/亮度） */
+      const sf = (0.992 + Math.random() * 0.008).toFixed(3);
+      el.style.setProperty("--sf", sf);
+      el.style.setProperty("--sp", (parseFloat(sf) + 0.03 + Math.random() * 0.02).toFixed(3));
+      el.style.setProperty("--of", (0.97 + Math.random() * 0.03).toFixed(2));
+      /* 粒子消散：幅度收窄，飘散更整齐 */
+      el.style.setProperty("--dx", Math.round(Math.random() * 56 - 28) + "px");
+      el.style.setProperty("--dy", Math.round(Math.random() * 40 - 34) + "px");
+      el.style.setProperty("--rr", Math.round(Math.random() * 60 - 30) + "deg");
+      /* 格子底色：沿点亮波前从青 → 靛 → 紫的整齐色阶（无随机色相、无杂色格子） */
+      const p = d1 / MAXD;                      /* 0 = 左下（最先亮）→ 1 = 右上（最后亮） */
+      const h = Math.round(188 + p * 68);       /* 188° 青 → 256° 紫 */
+      el.style.background = "linear-gradient(160deg,hsl(" + h + " 62% 26%),hsl(" + (h + 12) + " 56% 13%) 55%,hsl(" + (h + 20) + " 52% 6%) 100%)";
       el.dataset.r = r;
       el.dataset.c = c;
-      el.dataset.d1 = (ROWS - 1 - r) * 11 + c * 5; /* 点亮：左下→右上 */
-      el.dataset.d2 = r * 11 + c * 5;              /* 熄灭：左上→右下 */
+      el.dataset.d1 = d1;
+      el.dataset.d2 = d2;
     }
   }
 }
