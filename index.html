@@ -3926,6 +3926,7 @@ const WX_I18N = {
     chips: ["他适合什么岗位？", "他最擅长的三项技能？", "坦克大战项目做了什么？", "他拿过哪些证书？"],
     noend: "助手还没接入：需要先部署免费的 Cloudflare Worker 代理（步骤见 wlbx-worker/README.md），再把地址填进 index.html 里的 WLBX_ENDPOINT。",
     err: "抱歉，助手服务连接失败，请稍后再试；也可以直接通过「联系我」找他本人。",
+    errFile: "本地文件（file://）打开时请求被代理拒绝：请在 Cloudflare 的 ALLOW_ORIGIN 里加上 null（写成 https://wulanbai-lgtm.github.io,null），保存并重新部署后再试。",
     close: "关闭对话"
   },
   en: {
@@ -3936,6 +3937,7 @@ const WX_I18N = {
     chips: ["Which roles suit him?", "What are his top three skills?", "What did the Tank Battle project involve?", "Which certificates does he hold?"],
     noend: "Assistant not connected yet: deploy the free Cloudflare Worker proxy first (see wlbx-worker/README.md), then fill the address into WLBX_ENDPOINT in index.html.",
     err: "Sorry, the assistant service is unreachable right now. Please try later, or reach him directly via the Contact section.",
+    errFile: "Requests from a local file (file://) were rejected by the proxy: add null to ALLOW_ORIGIN in Cloudflare (e.g. https://wulanbai-lgtm.github.io,null), redeploy, then retry.",
     close: "Close chat"
   }
 };
@@ -4207,7 +4209,7 @@ function initWlbx() {
       else { history.push({ role: "assistant", content: acc }); }
     } catch (e) {
       typing(false);
-      bubble("err", T2().err);
+      bubble("err", location.protocol === "file:" ? T2().errFile : T2().err);
     } finally {
       busy = false;
       send.disabled = false;

@@ -100,10 +100,13 @@ function json(obj, status, headers) {
 
 export default {
   async fetch(request, env) {
-    const origin = request.headers.get("Origin") || "";
+    /* 本地双击 index.html 打开（file://）时，浏览器发送的 Origin 是 "null" 或缺失，
+       这里统一归一化为 "null"；只要白名单里写了 null，本地文件也能直接使用助手 */
+    const rawOrigin = request.headers.get("Origin") || "";
+    const origin = rawOrigin || "null";
     const list = String(env.ALLOW_ORIGIN || "*").split(",").map((s) => s.trim()).filter(Boolean);
     const wildcard = list.includes("*");
-    const allowed = wildcard || (!!origin && list.includes(origin));
+    const allowed = wildcard || list.includes(origin);
     const cors = {
       "Access-Control-Allow-Methods": "POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
